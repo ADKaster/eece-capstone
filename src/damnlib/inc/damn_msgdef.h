@@ -9,7 +9,7 @@
 #include <stdint.h>
 
 
-/*! @brief Message enumeration
+/*! \brief Message enumeration
 
     Enumeration of all possible messages that may be seen on the bus.
 
@@ -23,7 +23,7 @@ typedef enum msgenum_tag
     NUM_MSG_DEFINITONS, /**< The total number of possible messages */
 } damn_msg_enum_t;
 
-/*! @brief Message transmission type
+/*! \brief Message transmission type
     
     Determines how a message will be sent over the common bus.
 */
@@ -34,7 +34,20 @@ typedef enum tsmit_tag
     NUM_TRANSMIT_TYPES,     /**< The total number of transmission types. */
 } damn_tx_type_t;
 
-/*! @brief Message definition structure
+/*! \brief Bus enumeration
+
+    Defines the types of communications busses supported by the messaging library.
+*/
+typedef enum busenum_tag
+{
+    BUS_TYPE_I2C = 0,       /**< i2c bus */
+    BUS_TYPE_SPI,           /**< unsupported */
+    BUS_TYPE_UART,          /**< unsupported */
+    BUS_TYPE_USB,           /**< unsupported */
+    NUM_BUS_TYPES,          /**< The total number of bus types. */
+} damn_bus_type_t;
+
+/*! \brief Message definition structure
 
     This structure is used with the gobal array #gTheMessageDefinitions to define
     What messages are valid in the system and their properties.
@@ -43,10 +56,11 @@ typedef struct msgdef_tag
 {
     damn_msg_enum_t message_number;     /**< Which message is it? Using the enum type */
     damn_tx_type_t message_type;        /**< Point-to-point or broadcast */
+    damn_bus_type_t message_bus;        /**< Only I2C is supported */
     uint32_t message_length;            /**< Message length in bytes */
 } damn_msgdef_t;
 
-/*! @brief Ping message length
+/*! \brief Ping message length
     
     How long the ping message is, in bytes. Default is 8 bytes.
 */

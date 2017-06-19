@@ -21,6 +21,7 @@ damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     {
         .message_number =   STANDARD_PING_MSG,
         .message_type =     TX_TYPE_P2P,
+        .message_bus =      BUS_TYPE_I2C,
         .message_length =   PING_MSG_LEN,
     },
     /* Insert your message definitions here         */
@@ -28,6 +29,7 @@ damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     /* {                                            */
     /*      .message_number =   MY_FAV_MSG_NAME,    */
     /*      .message_type =     TX_TYPE_BROADCAST,  */
+    /*      .message_bus =      BUS_TYPE_I2C,       */
     /*      .message_length =   MY_FAV_MSG_LEN ,    */
     /* },                                           */
     
