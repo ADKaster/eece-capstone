@@ -1,8 +1,20 @@
+/*! \file damn_config.c
+
+    Configuration file for the messaging library.
+
+*/
+
 
 #include "damn_msgdef.h"
 
-
-/* Designated intializer format requires compiling with --std=c99 or higher */
+/*! \var gTheMessageDefinitions 
+ *  \brief An array to hold all defined message definitions
+ *
+ * Each message to be used in a system must be described here so that the
+ * message library can understand how to send and recieve the message. Note
+ * that the designated intializer format requires compiling with --std=c99 or
+ * higher  
+ */
 damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 {
     [STANDARD_PING_MSG] = 
