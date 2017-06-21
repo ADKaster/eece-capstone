@@ -13,12 +13,22 @@ fi
 FREERTOS_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40/kernel/freertos/builds/MSP_EXP432P401R/release/gcc
 FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
 
+SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40
+
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
 	if [ ! -f $FREERTOS_LIB ] ; then
-		echo $FREERTOS_LIB does not exist
+		echo "${FREERTOS_LIB} does not exist"
+		echo "Making backup of ${SIMPLELINK_DIR}/imports.mak"
+		cp $SIMPLELINK_DIR/imports.mak imports.mak.bak
+		echo "Creating soft link from current directory to simplelink directory"
+		ln -s imports.mak $SIMPLELINK_DIR/imports.mak
 		pushd $FREERTOS_DIR
 		make
 		popd
+		echo "Putting imports.mak back where it was..."
+		unlink $SIMPLELINK_DIR/imports.mak
+		cp imports.mak.bak $SIMPLELINK_DIR/imports.mak
+		rm imports.mak.bak
 	fi
 	echo "Building ${BUILD}"
 	mkdir -p build

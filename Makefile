@@ -9,6 +9,7 @@ CROSS = $(GCC_ARMCOMPILER)/bin/arm-none-eabi
 
 CC = $(CROSS)-gcc
 LNK = $(CROSS)-gcc
+AR = $(CROSS)-ar
 
 INCLUDES =  -I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source \
 			-I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/CMSIS/Include \
@@ -68,7 +69,7 @@ $(KERNEL_BUILD)/gcc/freertos.lib:
 	@ $(ECHOBLANKLINE)
 
 $(MSGLIB): $(OBJS_LIB)
-	$(CROSS)-ar cr $@ $^ 
+	$(AR) cr $@ $^ 
 
 $(DEMO).elf: $(OBJS_DEMO) $(KERNEL_BUILD)/gcc/freertos.lib
 	$(LNK) $(OBJS_DEMO) $(LFLAGS_DEMO) -o $@
