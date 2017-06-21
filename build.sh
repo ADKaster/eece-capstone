@@ -17,24 +17,27 @@ SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40
 
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
 	if [ $BUILD == "remake" ] ; then
-		pushd $FREERTOS_DIR
+		pushd $FREERTOS_DIR > /dev/null
 		make clean
-		popd
+		popd > /dev/null
 	fi
 	if [ ! -f $FREERTOS_LIB ] ; then
-		echo "${FREERTOS_LIB} does not exist"
+		echo "FreeRTOS Library does not exist"
 		echo "Making backup of ${SIMPLELINK_DIR}/imports.mak"
 		cp $SIMPLELINK_DIR/imports.mak imports.mak.bak
 		rm $SIMPLELINK_DIR/imports.mak
 		echo "Creating soft link from current directory to simplelink directory"
 		ln -s $PWD/imports.mak $SIMPLELINK_DIR/imports.mak
-		pushd $FREERTOS_DIR
+		echo "Making FreeRTOS Library"
+		pushd $FREERTOS_DIR > /dev/null
 		make
-		popd
+		popd > /dev/null
 		echo "Putting imports.mak back where it was..."
 		unlink $SIMPLELINK_DIR/imports.mak
 		cp imports.mak.bak $SIMPLELINK_DIR/imports.mak
 		rm imports.mak.bak
+		echo "Done making FreeRTOS Library"
+		echo -e "########################################\n"
 	fi
 	echo "Building ${BUILD}"
 	mkdir -p build
@@ -56,9 +59,9 @@ if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
 elif [ $BUILD == "clean" ] ; then
 	echo "Cleaning src"
 	make $BUILD
-	pushd $FREERTOS_DIR
+	pushd $FREERTOS_DIR > /dev/null
 	make clean
-	popd
+	popd > /dev/null
 else
 	echo "Invalid option. Candidates are: all clean remake"
 fi

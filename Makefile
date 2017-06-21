@@ -60,7 +60,6 @@ MAINS = $(MSGLIB) $(DEMO).elf
 
 all: $(MAINS)
 	@mkdir -p $(BUILDDIR)
-	@echo Done compiling $(MAINS)
 
 $(KERNEL_BUILD)/gcc/freertos.lib:
 	@ $(ECHOBLANKLINE)
@@ -69,25 +68,30 @@ $(KERNEL_BUILD)/gcc/freertos.lib:
 	@ $(ECHOBLANKLINE)
 
 $(MSGLIB): $(OBJS_LIB)
-	$(AR) cr $@ $^ 
+	@ echo AR $@
+	@ $(AR) cr $@ $^
 
 $(DEMO).elf: $(OBJS_DEMO) $(KERNEL_BUILD)/gcc/freertos.lib
-	$(LNK) $(OBJS_DEMO) $(LFLAGS_DEMO) -o $@
+	@ echo LNK $@
+	@ $(LNK) $(OBJS_DEMO) $(LFLAGS_DEMO) -o $@
 
 ##
 # C targets for demo application
 $(BUILDDIR)/demo%.o : $(DEMODIR)%.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS_DEMO) $(INCLUDES) -c $< -o $@
+	@ echo CC $@
+	@ mkdir -p $(dir $@)
+	@ $(CC) $(CFLAGS_DEMO) $(INCLUDES) -c $< -o $@
 
 ##
 # Generic C targets
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@ mkdir -p $(dir $@)
+	@ echo CC $@
+	@ $(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
-	$(RM) -rf $(BUILDDIR)
+	@ echo Cleaning
+	@ $(RM) -rf $(BUILDDIR)
 
 remake: clean all
-	@echo Finished remake
+	@ echo Finished remake
