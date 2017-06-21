@@ -44,17 +44,23 @@ SRCDIR := src
 SRCS_LIB := $(shell find $(SRCDIR)/damnlib -type f -name *.c)
 OBJS_LIB := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_LIB:.c=.o))
 
-SRCS_DEMO := $(shell find $(SRCDIR)/demo -type f -name *.c)
-OBJS_DEMO := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_DEMO:.c=.o))
+SRCS_DEMO_M := $(shell find $(SRCDIR)/demo/i2cmaster -type f -name *.c)
+OBJS_DEMO_M := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_DEMO_M:.c=.o))
+SRCS_DEMO_S := $(shell find $(SRCDIR)/demo/i2cslave -type f -name *.c)
+OBJS_DEMO_S := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_DEMO_S:.c=.o))
+
 
 MSGLIB = $(BUILDDIR)/damnlib.a
 
-DEMO = $(BUILDDIR)/i2cmasterexample1
+DEMO_M = $(BUILDDIR)/i2cmaster
+DEMO_S = $(BUILDDIR)/i2cslave
 DEMODIR = $(SRCDIR)/demo
 CFLAGS_DEMO = $(CFLAGS) -D__MSP432P401R__ 
-LFLAGS_DEMO = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds -Wl,-Map,$(DEMO).map 
+LFLAGS_DEMO = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds
+LFLAGS_DEMO_M = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_M).map
+LFLAGS_DEMO_S = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_S).map 
 
-MAINS = $(MSGLIB) $(DEMO).elf
+MAINS = $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
 
 .PHONY: all clean remake
 
@@ -71,12 +77,20 @@ $(MSGLIB): $(OBJS_LIB)
 	@ echo AR $@
 	@ $(AR) cr $@ $^
 
-$(DEMO).elf: $(OBJS_DEMO) $(KERNEL_BUILD)/gcc/freertos.lib
+##
+# I2C Master Demo
+$(DEMO_M).elf: $(OBJS_DEMO_M) $(KERNEL_BUILD)/gcc/freertos.lib
 	@ echo LNK $@
-	@ $(LNK) $(OBJS_DEMO) $(LFLAGS_DEMO) -o $@
+	@ $(LNK) $(OBJS_DEMO_M) $(LFLAGS_DEMO_M) -o $@
 
 ##
-# C targets for demo application
+# I2C Slave Demo
+$(DEMO_S).elf: $(OBJS_DEMO_S) $(KERNEL_BUILD)/gcc/freertos.lib
+	@ echo LNK $@
+	@ $(LNK) $(OBJS_DEMO_S) $(LFLAGS_DEMO_S) -o $@
+
+##
+# C targets for demo applications
 $(BUILDDIR)/demo%.o : $(DEMODIR)%.c
 	@ echo CC $@
 	@ mkdir -p $(dir $@)
