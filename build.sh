@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-echo "########################################"
-echo "Group M2 Capstone Spring 2018 Building ..."
-echo "########################################"
 if [[ $# -eq 0 ]] ; then
-    echo "No arguments supplied, defaulting to 'all'"
     BUILD="all"
 else
     BUILD=$1
 fi
+
+echo "########################################"
+echo "Group M2 Capstone Spring 2018 Building ${BUILD}"
+echo "########################################"
 
 FREERTOS_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40/kernel/freertos/builds/MSP_EXP432P401R/release/gcc
 FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
@@ -16,12 +16,18 @@ FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
 SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40
 
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
+	if [ $BUILD == "remake" ] ; then
+		pushd $FREERTOS_DIR
+		make clean
+		popd
+	fi
 	if [ ! -f $FREERTOS_LIB ] ; then
 		echo "${FREERTOS_LIB} does not exist"
 		echo "Making backup of ${SIMPLELINK_DIR}/imports.mak"
 		cp $SIMPLELINK_DIR/imports.mak imports.mak.bak
+		rm $SIMPLELINK_DIR/imports.mak
 		echo "Creating soft link from current directory to simplelink directory"
-		ln -s imports.mak $SIMPLELINK_DIR/imports.mak
+		ln -s $PWD/imports.mak $SIMPLELINK_DIR/imports.mak
 		pushd $FREERTOS_DIR
 		make
 		popd
