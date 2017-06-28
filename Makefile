@@ -2,6 +2,7 @@
 SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(HOME)/ti/simplelink_msp432_sdk_1_30_00_40
 
 include imports.mak
+include config.mak
 
 KERNEL_BUILD := $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/kernel/freertos/builds/MSP_EXP432P401R/release
 
@@ -27,7 +28,7 @@ OPTIMIZE = -O2
 CFLAGS := $(INCLUDES)
 CFLAGS += $(OPTIMIZE)
 CFLAGS += -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gstrict-dwarf -Wall
-
+CFLAGS += $(EXTRA_CFLAGS)
 
 LIBS =  -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib/display.am4fg \
 	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/drivers/lib/drivers_msp432p4xx.am4fg \

@@ -51,5 +51,9 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
+#Project specific files
 doxygen*
 build/*
+.project
+.cproject
+.settings/*
