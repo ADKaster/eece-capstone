@@ -1,8 +1,6 @@
 #
-SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(HOME)/ti/simplelink_msp432_sdk_1_30_00_40
-
-include imports.mak
 include config.mak
+include imports.mak
 
 KERNEL_BUILD := $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/kernel/freertos/builds/MSP_EXP432P401R/release
 

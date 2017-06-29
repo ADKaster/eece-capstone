@@ -10,10 +10,9 @@ echo "########################################"
 echo "Group M2 Capstone Spring 2018 Building ${BUILD}"
 echo "########################################"
 
-FREERTOS_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40/kernel/freertos/builds/MSP_EXP432P401R/release/gcc
-FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
-
 SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40
+FREERTOS_DIR=$SIMPLELINK_DIR/kernel/freertos/builds/MSP_EXP432P401R/release/gcc
+FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
 
 if [ $BUILD == "all" ] || [ $BUILD == "remake" ]; then
 	if [ $BUILD == "remake" ] ; then
