@@ -18,12 +18,12 @@
 # will build using each non-empty *_ARMCOMPILER cgtool.
 #
 
-XDC_INSTALL_DIR        ?= $(HOME)/ti/xdctools_3_50_01_12_core
+XDC_INSTALL_DIR        ?= $(HOME)/ti/xdctools_3_50_02_20_core
 
 FREERTOS_INSTALL_DIR   ?= $(HOME)/FreeRTOSv9.0.0
 
-CCS_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.1.LTS
-GCC_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/gcc-arm-none-eabi-4_9-2015q3
+CCS_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.3.LTS
+GCC_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update
 IAR_ARMCOMPILER        ?=
 
 ifeq ("$(SHELL)","sh.exe")

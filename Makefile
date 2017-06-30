@@ -2,7 +2,20 @@
 include config.mak
 include imports.mak
 
-KERNEL_BUILD := $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/kernel/freertos/builds/MSP_EXP432P401R/release
+ifeq ($(OS),Windows_NT)
+	os := Windows
+else
+	MSOFTCHK = $(shell grep Microsoft /proc/version)
+	ifneq ($(MSOFTCHK),)
+		#Why are you calling this from bash in Win10? Making life difficult :/
+		SHELL := cmd
+	endif
+endif
+
+BUILDDIR := build
+SRCDIR := src
+
+KERNEL_BUILD := $(SRCDIR)/FreeRTOS
 
 CROSS = $(GCC_ARMCOMPILER)/bin/arm-none-eabi
 
@@ -32,13 +45,10 @@ LIBS =  -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib/display.am
 	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/drivers/lib/drivers_msp432p4xx.am4fg \
 	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/fatfs/lib/fatfs.am4fg \
 	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/devices/msp432p4xx/driverlib/gcc/msp432p4xx_driverlib.a \
-	    -l:$(KERNEL_BUILD)/gcc/freertos.lib \
+	    -l:$(KERNEL_BUILD)/freertos.lib \
 
 LFLAGS := $(LIBS)
 LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostartfiles -static -Wl,--gc-sections -lgcc -lc -lm -lnosys
-
-BUILDDIR := build
-SRCDIR := src
 
 SRCS_LIB := $(shell find $(SRCDIR)/damnlib -type f -name *.c)
 OBJS_LIB := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_LIB:.c=.o))
@@ -66,10 +76,9 @@ MAINS = $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
 all: $(MAINS)
 	@mkdir -p $(BUILDDIR)
 
-$(KERNEL_BUILD)/gcc/freertos.lib:
+$(KERNEL_BUILD)/freertos.lib:
 	@ $(ECHOBLANKLINE)
-	@ echo $(abspath $@) is not built.
-	@ echo You can build it by issuing $(MAKE) in $(abspath $(dir $@)).
+	$(MAKE) -w $(KERNEL_BUILD) SIMPLELINK_MSP432_SDK_INSTALL_DIR=$SIMPLELINK_MSP432_SDK_INSTALL_DIR
 	@ $(ECHOBLANKLINE)
 
 $(MSGLIB): $(OBJS_LIB)
@@ -78,13 +87,13 @@ $(MSGLIB): $(OBJS_LIB)
 
 ##
 # I2C Master Demo
-$(DEMO_M).elf: $(OBJS_DEMO_M) $(KERNEL_BUILD)/gcc/freertos.lib
+$(DEMO_M).elf: $(OBJS_DEMO_M) $(KERNEL_BUILD)/freertos.lib
 	@ echo LNK $@
 	@ $(LNK) $(OBJS_DEMO_M) $(LFLAGS_DEMO_M) -o $@
 
 ##
 # I2C Slave Demo
-$(DEMO_S).elf: $(OBJS_DEMO_S) $(KERNEL_BUILD)/gcc/freertos.lib
+$(DEMO_S).elf: $(OBJS_DEMO_S) $(KERNEL_BUILD)/freertos.lib
 	@ echo LNK $@
 	@ $(LNK) $(OBJS_DEMO_S) $(LFLAGS_DEMO_S) -o $@
 
@@ -104,7 +113,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 
 clean:
 	@ echo Cleaning
-	@ $(RM) -rf $(BUILDDIR)
+	@ $(RMDIR) $(BUILDDIR)
 
 remake: clean all
 	@ echo Finished remake

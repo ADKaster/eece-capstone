@@ -10,7 +10,7 @@ echo "########################################"
 echo "Group M2 Capstone Spring 2018 Building ${BUILD}"
 echo "########################################"
 
-SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_30_00_40
+SIMPLELINK_DIR=$HOME/ti/simplelink_msp432_sdk_1_40_00_28
 FREERTOS_DIR=$SIMPLELINK_DIR/kernel/freertos/builds/MSP_EXP432P401R/release/gcc
 FREERTOS_LIB=$FREERTOS_DIR/freertos.lib
 
