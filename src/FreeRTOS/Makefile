@@ -11,7 +11,7 @@ VPATH = $(FREERTOS_INSTALL_DIR)/FreeRTOS/Source:$(FREERTOS_INSTALL_DIR)/FreeRTOS
 CC = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
 AR = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-ar"
 
-CFLAGS = -I./ "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/include" "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/portable/GCC/ARM_CM4F" "-I$(FREERTOSPORT_DIR)/source" "-I$(DRIVERLIB_DIR)/source" "-I$(DRIVERLIB_DIR)/source/third_party/CMSIS/Include" "-I$(GCC_ARMCOMPILER)/include" -DDeviceFamily_MSP432P401x -D__MSP432P401R__ -c -Wunused -Wunknown-pragmas -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -mabi=aapcs -mfloat-abi=hard -mfpu=fpv4-sp-d16  -c -Wunused -Wunknown-pragmas
+CFLAGS = "-I." "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/include" "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/portable/GCC/ARM_CM4F" "-I$(FREERTOSPORT_DIR)/source" "-I$(DRIVERLIB_DIR)/source" "-I$(DRIVERLIB_DIR)/source/third_party/CMSIS/Include" "-I$(GCC_ARMCOMPILER)/include" -DDeviceFamily_MSP432P401x -D__MSP432P401R__ -c -Wunused -Wunknown-pragmas -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -mabi=aapcs -mfloat-abi=hard -mfpu=fpv4-sp-d16  -c -Wunused -Wunknown-pragmas
 
 CFILES = \
     croutine.c \
@@ -43,19 +43,22 @@ CFILES = \
     PowerMSP432_freertos.c \
     startup_msp432_gcc.c
 
-OBJCFILES = $(CFILES:.c=.obj)
+OBJBUILDDIR := $(CURDIR)/../../build/FreeRTOS
+TGTBUILDDIR := $(CURDIR)/../../build
 
-freertos.lib: $(OBJCFILES)
-	@ echo ar $@ ...
-	@ $(RM) $@ > $(DEVNULL) 2>&1
-	@ $(AR) -cr $@ $(OBJCFILES)
+OBJCFILES = $(CFILES:%.c=$(OBJBUILDDIR)/%.obj)
+
+$(TGTBUILDDIR)/freertos.lib: $(OBJCFILES)
+	@ echo ar $(notdir $@) ...
+	@ $(AR) -cr "$(@)" $(OBJCFILES)
 
 $(CFILES):
 	@ echo "Error: can't find $@, please ensure FREERTOS_INSTALL_DIR in $(realpath $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/imports.mak) is correct (it is '$(FREERTOS_INSTALL_DIR)')"
 	@ exit 1
 
-%.obj:%.c
-	@ echo cc $@ ...
+$(OBJBUILDDIR)/%.obj:%.c
+	@ echo cc $(notdir $@) ...
+	@ $(call make_dir,"$(dir $@)")
 	@ $(CC) $(CFLAGS) $< -o $@
 
 clean:
