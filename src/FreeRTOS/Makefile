@@ -1,5 +1,8 @@
 #Makefile for FreeRTOS
 
+include config.mak
+include imports.mak
+
 DRIVERLIB_DIR = $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)
 FREERTOSPORT_DIR = $(SIMPLELINK_MSP432_SDK_INSTALL_DIR)
 
@@ -8,7 +11,7 @@ VPATH = $(FREERTOS_INSTALL_DIR)/FreeRTOS/Source:$(FREERTOS_INSTALL_DIR)/FreeRTOS
 CC = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-gcc"
 AR = "$(GCC_ARMCOMPILER)/bin/arm-none-eabi-ar"
 
-CFLAGS = -I.. "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/include" "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/portable/GCC/ARM_CM4F" "-I$(FREERTOSPORT_DIR)/source" "-I$(DRIVERLIB_DIR)/source" "-I$(DRIVERLIB_DIR)/source/third_party/CMSIS/Include" "-I$(GCC_ARMCOMPILER)/include" -DDeviceFamily_MSP432P401x -D__MSP432P401R__ -c -Wunused -Wunknown-pragmas -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -mabi=aapcs -mfloat-abi=hard -mfpu=fpv4-sp-d16  -c -Wunused -Wunknown-pragmas
+CFLAGS = -I./ "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/include" "-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/portable/GCC/ARM_CM4F" "-I$(FREERTOSPORT_DIR)/source" "-I$(DRIVERLIB_DIR)/source" "-I$(DRIVERLIB_DIR)/source/third_party/CMSIS/Include" "-I$(GCC_ARMCOMPILER)/include" -DDeviceFamily_MSP432P401x -D__MSP432P401R__ -c -Wunused -Wunknown-pragmas -ffunction-sections -fdata-sections -mcpu=cortex-m4 -mthumb -mabi=aapcs -mfloat-abi=hard -mfpu=fpv4-sp-d16  -c -Wunused -Wunknown-pragmas
 
 CFILES = \
     croutine.c \

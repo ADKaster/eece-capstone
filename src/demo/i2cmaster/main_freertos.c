@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Texas Instruments Incorporated
+ * Copyright (c) 2016-2017, Texas Instruments Incorporated
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ extern void *mainThread(void *arg0);
 int main(void)
 {
     pthread_t           thread;
-    pthread_attr_t      pAttrs;
+    pthread_attr_t      attrs;
     struct sched_param  priParam;
     int                 retc;
     int                 detachState;
@@ -65,25 +65,25 @@ int main(void)
     Board_initGeneral();
 
     /* Set priority and stack size attributes */
-    pthread_attr_init(&pAttrs);
+    pthread_attr_init(&attrs);
     priParam.sched_priority = 1;
 
     detachState = PTHREAD_CREATE_DETACHED;
-    retc = pthread_attr_setdetachstate(&pAttrs, detachState);
+    retc = pthread_attr_setdetachstate(&attrs, detachState);
     if (retc != 0) {
         /* pthread_attr_setdetachstate() failed */
         while (1);
     }
 
-    pthread_attr_setschedparam(&pAttrs, &priParam);
+    pthread_attr_setschedparam(&attrs, &priParam);
 
-    retc |= pthread_attr_setstacksize(&pAttrs, THREADSTACKSIZE);
+    retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
     if (retc != 0) {
         /* pthread_attr_setstacksize() failed */
         while (1);
     }
 
-    retc = pthread_create(&thread, &pAttrs, mainThread, NULL);
+    retc = pthread_create(&thread, &attrs, mainThread, NULL);
     if (retc != 0) {
         /* pthread_create() failed */
         while (1);

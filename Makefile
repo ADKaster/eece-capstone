@@ -2,6 +2,8 @@
 include config.mak
 include imports.mak
 
+PROJROOT := $(PWD)
+
 ifeq ($(OS),Windows_NT)
 	os := Windows
 else
@@ -41,14 +43,16 @@ CFLAGS += $(OPTIMIZE)
 CFLAGS += -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gstrict-dwarf -Wall
 CFLAGS += $(EXTRA_CFLAGS)
 
-LIBS =  -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib/display.am4fg \
-	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/drivers/lib/drivers_msp432p4xx.am4fg \
-	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/fatfs/lib/fatfs.am4fg \
-	    -l:$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/devices/msp432p4xx/driverlib/gcc/msp432p4xx_driverlib.a \
-	    -l:$(KERNEL_BUILD)/freertos.lib \
+LFLAGS := -nostartfiles
 
-LFLAGS := $(LIBS)
-LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -nostartfiles -static -Wl,--gc-sections -lgcc -lc -lm -lnosys
+LIBS := "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib" -l:display.am4fg \
+		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/drivers/lib" -l:drivers_msp432p401x.am4fg \
+		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/fatfs/lib" -l:fatfs.am4fg \
+		  "-L$(KERNEL_BUILD)" -l:freertos.lib \
+		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/devices/msp432p4xx/driverlib/gcc" -l:msp432p4xx_driverlib.a
+
+LFLAGS += $(LIBS)
+LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -static -Wl,--gc-sections -lgcc -lc -lm -lnosys
 
 SRCS_LIB := $(shell find $(SRCDIR)/damnlib -type f -name *.c)
 OBJS_LIB := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCS_LIB:.c=.o))
@@ -64,24 +68,30 @@ MSGLIB = $(BUILDDIR)/damnlib.a
 DEMO_M = $(BUILDDIR)/i2cmaster
 DEMO_S = $(BUILDDIR)/i2cslave
 DEMODIR = $(SRCDIR)/demo
-CFLAGS_DEMO = $(CFLAGS) -D__MSP432P401R__ 
-LFLAGS_DEMO = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds
+CFLAGS_DEMO = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
+LFLAGS_DEMO = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
 LFLAGS_DEMO_M = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_M).map
 LFLAGS_DEMO_S = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_S).map 
 
-MAINS = $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
+MAINS = message $(KERNEL_BUILD)/freertos.lib $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
 
-.PHONY: all clean remake
+.PHONY: message all clean remake
 
 all: $(MAINS)
-	@mkdir -p $(BUILDDIR)
+	@ mkdir -p $(BUILDDIR)
+
+message: 
+	@ echo "########################################"
+	@ echo "Group M2 Capstone Spring 2018 Build"
+	@ echo "########################################"
 
 $(KERNEL_BUILD)/freertos.lib:
 	@ $(ECHOBLANKLINE)
-	$(MAKE) -w $(KERNEL_BUILD) SIMPLELINK_MSP432_SDK_INSTALL_DIR=$SIMPLELINK_MSP432_SDK_INSTALL_DIR
+	@ $(MAKE) -C $(KERNEL_BUILD) -I$(PROJROOT)
 	@ $(ECHOBLANKLINE)
 
 $(MSGLIB): $(OBJS_LIB)
+	@ $(ECHOBLANKLINE)
 	@ echo AR $@
 	@ $(AR) cr $@ $^
 
@@ -111,9 +121,10 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@ echo CC $@
 	@ $(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-clean:
+clean: message
 	@ echo Cleaning
 	@ $(RMDIR) $(BUILDDIR)
+	@ $(MAKE) -C $(KERNEL_BUILD) -I$(PROJROOT) clean
 
 remake: clean all
 	@ echo Finished remake

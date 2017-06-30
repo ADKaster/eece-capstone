@@ -101,24 +101,13 @@ void *mainThread(void *arg0)
      * txBuffer[0] = 0x01 [GETSTATUS CMD]
      */
     txBuffer[0] = 0x01;
-    i2cTransaction.slaveAddress = 0x48;
-    i2cTransaction.writeBuf = txBuffer;
-    i2cTransaction.writeCount = 1;
-    i2cTransaction.readBuf = rxBuffer;
-    i2cTransaction.readCount = 0;
-
-    /* Re-try writing to slave till I2C_transfer returns true */
-    do {
-        retVal = I2C_transfer(i2c, &i2cTransaction);
-    } while(!retVal);
-
     /*
      * Response from slave for GETSTATUS Cmd
      * rxBuffer[0] = status
      */
     i2cTransaction.slaveAddress = 0x48;
     i2cTransaction.writeBuf = txBuffer;
-    i2cTransaction.writeCount = 0;
+    i2cTransaction.writeCount = 1;
     i2cTransaction.readBuf = rxBuffer;
     i2cTransaction.readCount = 1;
 
@@ -203,22 +192,13 @@ void *mainThread(void *arg0)
     txBuffer[0] = 0x03;
     txBuffer[1] = 0x00;
     txBuffer[2] = 0x1A;
-
-    i2cTransaction.slaveAddress = 0x48;
-    i2cTransaction.writeBuf = txBuffer;
-    i2cTransaction.writeCount = 3;
-    i2cTransaction.readBuf = rxBuffer;
-    i2cTransaction.readCount = 0;
-
-    retVal = I2C_transfer(i2c, &i2cTransaction); //read
-
     /*
      * Response from slave for READBLOCK Cmd
      * numberOfBytes to be read in this case 0x1A
      */
     i2cTransaction.slaveAddress = 0x48;
     i2cTransaction.writeBuf = txBuffer;
-    i2cTransaction.writeCount = 0;
+    i2cTransaction.writeCount = 3;
     i2cTransaction.readBuf = mirrorRegister;
     /* 0x1A bytes in this case */
     i2cTransaction.readCount = txBuffer[2];
