@@ -29,7 +29,7 @@ typedef enum
     FREQ_UNLIMITED,
     FREQ_TEN_HZ,
     FREQ_TWENTY_HZ,
-    FREQ_ONE_HUNDRED_HZ.
+    FREQ_ONE_HUNDRED_HZ,
 } damn_pubsub_freq_t;
 
 //Basic idea: Broadcast -- Publisher controlled timing
@@ -47,7 +47,7 @@ damn_pub_status_t damn_publish_send(damn_msgdef_t *msg);
 // subscriber's recieve buffer when published by the publisher.
 // This can only happen for broadcast messages. For point to point messages,
 // the subscriber must configure a frequency to poll the publisher at.
-damn_sub_status_t damn_subscribe_configure(damn_msgdef *msg,
+damn_sub_status_t damn_subscribe_configure(damn_msgdef_t *msg,
                                            damn_pubsub_freq_t frequency);
 
 damn_sub_status_t damn_subscribe_receive(damn_msgdef_t *msg,
