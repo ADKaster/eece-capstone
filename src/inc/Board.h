@@ -49,6 +49,10 @@ extern "C" {
 
 #include "MSP_EXP432P401R.h"
 
+#ifndef NULL
+#define NULL 0
+#endif
+
 #define Board_initGeneral           MSP_EXP432P401R_initGeneral
 
 #define Board_ADC0                  MSP_EXP432P401R_ADC0

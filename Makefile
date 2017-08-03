@@ -1,5 +1,4 @@
 #
-include config.mak
 include imports.mak
 
 PROJROOT := $(PWD)
@@ -60,10 +59,10 @@ MSGLIB = $(BUILDDIR)/damnlib.a
 DEMO_M = $(BUILDDIR)/i2cmaster
 DEMO_S = $(BUILDDIR)/i2cslave
 DEMODIR = $(SRCDIR)/demo
-CFLAGS_DEMO = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
-LFLAGS_DEMO = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
-LFLAGS_DEMO_M = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_M).map
-LFLAGS_DEMO_S = $(LFLAGS_DEMO) -Wl,-Map,$(DEMO_S).map 
+CFLAGS_MSP432 = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
+LFLAGS_MSP432 = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
+LFLAGS_DEMO_M = $(LFLAGS_MSP432) -Wl,-Map,$(DEMO_M).map
+LFLAGS_DEMO_S = $(LFLAGS_MSP432) -Wl,-Map,$(DEMO_S).map 
 
 MAINS = message $(FREERTOS) $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
 
@@ -103,14 +102,14 @@ $(DEMO_S).elf: $(OBJS_DEMO_S) $(FREERTOS)
 $(BUILDDIR)/demo%.o : $(DEMODIR)%.c
 	@ echo CC $@
 	@ $(call make_dir,"$(dir $@)")
-	@ $(CC) $(CFLAGS_DEMO) $(INCLUDES) -c $< -o $@
+	@ $(CC) $(CFLAGS_MSP432) $(INCLUDES) -c $< -o $@
 
 ##
 # Generic C targets
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@ $(call make_dir,"$(dir $@)")
 	@ echo CC $@
-	@ $(CC) -c $(CFLAGS) $(INCLUDES) -o $@ $<
+	@ $(CC) -c $(CFLAGS_MSP432) $(INCLUDES) -o $@ $<
 
 clean: message
 	@ echo Cleaning

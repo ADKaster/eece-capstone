@@ -18,24 +18,12 @@
 # will build using each non-empty *_ARMCOMPILER cgtool.
 #
 
-XDC_INSTALL_DIR        ?= $(HOME)/ti/xdctools_3_50_02_20_core
+include config.mak
 
-FREERTOS_INSTALL_DIR   ?= $(HOME)/FreeRTOSv9.0.0
+XDC_INSTALL_DIR        ?= $(TI_ROOT)ti/xdctools_3_50_02_20_core
 
-CCS_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.3.LTS
-GCC_ARMCOMPILER        ?= $(HOME)/ti/ccsv7/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update
+FREERTOS_INSTALL_DIR   ?= $(TI_ROOT)FreeRTOSv9.0.0
+
+CCS_ARMCOMPILER        ?= $(TI_ROOT)ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.3.LTS
+GCC_ARMCOMPILER        ?= $(TI_ROOT)ti/ccsv7/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update
 IAR_ARMCOMPILER        ?=
-
-ifeq ("$(SHELL)","sh.exe")
-# for Windows/DOS shell
-    RM     = del
-    RMDIR  = -rmdir /S /Q
-    DEVNULL = NUL
-    ECHOBLANKLINE = @cmd /c echo.
-else
-# for Linux-like shells
-    RM     = rm -f
-    RMDIR  = rm -rf
-    DEVNULL = /dev/null
-    ECHOBLANKLINE = echo
-endif

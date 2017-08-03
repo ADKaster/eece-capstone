@@ -2,9 +2,7 @@
 #
 # Extra configuration items
 
-EXTRA_CFLAGS= -DNOAPPLICATION
-
-SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(HOME)/ti/simplelink_msp432_sdk_1_40_00_28
+EXTRA_CFLAGS= -DNOAPPLICATION -DFREERTOS
 
 ifeq ($(OS),Windows_NT)
 	os := Windows
@@ -21,3 +19,21 @@ define make_dir
 	mkdir -p $(1)
 endef
 endif
+
+ifeq ("$(SHELL)","sh.exe")
+# for Windows/DOS shell
+    RM     = del
+    RMDIR  = -rmdir /S /Q
+    DEVNULL = NUL
+    ECHOBLANKLINE = @cmd /c echo.
+    TI_ROOT = c:/
+else
+# for Linux-like shells
+    RM     = rm -f
+    RMDIR  = rm -rf
+    DEVNULL = /dev/null
+    ECHOBLANKLINE = echo
+    TI_ROOT = $(HOME)/
+endif
+
+SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(TI_ROOT)/ti/simplelink_msp432_sdk_1_40_01_00
