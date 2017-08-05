@@ -17,11 +17,15 @@
 #include <ti/drivers/I2CSlave.h>
 
 
-damn_i2c_status_t i2c_msp432_send(damn_i2c_request_t *request);
+damn_i2c_status_t i2c_msp432_master_send(damn_i2c_request_t *request);
 
-damn_i2c_status_t i2c_msp432_recieve(damn_i2c_request_t *request);
+damn_i2c_status_t i2c_msp432_master_recieve(damn_i2c_request_t *request);
 
 damn_i2c_status_t i2c_msp432_init(void);
+
+void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status);
+
+extern volatile bool damn_i2c_slaveReadInProgress;
 
 
 #endif /* I2C_MSP432_H */

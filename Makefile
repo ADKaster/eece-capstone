@@ -44,6 +44,9 @@ LIBS := "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib" -l:displa
 LFLAGS += $(LIBS)
 LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -static -Wl,--gc-sections -lgcc -lc -lm -lnosys
 
+CFLAGS_MSP432 = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
+LFLAGS_MSP432 = $(LFLAGS) -Wl,-T,$(SRCDIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
+
 SRCS_LIB := $(wildcard $(SRCDIR)/damnlib/*.c)
 OBJS_LIB  := $(SRCS_LIB:$(SRCDIR)%.c=$(BUILDDIR)%.o)
 
@@ -53,18 +56,21 @@ OBJS_DEMO_M := $(SRCS_DEMO_M:$(SRCDIR)%.c=$(BUILDDIR)%.o)
 SRCS_DEMO_S := $(wildcard $(SRCDIR)/demo/i2cslave/*.c)
 OBJS_DEMO_S := $(SRCS_DEMO_S:$(SRCDIR)%.c=$(BUILDDIR)%.o)
 
-
 MSGLIB = $(BUILDDIR)/damnlib.a
 
 DEMO_M = $(BUILDDIR)/i2cmaster
 DEMO_S = $(BUILDDIR)/i2cslave
 DEMODIR = $(SRCDIR)/demo
-CFLAGS_MSP432 = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
-LFLAGS_MSP432 = $(LFLAGS) -Wl,-T,$(DEMODIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
 LFLAGS_DEMO_M = $(LFLAGS_MSP432) -Wl,-Map,$(DEMO_M).map
 LFLAGS_DEMO_S = $(LFLAGS_MSP432) -Wl,-Map,$(DEMO_S).map 
 
-MAINS = message $(FREERTOS) $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf
+EXAMPLE := $(BUILDDIR)/example
+SRCS_EXAMP := $(wildcard $(SRCDIR)/example/*.c)
+OBJS_EXAMP := $(SRCS_EXAMP:$(SRCDIR)%.c=$(BUILDDIR)%.o)
+LFLAGS_EXAMP = $(LFLAGS_MSP432) -Wl,-Map,$(EXAMPLE).map
+
+
+MAINS = message $(FREERTOS) $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf $(EXAMPLE).elf
 
 .PHONY: message all clean remake
 
@@ -96,6 +102,12 @@ $(DEMO_M).elf: $(OBJS_DEMO_M) $(FREERTOS)
 $(DEMO_S).elf: $(OBJS_DEMO_S) $(FREERTOS)
 	@ echo LNK $@
 	@ $(LNK) $(OBJS_DEMO_S) $(LFLAGS_DEMO_S) -o $@
+
+##
+# Example application
+$(EXAMPLE).elf: $(OBJS_EXAMP) $(FREERTOS) $(MSGLIB)
+	@ echo LNK $@
+	@ $(LNK) $(OBJS_EXAMP) $(MSGLIB) $(LFLAGS_EXAMP) -o $@
 
 ##
 # C targets for demo applications

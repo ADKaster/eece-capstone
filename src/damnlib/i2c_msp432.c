@@ -26,14 +26,14 @@
 
 static I2C_Handle i2cMasterHandle;
 static I2CSlave_Handle i2cSlaveHandle;
+int32_t damn_arch_rxDataAvail;
 
-
-damn_i2c_status_t i2c_msp432_send(damn_i2c_request_t *request)
+damn_i2c_status_t i2c_msp432_master_send(damn_i2c_request_t *request)
 {
 	return I2C_FAIL; 
 }
 
-damn_i2c_status_t i2c_msp432_recieve(damn_i2c_request_t *request)
+damn_i2c_status_t i2c_msp432_master_recieve(damn_i2c_request_t *request)
 {
 	return I2C_FAIL;
 }
@@ -55,7 +55,8 @@ damn_i2c_status_t i2c_msp432_init(void)
 	i2cMasterHandle = I2C_open(DAMN_I2C_MASTER_PORT, &masterParams); 
 
 	I2CSlave_Params_init(&slaveParams);
-	slaveParams.transferMode = I2CSLAVE_MODE_BLOCKING;
+	slaveParams.transferMode = I2CSLAVE_MODE_CALLBACK;
+	slaveParams.transferCallbackFxn = i2c_msp432_SlaveTransferCallback;
 	i2cSlaveHandle = I2CSlave_open(DAMN_I2C_SLAVE_PORT, &slaveParams);
 
 	if(NULL == i2cMasterHandle || NULL == i2cSlaveHandle)
@@ -68,4 +69,12 @@ damn_i2c_status_t i2c_msp432_init(void)
 	}
 
 	return retVal;
+}
+
+void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
+{
+	/* TODO: Need to implement custom I2CSlave_Open and I2C ISR to blindly store all */
+	/* recieved data into a ring buffer and let the number of byes in the buffer be available */
+    /* to the application*/
+    damn_arch_rxDataAvail = -1;
 }

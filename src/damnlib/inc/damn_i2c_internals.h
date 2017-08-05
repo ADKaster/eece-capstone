@@ -8,12 +8,7 @@
 #ifndef DAMN_I2C_INTERNALS_H
 #define DAMN_I2C_INTERNALS_H
 
-#ifdef FREERTOS
-	#include <FreeRTOS.h>
-	#include <queue.h>
-#else
-	#error Non-FreeRTOS implemenations Unsupported
-#endif
+#include <mqueue.h>
 
 /* Forward declare request structure. transaction is arch specific. */
 typedef struct damn_i2c_request_s damn_i2c_request_t;
@@ -51,16 +46,17 @@ struct damn_i2c_request_s
 };
 
 
-damn_i2c_status_t damn_arch_i2c_send(damn_i2c_request_t *request);
+damn_i2c_status_t damn_arch_i2c_tx_send(damn_i2c_request_t *request);
 
-damn_i2c_status_t damn_arch_i2c_recieve(damn_i2c_request_t *request);
+damn_i2c_status_t damn_arch_i2c_tx_get(damn_i2c_request_t *request);
 
 damn_i2c_status_t damn_i2c_init(void);
 
 damn_i2c_status_t damn_arch_i2c_init(void);
 
-void i2cThread(void *arg0);
+void *i2cThread(void *arg0);
 
-extern QueueHandle_t gI2CServiceQueue;
+extern mqd_t gI2C_TXQueue;
+extern mqd_t gI2C_RXQueue;
 
 #endif /* DAMN_I2C_INTERNALS_H */
