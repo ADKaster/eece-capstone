@@ -4,10 +4,10 @@
 */  
 
 
-#include "damn_i2c_internals.h"
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
+#include "damn_i2c_internals.h"
 
 /* Stack size in bytes */
 #define THREADSTACKSIZE   1024

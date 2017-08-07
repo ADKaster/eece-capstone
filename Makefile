@@ -47,7 +47,7 @@ LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -static -Wl
 CFLAGS_MSP432 = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
 LFLAGS_MSP432 = $(LFLAGS) -Wl,-T,$(SRCDIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
 
-SRCS_LIB := $(wildcard $(SRCDIR)/damnlib/*.c)
+SRCS_LIB := $(wildcard $(SRCDIR)/damnlib/*.c) $(wildcard $(SRCDIR)/damnlib/*/*.c) 
 OBJS_LIB  := $(SRCS_LIB:$(SRCDIR)%.c=$(BUILDDIR)%.o)
 
 SRCS_DEMO_M := $(wildcard $(SRCDIR)/demo/i2cmaster/*.c)

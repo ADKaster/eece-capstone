@@ -48,13 +48,27 @@ typedef enum busenum_tag
 */
 typedef struct msgdef_tag
 {
-    damn_msg_enum_t message_number;     /**< Which message is it? Using the enum type */
-    damn_node_t message_source;          /**< What node is the source of this message? */
-    damn_tx_type_t message_type;        /**< Point-to-point or broadcast */
-    damn_bus_type_t message_bus;        /**< Only I2C is supported */
-    uint32_t message_length;            /**< Message length in bytes */
+    damn_msg_enum_t     message_number;     /**< Which message is it? Using the enum type */
+    damn_node_t         message_source;     /**< What node is the source of this message? */
+    damn_tx_type_t      message_type;       /**< Point-to-point or broadcast */
+    damn_bus_type_t     message_bus;        /**< Only I2C is supported */
+    uint32_t            message_length;     /**< Message length in bytes */
 } damn_msgdef_t;
 
 extern damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS];
+
+
+
+typedef struct damn_pkthdr_s
+{
+    uint32_t            syncword;
+    damn_node_t         src;
+    damn_node_t         dest;
+    damn_msg_enum_t     id;
+    uint32_t            msg_size;
+} damn_pkthdr_t;
+
+#define DAMN_MSG_HDR_BYTES (sizeof(damn_pkthdr_t))
+#define DAMN_MSG_HDR_WORDS (DAMN_MSG_HDR_BYTES/4)
 
 #endif

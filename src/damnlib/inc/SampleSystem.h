@@ -18,6 +18,7 @@
  * Each application must define which node it is as well.
  *
  */
+
 typedef enum nodeenum_tag
 {
 	NODE_FOO, /**< Foo contains feature x */
@@ -26,6 +27,7 @@ typedef enum nodeenum_tag
 	NUM_NODES, /**< The number of nodes in the system. Do not change location */
 } damn_node_t;
 
+#define APPLICATION_WHOAMI (NODE_FOO)
 
 /*! \brief Message enumeration
 

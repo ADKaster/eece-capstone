@@ -23,9 +23,7 @@ damn_i2c_status_t i2c_msp432_master_recieve(damn_i2c_request_t *request);
 
 damn_i2c_status_t i2c_msp432_init(void);
 
-void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status);
-
-extern volatile bool damn_i2c_slaveReadInProgress;
-
+extern void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status);
+extern void damn_i2cslave_hwiIntFxn(uintptr_t arg);
 
 #endif /* I2C_MSP432_H */
