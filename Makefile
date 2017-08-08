@@ -28,7 +28,7 @@ INCLUDES =  -I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source \
 
 OPTIMIZE = -O2
 
-CFLAGS := $(INCLUDES)
+CFLAGS := $(INCLUDES) -MP -MD
 CFLAGS += $(OPTIMIZE)
 CFLAGS += -mcpu=cortex-m4 -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -ffunction-sections -fdata-sections -g -gstrict-dwarf -Wall
 CFLAGS += $(EXTRA_CFLAGS)
@@ -69,9 +69,12 @@ SRCS_EXAMP := $(wildcard $(SRCDIR)/example/*.c)
 OBJS_EXAMP := $(SRCS_EXAMP:$(SRCDIR)%.c=$(BUILDDIR)%.o)
 LFLAGS_EXAMP = $(LFLAGS_MSP432) -Wl,-Map,$(EXAMPLE).map
 
+rwildcard=$(wildcard $(addsuffix $2, $1)) $(foreach d,$(wildcard $(addsuffix *, $1)),$(call rwildcard,$d/,$2))
+ALL_SRCS := $(call rwildcard,$(SRCDIR)/,*.c)
 
 MAINS = message $(FREERTOS) $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf $(EXAMPLE).elf
 
+-include $(ALL_SRCS:$(SRCDIR)%.c=$(BUILDDIR)%.d)
 .PHONY: message all clean remake
 
 all: $(MAINS)
