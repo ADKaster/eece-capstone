@@ -7,6 +7,7 @@
 /******* Includes *******/
 #include "damn_i2c_internals.h"
 #include "damn_msgdef.h"
+#include "messaging.h"
 
 #include <pthread.h>
 #include <mqueue.h>
@@ -32,6 +33,8 @@ mqd_t gI2C_TXQueue;
 mqd_t gI2C_RXQueue;
 volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
 damn_i2c_slave_state_t gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
+
+static uint32_t slaveRxHoldingBuf[I2C_RX_BUFFER_SIZE];
 
 pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
@@ -135,6 +138,7 @@ void *i2cMasterThread(void *arg0)
 
 void *i2cSlaveThread(void *arg0)
 {
+    /* Use the thread stack to store some variables we'll need often */
     volatile ringbuf_t      *pSlaveRingbuf = (volatile ringbuf_t *)&gI2C_SlaveRingbuf;
     uint32_t                rbufCount = 0;
     damn_pkthdr_t           currHdr;
@@ -164,13 +168,32 @@ void *i2cSlaveThread(void *arg0)
                         /* Recalculate how many words are available */
                         num_words_avail = (rbufCount - rbufRead)/4;
                         /* Proceed to the next state */
-                        gI2C_SlaveState = I2C_SLAVE_WAIT_MSG;
+                        gI2C_SlaveState = I2C_PARSE_HDR;
                     } /* DAMN_MSG_HDR_BYTES actually in buffer*/
                 } /* DAMN_MSG_HDR_WORDS Allegedly in buffer */
                 break;
 
-            case I2C_SLAVE_WAIT_MSG:
+            case I2C_PARSE_HDR:
                 /* Check how many words are available */
+                /* verify header --> if fail, tell master on this mcu to send nack packet and flush slave ring buffer */
+                if(!damn_msg_verify_header(&currHdr))
+                {
+                    // SEND NACK and FLUSH RINGBUF
+                    gI2C_SlaveState = I2C_SLAVE_SEND_NACK;
+                }
+                else if (currHdr.msg_size > I2C_RX_BUFFER_SIZE)
+                {
+                    // SEND "packet too big" nack and FLUSH RINGBUF
+                    gI2C_SlaveState = I2C_SLAVE_SEND_NACK;
+                }
+                else
+                {
+                    gI2C_SlaveState = I2C_SLAVE_WAIT_MSG;
+                }
+                break;
+
+            case I2C_SLAVE_WAIT_MSG:
+                /* Wait until enough words are available, waking up one word at a time */
                 if(num_words_avail < ((currHdr.msg_size)/4))
                 {
 #ifdef FREERTOS
@@ -185,14 +208,16 @@ void *i2cSlaveThread(void *arg0)
                     rbufCount = ringbuf_getcount(pSlaveRingbuf);
                     if(rbufCount >= currHdr.msg_size)
                     {
-                        gI2C_SlaveState = I2C_PARSE_HDR;
+                        gI2C_SlaveState = I2C_SLAVE_WAIT_MSG;
                     }
                 }
                 break;
 
-            case I2C_PARSE_HDR:
-                    //read whole packet
-                    // verify syncword --> if fail, tell master on this mcu to send nack packet and flush slave ring buffer;
+            case I2C_PROCESS_MSG:
+                    /* read whole packet */
+                    rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)slaveRxHoldingBuf, currHdr.msg_size);
+
+                    num_words_avail = ringbuf_getcount(pSlaveRingbuf);
                     //if header.id is one that application publishes/isconnfigured to respond to
                     //      gI2C_SlaveState = I2C_SLAVE_SEND_RESP;
                     //  else if header.type is a broadcast that application subscribes to
@@ -210,15 +235,20 @@ void *i2cSlaveThread(void *arg0)
                     gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
                 break;
 
+            case I2C_SLAVE_SEND_NACK:
+                    // create nack packet
+                    //      Fill with global error values, header info
+                    //       i.e. gI2CSlave_NackVal
+                    gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
+                break;
+
             default:
                     gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
                 break;
-        }
+
+        } /* Switch gI2C_SlaveState */
     } /* Infinite task loop */
-    return NULL;
+    /* If we get here there's some serious problems */
+    return NULL; 
 } /* i2cSlaveThread() */
 
-void damn_i2cSlaveHandle(damn_pkthdr_t *hdr, volatile ringbuf_t *rbuf)
-{
-    return;
-}

@@ -71,7 +71,7 @@ typedef struct damn_pkthdr_s
     damn_node_t         src;            /**< Enum of the source node */  
     damn_node_t         dest;           /**< Enum of the destination node */  
     damn_msg_enum_t     id;             /**< Packet id from damn_config.c */  
-    uint32_t            msg_size;       /**< Message size in words */  
+    uint32_t            msg_size;       /**< Message size in *BYTES* */  
     uint32_t            hdr_chksum;     /**< 32-bit version of IP header checksum */  
 }__attribute__((aligned(4))) damn_pkthdr_t ;
 

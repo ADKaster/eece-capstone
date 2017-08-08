@@ -17,7 +17,7 @@ static uint32_t calculate_checksum(uint32_t *buf, uint32_t size)
     uint32_t sum = 0;
     for(i = 0; i < size; i++)
     {
-        sum+= buf[i];
+        sum += buf[i];
     }
 
     return ~sum;

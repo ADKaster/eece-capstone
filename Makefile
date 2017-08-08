@@ -74,7 +74,6 @@ ALL_SRCS := $(call rwildcard,$(SRCDIR)/,*.c)
 
 MAINS = message $(FREERTOS) $(MSGLIB) $(DEMO_M).elf $(DEMO_S).elf $(EXAMPLE).elf
 
--include $(ALL_SRCS:$(SRCDIR)%.c=$(BUILDDIR)%.d)
 .PHONY: message all clean remake
 
 all: $(MAINS)
@@ -133,3 +132,6 @@ clean: message
 
 remake: clean all
 	@ echo Finished remake
+
+
+-include $(ALL_SRCS:$(SRCDIR)%.c=$(BUILDDIR)%.d)

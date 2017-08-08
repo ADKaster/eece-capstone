@@ -53,9 +53,11 @@ typedef struct damn_i2c_master_request_s
 typedef enum
 {
     I2C_SLAVE_WAIT_HDR,
-    I2C_SLAVE_WAIT_MSG,
     I2C_PARSE_HDR,
+    I2C_SLAVE_WAIT_MSG,
+    I2C_PROCESS_MSG,
     I2C_SLAVE_SEND_RESP,
+    I2C_SLAVE_SEND_NACK
 } damn_i2c_slave_state_t;
 
 /* don't put a semicolon at the end of this! part of this macro is a function definition */
@@ -63,8 +65,6 @@ RINGBUF_DECL(i2c_slave, I2C_SLAVE_RINGBUF_SIZE)
 
 void *i2cMasterThread(void *arg0);
 void *i2cSlaveThread(void *arg0);
-
-void damn_i2cSlaveHandle(damn_pkthdr_t *hdr, volatile ringbuf_t *rbuf);
 
 damn_i2c_status_t damn_i2c_init(void);
 

@@ -4,6 +4,11 @@
 
  */
 
+#ifdef FREERTOS
+    #include <FreeRTOS.h>
+    #include <task.h>
+#endif
+
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
@@ -15,7 +20,12 @@ extern Display_Handle gTheDisplay;
 
 void *mainThread(void *arg0)
 {
+#ifdef FREERTOS
+    TickType_t xLastWaketime = xTaskGetTickCount();
+    TickType_t xFrequency = portTICK_PERIOD_MS * 5000;
+#endif
     struct timespec currtime;
+
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
@@ -26,8 +36,11 @@ void *mainThread(void *arg0)
 
         pthread_mutex_unlock(&gDisplayMuxtex);
 
-
+#ifdef FREERTOS
+        vTaskDelayUntil( &xLastWaketime, xFrequency );
+#else
         sleep(5);
+#endif
     }
     return NULL;
- }
+}
