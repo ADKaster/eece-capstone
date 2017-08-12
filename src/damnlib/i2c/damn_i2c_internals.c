@@ -12,6 +12,7 @@
 #include <pthread.h>
 #include <mqueue.h>
 #include <unistd.h>
+#include <string.h>
 
 #ifdef FREERTOS 
     #include <FreeRTOS.h>
@@ -23,14 +24,18 @@
 
 /******* File Defines *******/
 #define I2C_STACK_DEPTH (1024) /* 1kiB of stack */
-#define I2C_TXQUEUE_DEPTH (0x14)  /* Hold 20 i2c transactions at once */
-#define I2C_TXQUEUE_NAME ("I2C TX QUEUE")
-#define I2C_TXQUEUE_WIDTH (sizeof(damn_i2c_request_t))
 #define I2C_RX_BUFFER_SIZE (0x64) /* Hold 100 words of data at once */
+#define I2C_TXQUEUE_NAME ("I2C TX QUEUE")
+#define I2C_TXQUEUE_DEPTH (0x14)  /* Hold 20 i2c transactions at once */
+#define I2C_TXQUEUE_WIDTH (sizeof(damn_i2c_trans_t))
+#define I2C_TXRESP_NAME ("I2C TXRESP")
+#define I2C_TXRESP_DEPTH (0x14)
+#define I2C_TXRESP_WIDTH (sizeof(damn_i2c_status_t))
 
 /******* Global Data *******/
 mqd_t gI2C_TXQueue;
 mqd_t gI2C_RXQueue;
+mqd_t gI2C_TXRespQueue;
 volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
 damn_i2c_slave_state_t gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
 
@@ -95,6 +100,21 @@ damn_i2c_status_t damn_i2c_init(void)
         while(1);
     }
 
+    /* Setup Transmit Response queue */
+    queueAttr.mq_flags = 0;
+    queueAttr.mq_maxmsg = I2C_TXRESP_DEPTH;
+    queueAttr.mq_msgsize = I2C_TXQUEUE_DEPTH;
+    queueAttr.mq_curmsgs = 0;
+
+    gI2C_TXRespQueue = mq_open(I2C_TXRESP_NAME, (O_CREAT), 0, &queueAttr);
+
+    if((mqd_t)-1 == gI2C_TXRespQueue)
+    {
+        /* mq_open() failed */
+        while(1);
+    }
+
+
     /* initalize ring buffer **MUST BE DONE BEFORE SLAVE INITALIZED** */
     i2c_slave_ringbuf_init(&gI2C_SlaveRingbuf);
 
@@ -105,7 +125,8 @@ damn_i2c_status_t damn_i2c_init(void)
 
 void *i2cMasterThread(void *arg0)
 {
-    damn_i2c_request_t  currRequest;
+    damn_i2c_trans_t    currTrans;
+    damn_i2c_trans_t    backupTrans;
     damn_i2c_status_t   reqStatus;
     ssize_t             txBytes;
 
@@ -113,24 +134,23 @@ void *i2cMasterThread(void *arg0)
     {
         /* block waiting for application tx messages */
         /* argument 4, msg_prio completely ignored by TI's implementation for FreeRTOS */
-        txBytes = mq_receive(gI2C_TXQueue, (char *)&currRequest, I2C_TXQUEUE_WIDTH, NULL);
+        txBytes = mq_receive(gI2C_TXQueue, (char *)&currTrans, I2C_TXQUEUE_WIDTH, NULL);
 
         if(txBytes >= 0)
         {
-            // TODO Add semaphore/task notification, something to let application know request is done
+            memcpy((void *)&backupTrans, (void *)&currTrans, sizeof(damn_i2c_trans_t));
             /* We have a new request to service */
-            if(I2C_TX_SEND_TYPE == currRequest.type)
+            reqStatus = damn_arch_i2c_transfer(&currTrans);
+            /* Try again to send if we failed. If we fail twice, return an error to the application */
+            if(I2C_FAIL == reqStatus)
             {
-                /* Application wants to send its own data */
-                reqStatus = damn_arch_i2c_tx_send(&currRequest);
+                reqStatus = damn_arch_i2c_transfer(&backupTrans);
             }
-            else
-            {
-                /* Application wants to get someone else's data (P2P) */
-                reqStatus = damn_arch_i2c_tx_get(&currRequest);
-            } /* Check i2c Request type */
-            /* Suppress compiler warning... TODO notify somebody if status isn't success */
-            (void)reqStatus;
+
+            /* Send the result of this to the application. Discard return value. 
+               If this queue is full then we need to fix something else, it should always be less full than the txqueue
+            */
+            (void)mq_send(gI2C_TXRespQueue, (char *)&reqStatus, I2C_TXRESP_WIDTH, 0);
         }
     }
     return NULL;

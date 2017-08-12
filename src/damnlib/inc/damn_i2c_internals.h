@@ -23,10 +23,10 @@ typedef enum i2c_status_tag
 
 /* Architecture selection logic. Add new architectures here */
 #ifdef __MSP432P401R__
-    #define damn_i2c_trans_t                    I2C_Transaction
-    #define damn_arch_i2c_tx_send(request)      i2c_msp432_master_send(request);
-    #define damn_arch_i2c_tx_get(request)       i2c_msp432_master_recieve(request);
+    typedef I2C_Transaction                     damn_i2c_trans_t;
+    #define damn_arch_i2c_transfer(request)     i2c_msp432_master_transfer(request);
     #define damn_arch_i2c_init                  i2c_msp432_init
+    #include "i2c_msp432.h"
 #else
     #error Unsupported processor/board. Please define a valid processor.
 #endif
@@ -36,17 +36,6 @@ typedef enum i2c_tx_type_tag
     I2C_TX_SEND_TYPE,
     I2C_TX_GET_TYPE,
 } i2c_tx_type_t;
-
-#define I2C_MASTER_BUFSIZE 0x40 /* max transfer size is 16 words */
-
-/* NOTE: The typedef for this is forward declared at the top of the file */
-typedef struct damn_i2c_master_request_s
-{
-    damn_i2c_trans_t transaction;
-    uint8_t txbuf[I2C_MASTER_BUFSIZE];
-    uint8_t rxbuf[I2C_MASTER_BUFSIZE];
-    i2c_tx_type_t type; 
-} damn_i2c_request_t;
 
 #define I2C_SLAVE_RINGBUF_SIZE (0x100) /* 256 byte ring buffer should be plenty(tm) */
 
@@ -74,12 +63,5 @@ extern volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
 
 extern pthread_t            i2cMasterPthread;
 extern pthread_t            i2cSlavePthread;
-
-
-#ifdef __MSP432P401R__
-    #include "i2c_msp432.h"
-#else
-    #error Unsupported processor/board. Please define a valid processor.
-#endif
 
 #endif /* DAMN_I2C_INTERNALS_H */
