@@ -214,31 +214,20 @@ void damn_i2cslave_hwiIntFxn(uintptr_t arg)
         case I2CSLAVE_READ_MODE:
             object->transferInProgress = true;
             /* Data read from RXBUF and next byte has already been shifted */
-            if(!ringbuf_isfull(pSlaveRingbuf)) {
-                /* Put all data in ring buffer */
-                ringbuf_put(pSlaveRingbuf, MAP_I2C_slaveGetData(hwAttrs->baseAddr));
+            /* Put all data in ring buffer. don't care if it overruns. that's why it's a RING */
+            ringbuf_put(pSlaveRingbuf, MAP_I2C_slaveGetData(hwAttrs->baseAddr));
 
-                DebugP_log2("I2CSlave:(%p) ISR I2CSLAVE_READ_MODE: "
-                    "Read data byte: 0x%x",
-                    hwAttrs->baseAddr, pSlaveRingbuf->buf[head]);
+            DebugP_log2("I2CSlave:(%p) ISR I2CSLAVE_READ_MODE: "
+                "Read data byte: 0x%x",
+                hwAttrs->baseAddr, pSlaveRingbuf->buf[head]);
 
-                num_bytes_rx++;
-                /* Let the i2c task know how many words we've found; */
-                if(num_bytes_rx >= 4)
-                {
-                    vTaskNotifyGiveFromISR(*slaveTaskPtr, &xHigherPriorityTaskWoken);
-                    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-                    num_bytes_rx = 0;
-                }
-            }
-            else {
-                DebugP_log1("I2CSlave:(%p) ISR I2CSLAVE_READ_MODE: "
-                        "Ring Buffer overrun. Please increase the buffer size",
-                        hwAttrs->baseAddr);
-                object->mode = I2CSLAVE_ERROR;
-                MAP_I2C_slaveSendNAK(hwAttrs->baseAddr);
-                MAP_I2C_slaveGetData(hwAttrs->baseAddr);
-                completeTransfer((I2CSlave_Handle) arg);
+            num_bytes_rx++;
+            /* Let the i2c task know how many words we've found; */
+            if(num_bytes_rx >= 4)
+            {
+                num_bytes_rx -= 4;
+                vTaskNotifyGiveFromISR(*slaveTaskPtr, &xHigherPriorityTaskWoken);
+                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
             }
             break; /* I2CSLAVE_READ_MODE */
 /*************************************END CHANGES*************************************/

@@ -17,6 +17,8 @@
     #include "SampleSystem.h"
 #endif
 
+#include <mqueue.h>
+
 /*! \brief Message transmission type
     
     Determines how a message will be sent over the common bus.
@@ -58,12 +60,14 @@ typedef struct msgdef_tag
 
 extern damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS];
 
-
 /* \brief Packet definition
 
     This is the structure of the packet header that will actually be sent out on the bus <br>
     The checksum is the one's complement of the one's complement word-sum with the checksum field zero'd out.
     In this way the sum can be verified by comparing the sum that includes the checksum to zero.
+
+    The packet will contain the header, followed by the payload and finally the checksum.
+    header.msg_size will be the payload length + 4 bytes for the checksum
 */
 typedef struct damn_pkthdr_s
 {
@@ -74,6 +78,14 @@ typedef struct damn_pkthdr_s
     uint32_t            msg_size;       /**< Message size in *BYTES* */  
     uint32_t            hdr_chksum;     /**< 32-bit version of IP header checksum */  
 }__attribute__((aligned(4))) damn_pkthdr_t ;
+
+typedef enum nack_tag
+{
+    NACK_NONACK = 0,
+    NACK_BAD_CHECKSUM,
+    NACK_INVLD_DEST,
+    NACK_NO_MSG,
+} damn_nack_t;
 
 #define DAMN_MSG_HDR_BYTES (sizeof(damn_pkthdr_t))
 #define DAMN_MSG_HDR_WORDS (DAMN_MSG_HDR_BYTES/4)

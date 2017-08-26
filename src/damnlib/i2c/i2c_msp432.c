@@ -89,20 +89,19 @@ damn_i2c_status_t i2c_msp432_init(void)
     return retVal;
 }
 
-
 void i2c_msp432_slaveFixups(void)
 {
     I2CSlaveMSP432_HWAttrs const *hwAttrs = ((I2CSlave_Handle) i2cSlaveHandle)->hwAttrs;
     I2CSlaveMSP432_Object        *object = ((I2CSlave_Handle) i2cSlaveHandle)->object;
 
-    /* Disable module by setting UCSWRST = 1 in CTLW0 */
+    /* Disable module by setting UCSoftWareReSeT = 1 in ConTroLWord0 */
     MAP_I2C_disableModule(hwAttrs->baseAddr);
 
     i2c_msp432_enableGeneralCall(hwAttrs);
 
     i2c_msp432_enableCustomSlaveInt(hwAttrs, object);
 
-    /* re-enable by clearing UCSWRST in CTLW0 */
+    /* re-enable by clearing UCSoftWareReSeTinConTroLWord0 */
     MAP_I2C_enableModule(hwAttrs->baseAddr);
 }
 
@@ -112,7 +111,7 @@ void i2c_msp432_slaveFixups(void)
  */
 void i2c_msp432_enableGeneralCall(I2CSlaveMSP432_HWAttrs const *hwAttrs)
 {
-    /* Set General Call Response Enable in I2COA0 */
+    /* Set General Call Response Enable in I2COwnAddress0 */
     HWREG16((uint32_t) &EUSCI_B_CMSIS(hwAttrs->baseAddr)->I2COA0) |= EUSCI_B_I2COA0_GCEN;
 }
 

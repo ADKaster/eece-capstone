@@ -42,6 +42,7 @@ typedef struct
 bool ringbuf_isempty(volatile ringbuf_t *rbuf);
 bool ringbuf_isfull(volatile ringbuf_t *rbuf);
 uint32_t ringbuf_getcount(volatile ringbuf_t *rbuf);
+uint32_t ringbuf_peek(volatile ringbuf_t *rbuf);
 
 /* Returns how many bytes were extracted from the ring buffer */
 uint32_t ringbuf_get(volatile ringbuf_t *rbuf, uint8_t *getbuf, uint32_t numbytes);

@@ -24,7 +24,7 @@ typedef enum nodeenum_tag
 	NODE_FOO, /**< Foo contains feature x */
 	NODE_BAR, /**< Bar contains feature y */
 	NODE_BAZ, /**< Baz contains feature z */
-	NUM_NODES, /**< The number of nodes in the system. Do not change location */
+	BROADCAST, /**< MUST BE INCLUDED in this enum */
 } damn_node_t;
 
 #define APPLICATION_WHOAMI (NODE_FOO)

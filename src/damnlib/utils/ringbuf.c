@@ -6,16 +6,8 @@
  *
  */
 #include "ringbuf.h"
+#include "messaging.h"
 #include <string.h>
-
-#ifdef FREERTOS
-    #include <FreeRTOS.h>
-    #include <portmacro.h>
-    #define DAMN_DISABLE_INTS() portDISABLE_INTERRUPTS()
-    #define DAMN_ENABLE_INTS()  portENABLE_INTERRUPTS()
-#else
-    #error "Look up how to disable interrupts with TI RTOS. Or like, implement your own macros"
-#endif
 
 bool ringbuf_isempty(volatile ringbuf_t *rbuf)
 {
@@ -48,6 +40,17 @@ uint32_t ringbuf_getcount(volatile ringbuf_t *rbuf)
     DAMN_ENABLE_INTS();
 
     return count;   
+}
+
+uint32_t ringbuf_peek(volatile ringbuf_t *rbuf)
+{
+    uint32_t value;
+
+    DAMN_DISABLE_INTS();
+    value = rbuf->buf[rbuf->tail];
+    DAMN_ENABLE_INTS();
+
+    return value;
 }
 
 uint32_t ringbuf_get(volatile ringbuf_t *rbuf, uint8_t *getbuf, uint32_t numbytes)

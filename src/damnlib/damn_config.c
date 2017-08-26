@@ -19,6 +19,7 @@
  */
 damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 {
+    /* PING Message. For testing purposes */
     [STANDARD_PING_MSG] = 
     {
         .message_number =   STANDARD_PING_MSG,

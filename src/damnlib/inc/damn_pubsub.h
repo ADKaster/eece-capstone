@@ -32,6 +32,33 @@ typedef enum
     FREQ_ONE_HUNDRED_HZ,
 } damn_pubsub_freq_t;
 
+typedef enum pubsubstat_tag
+{
+    STATUS_IGNORE = 0,
+    STATUS_SUBSCRIBED,
+    STATUS_PUBLISHING
+} damn_pubsub_status_t;
+
+typedef struct subinfo_tag
+{
+    damn_msgdef_t          *pmsg_def;
+    uint32_t                period_ms;
+    mqd_t                   queue;
+    uint32_t                q_width;
+    uint32_t                q_depth;
+    damn_pubsub_status_t    status;
+} damn_subinfo_t, *damn_subinfo_ptr;
+
+typedef damn_subinfo_t damn_pubinfo_t, *damn_pubinfo_ptr;
+
+typedef struct p2pitem_tag
+{
+    damn_subinfo_ptr        psub_info;
+    uint32_t                last_sent;
+    volatile bool           completed;
+    bool                    in_progress;
+} damn_p2p_subinfo_t;
+
 //Basic idea: Broadcast -- Publisher controlled timing
 //            P2P       -- Subscriber controlled timing
 

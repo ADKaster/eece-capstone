@@ -12,7 +12,18 @@
 #include "damn_msgdef.h"
 #include "Board.h"
 
+#ifdef FREERTOS
+    #include <FreeRTOS.h>
+    #include <portmacro.h>
+    #define DAMN_DISABLE_INTS() portDISABLE_INTERRUPTS()
+    #define DAMN_ENABLE_INTS()  portENABLE_INTERRUPTS()
+#else
+    #error "Look up how to disable interrupts with TI RTOS. Or like, implement your own macros"
+#endif
+
 bool damn_msg_verify_header(damn_pkthdr_t *hdr);
+
+bool damn_msg_verify_msg(uint32_t *buf, uint32_t len);
 
 void damn_msg_create_header(damn_pkthdr_t *hdr,
                             damn_node_t src,
