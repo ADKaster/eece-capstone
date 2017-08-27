@@ -41,7 +41,7 @@ static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
 pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
 
-static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, damn_nack_t *nackptr);
+static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf, damn_nack_t *nackptr);
 
 
 /* Initalize I2C Thread and message queue  */
@@ -155,7 +155,7 @@ void *i2cSlaveThread(void *arg0)
     /* Use the thread stack to store some variables we'll need often */
     volatile ringbuf_t      *pSlaveRingbuf = (volatile ringbuf_t *)&gI2C_SlaveRingbuf;
     uint32_t                rbufCount = 0;
-    damn_pkthdr_t           currHdr;
+    damn_pkthdr_t           *currHdr = (damn_pkthdr_t *)slaveRxHoldingBuf; /* Need header to be able to be sent to pubsub layer */
     uint32_t                num_words_avail = 0;
     uint32_t                rbufRead;
     uint32_t                rbufFirstWord;
@@ -182,7 +182,7 @@ void *i2cSlaveThread(void *arg0)
                     if(rbufFirstWord == DAMN_HDR_SYNCWORD)
                     {
                         /* Retrieve the header from the ring buffer */
-                        rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)&currHdr, DAMN_MSG_HDR_BYTES);
+                        rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)currHdr, DAMN_MSG_HDR_BYTES);
                         /* Recalculate how many words are available */
                         num_words_avail = (rbufCount - rbufRead) >> 2;
                         /* Proceed to the next state */
@@ -201,7 +201,7 @@ void *i2cSlaveThread(void *arg0)
             case I2C_SLAVE_PARSE_HDR:
                 /* Check how many words are available */
                 /* verify header --> if fail, tell master on this mcu to send nack packet and flush slave ring buffer */
-                if(damn_msg_verify_header(&currHdr) && (currHdr.msg_size <= I2C_RX_BUFFER_SIZE))
+                if(damn_msg_verify_header(currHdr) && (currHdr->msg_size <= I2C_RX_BUFFER_SIZE))
                 {
                     /* HDR is verified and We have space for message */
                     gI2C_SlaveState = I2C_SLAVE_WAIT_MSG;
@@ -217,7 +217,7 @@ void *i2cSlaveThread(void *arg0)
 
             case I2C_SLAVE_WAIT_MSG:
                 /* Wait until enough words are available, waking up one word at a time */
-                if(num_words_avail < ((currHdr.msg_size) >> 2))
+                if(num_words_avail < ((currHdr->msg_size) >> 2))
                 {
 #ifdef FREERTOS
                     /* Wait until we've got words enough for the message */
@@ -230,7 +230,7 @@ void *i2cSlaveThread(void *arg0)
                     /* non-word aligned number of bytes in their message  */
                     rbufCount = ringbuf_getcount(pSlaveRingbuf);
                     num_words_avail = rbufCount >> 2;
-                    if(rbufCount >= currHdr.msg_size)
+                    if(rbufCount >= currHdr->msg_size)
                     {
                         gI2C_SlaveState = I2C_SLAVE_PROCESS_MSG;
                     }
@@ -239,14 +239,14 @@ void *i2cSlaveThread(void *arg0)
 
             case I2C_SLAVE_PROCESS_MSG:
                 /* read whole packet */
-                rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)slaveRxHoldingBuf, currHdr.msg_size);
+                rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)&(slaveRxHoldingBuf[DAMN_MSG_HDR_WORDS]), currHdr->msg_size);
 
                 /* Update number of words available */
                 num_words_avail = ringbuf_getcount(pSlaveRingbuf) >> 2;
 
                 /* Only verify the checksum of p2p messages, where the master is expecting a reply. */
-                if( (TX_TYPE_P2P == gTheMessageDefinitions[currHdr.id].message_type) &&
-                    (!damn_msg_verify_msg(slaveRxHoldingBuf, currHdr.msg_size)))
+                if( (TX_TYPE_P2P == gTheMessageDefinitions[currHdr->id].message_type) &&
+                    (!damn_msg_verify_msg(&(slaveRxHoldingBuf[DAMN_MSG_HDR_WORDS]), (currHdr->msg_size >> 2))))
                 {
                     slaveNack = NACK_BAD_CHECKSUM;
                     gI2C_SlaveState = I2C_SLAVE_SEND_NACK;
@@ -280,16 +280,16 @@ void *i2cSlaveThread(void *arg0)
 } /* i2cSlaveThread() */
 
 /* Determines what state to go to after the message has been read */
-static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, damn_nack_t *nackptr)
+static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf, damn_nack_t *nackptr)
 {
     damn_i2c_slave_state_t newState = I2C_SLAVE_PROCESS_MSG;
-    damn_msg_enum_t             id = hdr.id;
+    damn_msg_enum_t             id = hdr->id;
     ssize_t                     bytes_rx = -1;
     size_t                      bytes_to_send;
     mqd_t                       queue;
     uint32_t                    queue_width;
 
-    if(APPLICATION_WHOAMI == hdr.dest)
+    if(APPLICATION_WHOAMI == hdr->dest)
     {
         if((STATUS_PUBLISHING == gThePublications[id].status))
         {
@@ -315,15 +315,23 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, 
             newState = I2C_SLAVE_SEND_NACK;
         }
     }
-    else if(BROADCAST == hdr.dest)
+    else if(BROADCAST == hdr->dest)
     {
         if(STATUS_SUBSCRIBED == gTheSubscriptions[id].status)
         {
             queue = gTheSubscriptions[id].queue;
             queue_width = gTheSubscriptions[id].q_width;
-            bytes_to_send = hdr.msg_size - 1; /* Don't copy checksum */
+            /* Send HEADER along with PAYLOAD */
+            /********************FORMAT*****************
+             *
+             *  DAMN_MSG_HDR_BYTES|  hdr.message_len
+             *  -------------------------------------------
+             *  | HDR |hdrchksum  |    PAYLOAD    | chksum|
+             *  -------------------------------------------
+             *
+             */
+            bytes_to_send = DAMN_MSG_HDR_BYTES + hdr->msg_size;
             /* Ignore return value. msg_prio is ignored by function. */
-            /* TODO QUEUES MUST BE NONBLOCKING */
             (void)mq_send(queue, (char *)slaveRxHoldingBuf, bytes_to_send, 0);
         }
 

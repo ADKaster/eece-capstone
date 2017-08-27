@@ -8,10 +8,7 @@
 #include "damn_msgdef.h"
 #include "messaging.h"
 
-static uint32_t calculate_checksum(uint32_t *buf, uint32_t size);
-
-
-static uint32_t calculate_checksum(uint32_t *buf, uint32_t size)
+uint32_t damn_calculate_checksum(uint32_t *buf, uint32_t size)
 {   
     uint32_t i;
     uint32_t sum = 0;
@@ -30,14 +27,13 @@ static uint32_t calculate_checksum(uint32_t *buf, uint32_t size)
 }
 
 
-
 bool damn_msg_verify_header(damn_pkthdr_t *hdr)
 {
     bool retVal = false;
     damn_msgdef_t msg_check;
 
     if ( (hdr->syncword == DAMN_HDR_SYNCWORD) &&
-         (0 == calculate_checksum((uint32_t *)hdr, DAMN_MSG_HDR_WORDS)) &&
+         (0 == damn_calculate_checksum((uint32_t *)hdr, DAMN_MSG_HDR_WORDS)) &&
          (hdr->id < NUM_MSG_DEFINITONS) )
     {
         msg_check = gTheMessageDefinitions[hdr->id];
@@ -53,11 +49,12 @@ bool damn_msg_verify_header(damn_pkthdr_t *hdr)
     return retVal;
 }
 
+/* LEN IN WORDS */
 bool damn_msg_verify_msg(uint32_t *buf, uint32_t len)
 {
     bool retVal = false;
 
-    if( 0 == calculate_checksum(buf, len))
+    if( 0 == damn_calculate_checksum(buf, len))
     {
         retVal = true;
     }
@@ -75,6 +72,6 @@ void damn_msg_create_header(damn_pkthdr_t *hdr, damn_node_t src, damn_node_t des
     hdr->ack = 0;
     hdr->hdr_chksum = 0;
 
-    hdr->hdr_chksum = calculate_checksum((uint32_t *)hdr, DAMN_MSG_HDR_WORDS);
+    hdr->hdr_chksum = damn_calculate_checksum((uint32_t *)hdr, DAMN_MSG_HDR_WORDS);
 }
 

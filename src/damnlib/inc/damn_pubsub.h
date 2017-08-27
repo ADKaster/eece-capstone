@@ -11,18 +11,23 @@
 #include "damn_msgdef.h"
 #include "Board.h"
 
+#define MAX_QUEUE_DEPTH (20) /* Needs testing. 20 seems reasonable maximum though */
+
 typedef enum pub_status_tag
 {
     PUB_SUCCESS,
     PUB_FAIL,
-    PUB_ABORT,
+    PUB_INVALID,
+    PUB_FULL,
 } damn_pub_status_t;
 
 typedef enum sub_status_tag
 {
     SUB_SUCCESS,
     SUB_FAIL,
-    SUB_ABORT,
+    SUB_INVALID,
+    SUB_NONE,
+    SUB_ERR
 } damn_sub_status_t;
 
 typedef enum
@@ -59,6 +64,7 @@ typedef struct p2pitem_tag
     uint32_t                last_sent;
     volatile bool           completed;
     bool                    in_progress;
+    volatile bool           success;
 } damn_p2p_subinfo_t;
 
 //Basic idea: Broadcast -- Publisher controlled timing
@@ -66,23 +72,24 @@ typedef struct p2pitem_tag
 
 // If a subscriber tries to poll at a frequency faster than the publisher is
 // publishing, the publisher will notify the subscriber that it's going too fast.
-damn_pub_status_t damn_publish_configure(damn_msgdef_t *msg,
-                                         damn_pubsub_freq_t frequency);
+damn_pub_status_t damn_publish_configure(damn_msg_enum_t id,
+                                         damn_pubsub_freq_t frequency,
+                                         uint32_t queue_depth);
 
-damn_pub_status_t damn_publish_send(damn_msg_enum_t id,
-                                    void *send_buff);
+damn_pub_status_t damn_pub_put(damn_msg_enum_t id,
+                               void *send_buff);
 
 // When frequency is set to unlimited, the message will be populated in the
 // subscriber's recieve buffer when published by the publisher.
 // This can only happen for broadcast messages. For point to point messages,
 // the subscriber must configure a frequency to poll the publisher at.
 damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
-                                           damn_pubsub_freq_t frequency);
+                                           damn_pubsub_freq_t frequency,
+                                           uint32_t queue_depth);
 
 damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
-                                         uint32_t timeout,
-                                         void *recvbuff,
-                                         uint32_t num_msgs);
+                               void *recvbuff,
+                               damn_nack_t *ack_chk);
 
 void damn_init(void);
 

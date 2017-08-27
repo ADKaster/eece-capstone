@@ -31,6 +31,7 @@ void damn_msg_create_header(damn_pkthdr_t *hdr,
                             damn_msg_enum_t id,
                             uint32_t msg_size);
 
+uint32_t damn_calculate_checksum(uint32_t *buf, uint32_t size);
 
 
  #endif /* MESSAGING_H */

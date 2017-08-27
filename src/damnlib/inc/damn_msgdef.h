@@ -55,7 +55,7 @@ typedef struct msgdef_tag
     damn_node_t         message_dest;       /**< Where is this message going? */
     damn_tx_type_t      message_type;       /**< Point-to-point or broadcast */
     damn_bus_type_t     message_bus;        /**< Only I2C is supported */
-    uint32_t            message_length;     /**< Message length in bytes */
+    uint32_t            message_length;     /**< Message length in bytes **** INCLUDES CHECKSUM at end of payload *****/
 } damn_msgdef_t;
 
 extern damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS];
