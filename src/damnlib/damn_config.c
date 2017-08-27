@@ -42,6 +42,23 @@ damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     
 };
 
+/*! \var gTheMasterAddresses
+ *  \brief Array to hold all slave addresses of the system
+ */
+damn_master_addr_t gTheMasterAddresses[NUM_NODES] =
+{
+    MASTERADDR_FOO,
+    MASTERADDR_BAR,
+    MASTERADDR_BAZ
+};
 
-
+/*! \var gTheSlaveAddresses
+ *  \brief Array to hold all slave addresses of the system
+ */
+damn_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
+{
+    SLAVEADDR_FOO,
+    SLAVEADDR_BAR,
+    SLAVEADDR_BAZ
+};
 

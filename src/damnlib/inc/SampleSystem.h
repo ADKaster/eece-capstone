@@ -27,6 +27,37 @@ typedef enum nodeenum_tag
 	BROADCAST, /**< MUST BE INCLUDED in this enum */
 } damn_node_t;
 
+#define NUM_NODES BROADCAST
+
+/*! \brief enumeration of system slave addresses
+ *
+ *  Define an enumeration of slave addresses for each application/board
+ *  See line 410 of MSP_EXP432P401R.c ** THESE MUST MATCH **
+ *
+ */
+typedef enum slvaddr_tag
+{
+    SLAVEADDR_FOO = 0x48, /**< Address for FOO */
+    SLAVEADDR_BAR = 0x49, /**< Address for BAR */
+    SLAVEADDR_BAZ = 0x50, /**< Address for BAZ */
+} damn_slave_addr_t;
+
+extern damn_slave_addr_t gTheSlaveAddresses[NUM_NODES];
+
+/*! \brief enumeration of system master addresses
+ *
+ *  Define an enumeration of master addresses for each application/board
+ *
+ */
+typedef enum masaddr_tag
+{
+    MASTERADDR_FOO = 0x40, /**< Address for FOO */
+    MASTERADDR_BAR = 0x41, /**< Address for BAR */
+    MASTERADDR_BAZ = 0x42, /**< Address for BAZ */
+} damn_master_addr_t;
+
+extern damn_master_addr_t gTheMasterAddresses[NUM_NODES];
+
 #define APPLICATION_WHOAMI (NODE_FOO)
 
 /*! \brief Message enumeration
@@ -41,7 +72,7 @@ typedef enum msgenum_tag
     /* Insert your message names here */
     /* MY_FAV_MSG_NAME, */
 
-    NUM_MSG_DEFINITONS, /**< The total number of possible messages */
+    NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
 } damn_msg_enum_t;
 
 

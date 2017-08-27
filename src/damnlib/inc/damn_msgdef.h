@@ -60,6 +60,14 @@ typedef struct msgdef_tag
 
 extern damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS];
 
+typedef enum nack_tag
+{
+    ACK = 0,
+    NACK_BAD_CHECKSUM,
+    NACK_INVLD_DEST,
+    NACK_NO_MSG,
+} damn_nack_t;
+
 /* \brief Packet definition
 
     This is the structure of the packet header that will actually be sent out on the bus <br>
@@ -75,17 +83,12 @@ typedef struct damn_pkthdr_s
     damn_node_t         src;            /**< Enum of the source node */  
     damn_node_t         dest;           /**< Enum of the destination node */  
     damn_msg_enum_t     id;             /**< Packet id from damn_config.c */  
-    uint32_t            msg_size;       /**< Message size in *BYTES* */  
+    uint32_t            msg_size;       /**< Message size in *BYTES* */
+    damn_nack_t         ack;           /**< ACK/NACK Status */
     uint32_t            hdr_chksum;     /**< 32-bit version of IP header checksum */  
 }__attribute__((aligned(4))) damn_pkthdr_t ;
 
-typedef enum nack_tag
-{
-    NACK_NONACK = 0,
-    NACK_BAD_CHECKSUM,
-    NACK_INVLD_DEST,
-    NACK_NO_MSG,
-} damn_nack_t;
+
 
 #define DAMN_MSG_HDR_BYTES (sizeof(damn_pkthdr_t))
 #define DAMN_MSG_HDR_WORDS (DAMN_MSG_HDR_BYTES/4)

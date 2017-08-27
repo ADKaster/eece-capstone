@@ -9,6 +9,7 @@
 #define DAMN_PUBSUB_H
 
 #include "damn_msgdef.h"
+#include "Board.h"
 
 typedef enum pub_status_tag
 {
@@ -49,7 +50,8 @@ typedef struct subinfo_tag
     damn_pubsub_status_t    status;
 } damn_subinfo_t, *damn_subinfo_ptr;
 
-typedef damn_subinfo_t damn_pubinfo_t, *damn_pubinfo_ptr;
+typedef damn_subinfo_t damn_pubinfo_t;
+typedef damn_subinfo_ptr damn_pubinfo_ptr;
 
 typedef struct p2pitem_tag
 {
@@ -65,21 +67,27 @@ typedef struct p2pitem_tag
 // If a subscriber tries to poll at a frequency faster than the publisher is
 // publishing, the publisher will notify the subscriber that it's going too fast.
 damn_pub_status_t damn_publish_configure(damn_msgdef_t *msg,
-                                         damn_pubsub_freq_t frequency,
-                                         void *send_buff);
+                                         damn_pubsub_freq_t frequency);
 
-damn_pub_status_t damn_publish_send(damn_msgdef_t *msg);
+damn_pub_status_t damn_publish_send(damn_msg_enum_t id,
+                                    void *send_buff);
 
 // When frequency is set to unlimited, the message will be populated in the
 // subscriber's recieve buffer when published by the publisher.
 // This can only happen for broadcast messages. For point to point messages,
 // the subscriber must configure a frequency to poll the publisher at.
-damn_sub_status_t damn_subscribe_configure(damn_msgdef_t *msg,
+damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
                                            damn_pubsub_freq_t frequency);
 
-damn_sub_status_t damn_subscribe_receive(damn_msgdef_t *msg,
+damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
                                          uint32_t timeout,
                                          void *recvbuff,
                                          uint32_t num_msgs);
+
+void damn_init(void);
+
+extern damn_subinfo_t gTheSubscriptions[NUM_MSG_DEFINITONS];
+extern damn_pubinfo_t gThePublications[NUM_MSG_DEFINITONS];
+
 
 #endif /* DAMN_PUBSUB_H */

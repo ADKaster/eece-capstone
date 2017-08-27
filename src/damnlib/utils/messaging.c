@@ -72,6 +72,7 @@ void damn_msg_create_header(damn_pkthdr_t *hdr, damn_node_t src, damn_node_t des
     hdr->dest = dest;
     hdr->id = id;
     hdr->msg_size = msg_size;
+    hdr->ack = 0;
     hdr->hdr_chksum = 0;
 
     hdr->hdr_chksum = calculate_checksum((uint32_t *)hdr, DAMN_MSG_HDR_WORDS);

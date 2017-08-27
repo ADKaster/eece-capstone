@@ -64,8 +64,7 @@ void *i2cSlaveThread(void *arg0);
 
 damn_i2c_status_t damn_i2c_init(void);
 
-extern mqd_t gI2C_TXQueue;
-extern mqd_t gI2C_RXQueue;
+extern mqd_t gI2C_MasterActionQueue;
 extern volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
 
 extern pthread_t            i2cMasterPthread;

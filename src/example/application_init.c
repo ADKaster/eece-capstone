@@ -7,7 +7,7 @@
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
-#include "damn_i2c_internals.h"
+#include "damn_pubsub.h"
 
 /* Stack size in bytes */
 #define THREADSTACKSIZE   1024
@@ -20,20 +20,17 @@ void appDisplay_Init(void);
 pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
-/* Initalize the entire application before the scheduler */
+/* Initialize the entire application before the scheduler. Initialize damn library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    damn_i2c_status_t ret;
+    damn_init();
+
     createMainThread();
 
     appDisplay_Init();
 
-    ret = damn_i2c_init();
-    if(I2C_FAIL == ret)
-    {   
-        /* Failed to initialize i2c communications*/
-        while(1);
-    }
+
+    return;
 }
 
 /* This thread is made using TI's implementation of the POSIX API. */

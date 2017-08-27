@@ -7,6 +7,7 @@
 /******* Includes *******/
 #include "damn_i2c_internals.h"
 #include "damn_msgdef.h"
+#include "damn_pubsub.h"
 #include "messaging.h"
 
 #include <pthread.h>
@@ -35,7 +36,7 @@ volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
 damn_i2c_slave_state_t gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
 
 static uint32_t slaveRxHoldingBuf[I2C_RX_BUFFER_SIZE];
-//static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
+static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
 
 pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
@@ -91,7 +92,7 @@ damn_i2c_status_t damn_i2c_init(void)
 
     /* RTOS implementaiton only cares about O_CREAT, O_EXCL and O_NONBLOCK */
     /* RTOS implemenation discards third argument, mode. */
-    gI2C_MasterActionQueue = mq_open(I2C_TXQUEUE_NAME, (O_CREAT), 0, &queueAttr);
+    gI2C_MasterActionQueue = mq_open(I2C_TXQUEUE_NAME, (O_CREAT | O_NONBLOCK), 0, &queueAttr);
     /* mq_open returns (mqd_t)-1 on error */
     if((mqd_t)-1 == gI2C_MasterActionQueue)
     {
@@ -282,7 +283,6 @@ void *i2cSlaveThread(void *arg0)
 static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, damn_nack_t *nackptr)
 {
     damn_i2c_slave_state_t newState = I2C_SLAVE_PROCESS_MSG;
-#if 0
     damn_msg_enum_t             id = hdr.id;
     ssize_t                     bytes_rx = -1;
     size_t                      bytes_to_send;
@@ -291,13 +291,13 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, 
 
     if(APPLICATION_WHOAMI == hdr.dest)
     {
-        if((PUBLISHING == gThePublications[id].status))
+        if((STATUS_PUBLISHING == gThePublications[id].status))
         {
             queue = gThePublications[id].queue;
             queue_width = gThePublications[id].q_width;
-            if((queue != -1) && (queue != NULL))
+            if((queue != (mqd_t)-1) && (queue != NULL))
             {
-                bytes_rx = mq_receive(queue, (char *)slavePubHoldingBuf, queue_width);
+                bytes_rx = mq_receive(queue, (char *)slavePubHoldingBuf, queue_width, 0);
             }
             
             if(-1 != bytes_rx)
@@ -317,15 +317,14 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, 
     }
     else if(BROADCAST == hdr.dest)
     {
-        if(SUBSCRIBED == gTheSubscriptions[id].status)
+        if(STATUS_SUBSCRIBED == gTheSubscriptions[id].status)
         {
             queue = gTheSubscriptions[id].queue;
             queue_width = gTheSubscriptions[id].q_width;
-            bytes_to_send = hdr.msg_len - 1; /* Don't copy checksum */
+            bytes_to_send = hdr.msg_size - 1; /* Don't copy checksum */
             /* Ignore return value. msg_prio is ignored by function. */
             /* TODO QUEUES MUST BE NONBLOCKING */
-    
-            (void)mq_send(queue, (char *)slaveRxHoldingBuf, bytes_to_send, NULL);
+            (void)mq_send(queue, (char *)slaveRxHoldingBuf, bytes_to_send, 0);
         }
 
         newState = I2C_SLAVE_WAIT_HDR;
@@ -335,6 +334,5 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t hdr, uint32_t *buf, 
         *nackptr = NACK_INVLD_DEST;
         newState = I2C_SLAVE_SEND_NACK;
     }
-#endif
     return newState;
 }
