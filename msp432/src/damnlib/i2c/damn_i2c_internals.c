@@ -270,7 +270,7 @@ void *i2cSlaveThread(void *arg0)
                 break;
 
             default:
-                    gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
+                gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
                 break;
 
         } /* Switch gI2C_SlaveState */

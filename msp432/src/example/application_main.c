@@ -9,14 +9,9 @@
     #include <task.h>
 #endif
 
-#include <pthread.h>
 #include <unistd.h>
 #include <time.h>
-
-#include <ti/display/Display.h>
-
-extern pthread_mutex_t gDisplayMuxtex;
-extern Display_Handle gTheDisplay;
+#include "appdefs.h"
 
 void *mainThread(void *arg0)
 {
