@@ -21,6 +21,7 @@
 
 
 damn_i2c_status_t i2c_msp432_master_transfer(damn_i2c_trans_t *request);
+damn_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size);
 
 damn_i2c_status_t i2c_msp432_init(void);
 

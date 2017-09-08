@@ -42,6 +42,7 @@ pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
 
 static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf, damn_nack_t *nackptr);
+static void Slave_Reverse_Hdr(damn_pkthdr_t *dest, damn_pkthdr_t *src);
 
 
 /* Initalize I2C Thread and message queue  */
@@ -159,7 +160,8 @@ void *i2cSlaveThread(void *arg0)
     uint32_t                num_words_avail = 0;
     uint32_t                rbufRead;
     uint32_t                rbufFirstWord;
-    damn_nack_t             slaveNack;
+    damn_nack_t             slaveNack = ACK;
+    damn_pkthdr_t           *pubHdr = (damn_pkthdr_t *)slavePubHoldingBuf;
 
     for(;;)
     {
@@ -258,14 +260,16 @@ void *i2cSlaveThread(void *arg0)
                 break;
 
             case I2C_SLAVE_SEND_RESP:
-                // create response packet using slavePubHoldingBuf, and message info data.
+                /* create response packet using slavePubHoldingBuf, and message info data. */
+                Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
+                /* Send the completed message */
+                damn_arch_i2c_slave_send((void *)slavePubHoldingBuf, DAMN_MSG_HDR_BYTES + pubHdr->msg_size);
                 break;
 
             case I2C_SLAVE_SEND_NACK:
-
-                // create nack packet
-                //      Fill with global error values, header info
-                //       i.e. gI2CSlave_NackVal
+                Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
+                currHdr->ack = slaveNack;
+                damn_arch_i2c_slave_send((void *)slavePubHoldingBuf, DAMN_MSG_HDR_BYTES);
                 gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
                 break;
 
@@ -297,7 +301,7 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf,
             queue_width = gThePublications[id].q_width;
             if((queue != (mqd_t)-1) && (queue != NULL))
             {
-                bytes_rx = mq_receive(queue, (char *)slavePubHoldingBuf, queue_width, 0);
+                bytes_rx = mq_receive(queue, (char *)&(slavePubHoldingBuf[DAMN_MSG_HDR_WORDS]), queue_width, 0);
             }
             
             if(-1 != bytes_rx)
@@ -332,7 +336,7 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf,
              */
             bytes_to_send = DAMN_MSG_HDR_BYTES + hdr->msg_size;
             /* Ignore return value. msg_prio is ignored by function. */
-            (void)mq_send(queue, (char *)slaveRxHoldingBuf, bytes_to_send, 0);
+            (void)mq_send(queue, (char *)buf, bytes_to_send, 0);
         }
 
         newState = I2C_SLAVE_WAIT_HDR;
@@ -343,4 +347,16 @@ static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf,
         newState = I2C_SLAVE_SEND_NACK;
     }
     return newState;
+}
+
+static void Slave_Reverse_Hdr(damn_pkthdr_t *dest, damn_pkthdr_t *src)
+{
+    damn_node_t    tempDest;
+
+    memcpy((void *)dest, (void *)src, DAMN_MSG_HDR_BYTES);
+    tempDest = dest->dest;
+    dest->dest = dest->src;
+    dest->src = tempDest;
+    dest->hdr_chksum = 0; /* recalculate checksum */
+    dest->hdr_chksum = damn_calculate_checksum((uint32_t *)dest, DAMN_MSG_HDR_WORDS);
 }

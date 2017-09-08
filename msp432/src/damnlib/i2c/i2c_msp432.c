@@ -47,6 +47,15 @@ damn_i2c_status_t i2c_msp432_master_transfer(damn_i2c_trans_t *request)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL; 
 }
 
+damn_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
+{
+    bool i2cRet = false;
+
+    i2cRet = I2CSlave_write(i2cSlaveHandle, buf, size);
+
+    return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL;
+}
+
 damn_i2c_status_t i2c_msp432_init(void)
 {
     damn_i2c_status_t retVal = I2C_FAIL;
