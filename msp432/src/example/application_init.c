@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include "Board.h"
 #include "damn_pubsub.h"
+#include "appdefs.h"
 
 /* Stack size in bytes */
 #define THREADSTACKSIZE   1024
@@ -19,6 +20,7 @@ void appDisplay_Init(void);
 /* Global data */
 pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
+uint32_t       currentApplication = APPLICATION_WHOAMI;
 
 /* Initialize the entire application before the scheduler. Initialize damn library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
@@ -29,6 +31,26 @@ void ApplicationInit(void)
 
     appDisplay_Init();
 
+    if(NODE_FOO == currentApplication)
+     {
+        damn_subscribe_configure(STANDARD_PING_MSG,
+                                 FREQ_TEN_HZ,
+                                 APP_QUEUE_DEPTH);
+
+        damn_publish_configure(BROADCAST_PING_MSG,
+                               FREQ_UNLIMITED,
+                               APP_QUEUE_DEPTH);
+    }
+    else
+    {
+        damn_subscribe_configure(BROADCAST_PING_MSG,
+                                 FREQ_UNLIMITED,
+                                 APP_QUEUE_DEPTH);
+
+        damn_publish_configure(STANDARD_PING_MSG,
+                               FREQ_TEN_HZ,
+                               APP_QUEUE_DEPTH);
+    }
 
     return;
 }
@@ -41,7 +63,7 @@ void createMainThread(void)
     pthread_attr_t      attrs;
     struct sched_param  priParam;
     int                 retc;
-    int                 detachState;  
+    int                 detachState;
 
     /* Set priority and stack size attributes */
     pthread_attr_init(&attrs);
@@ -67,6 +89,7 @@ void createMainThread(void)
         /* pthread_create() failed */
         while (1);
     }
+
 }
 
 /* Intialize the display and create a mutex for it */
