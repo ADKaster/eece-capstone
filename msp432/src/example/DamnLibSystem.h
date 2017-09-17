@@ -26,6 +26,15 @@ typedef enum nodeenum_tag
 
 #define NUM_NODES BROADCAST
 
+#ifdef APPFOO
+#define APPLICATION_WHOAMI (NODE_FOO)
+#else
+#define APPLICATION_WHOAMI (NODE_BAR)
+#endif
+
+#define DAMN_I2C_MASTER_PORT (MSP_EXP432P401R_I2CB1)
+#define DAMN_I2C_SLAVE_PORT  (MSP_EXP432P401R_I2CB0)
+
 /*! \brief enumeration of system slave addresses
  *
  *  Define an enumeration of slave addresses for each application/board

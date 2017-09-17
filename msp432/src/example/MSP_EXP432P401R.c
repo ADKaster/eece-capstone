@@ -61,6 +61,8 @@
 
 #include "MSP_EXP432P401R.h"
 
+#include "DamnLibSystem.h"
+
 /*
  *  =============================== ADC ===============================
  */
@@ -407,7 +409,11 @@ const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT
         .baseAddr = EUSCI_B0_BASE,
         .intNum = INT_EUSCIB0,
         .intPriority = ~0,
-        .slaveAddress = 0x48,
+#ifdef APPFOO
+        .slaveAddress = SLAVEADDR_FOO,
+#else
+        .slaveAddress = SLAVEADDR_BAR,
+#endif
         .dataPin = I2CSLAVEMSP432_P1_6_UCB0SDA,
         .clkPin = I2CSLAVEMSP432_P1_7_UCB0SCL
     }
