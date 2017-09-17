@@ -2,7 +2,7 @@
 #
 # Extra configuration items
 
-EXTRA_CFLAGS= -DAPPLICATION_WHOAMI=NODE_FOO -DFREERTOS -Isrc/example
+EXTRA_CFLAGS= -DAPPFOO -DFREERTOS -Isrc/example
 
 ifeq ($(OS),Windows_NT)
 	os := Windows
