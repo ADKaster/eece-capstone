@@ -1,5 +1,14 @@
 # eece-capstone
-Repository to store software work products for capstone
+Repository to store software work products for capstone.
+
+## Project Overview
+
+The communication library is the Distributed Application Microcontroller Network Library (damnlib for short).
+
+The end goal is to enable an application developer to use the publish-subscribe API presented in the library to easily send messages
+between different microcontrollers in a system over I2C. The real demo application will be a telemetry system for an amateur rocket
+with a Sensor, Data Logging, Power and Radio Communcations board. The project will be implemented uusing the TI Simplelink family
+of ARM microcontrollers, with 3 MSP432s and one CC1310 Sub-1GHz MCU. 
 
 ## Configuration
 
