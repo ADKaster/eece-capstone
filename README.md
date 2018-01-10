@@ -88,11 +88,11 @@ TODO Change to reccomend adding project variables for FreeRTOS root, simplelinks
  				* ${ccs_install_root}/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-${COMMAND} ${FLAGS} -E -P -v -dD "${INPUTS}"
  		* Entries, click GNU C, click CDT User Setting Entries
  			* Add, Include Directory, Filesystem Path, ****Contains System headers****
- 				* C:\FreeRTOSv9.0.0\FreeRTOS\Source\include
- 				* C:\FreeRTOSv9.0.0\FreeRTOS\Source\portable\GCC\ARM_CM4F
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\source
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\source\third_party\CMSIS\Include
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\kernel\freertos\posix
+ 				* C:\FreeRTOSv10.0.0\FreeRTOS\Source\include
+ 				* C:\FreeRTOSv10.0.0\FreeRTOS\Source\portable\GCC\ARM_CM4F
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source\third_party\CMSIS\Include
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source\ti\posix\gcc
  		* Entries, click GNU C, click CDT User Setting Entries
  			* Add, Preprocessor Macro from dropdown. Value of 1
  				* FREERTOS 
