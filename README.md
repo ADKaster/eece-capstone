@@ -1,5 +1,14 @@
 # eece-capstone
-Repository to store software work products for capstone
+Repository to store software work products for capstone.
+
+## Project Overview
+
+The communication library is the Distributed Application Microcontroller Network Library (damnlib for short).
+
+The end goal is to enable an application developer to use the publish-subscribe API presented in the library to easily send messages
+between different microcontrollers in a system over I2C. The real demo application will be a telemetry system for an amateur rocket
+with a Sensor, Data Logging, Power and Radio Communcations board. The project will be implemented uusing the TI Simplelink family
+of ARM microcontrollers, with 3 MSP432s and one CC1310 Sub-1GHz MCU. 
 
 ## Configuration
 
@@ -79,11 +88,11 @@ TODO Change to reccomend adding project variables for FreeRTOS root, simplelinks
  				* ${ccs_install_root}/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update/bin/arm-none-eabi-${COMMAND} ${FLAGS} -E -P -v -dD "${INPUTS}"
  		* Entries, click GNU C, click CDT User Setting Entries
  			* Add, Include Directory, Filesystem Path, ****Contains System headers****
- 				* C:\FreeRTOSv9.0.0\FreeRTOS\Source\include
- 				* C:\FreeRTOSv9.0.0\FreeRTOS\Source\portable\GCC\ARM_CM4F
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\source
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\source\third_party\CMSIS\Include
- 				* C:\ti\simplelink_msp432_sdk_1_40_01_00\kernel\freertos\posix
+ 				* C:\FreeRTOSv10.0.0\FreeRTOS\Source\include
+ 				* C:\FreeRTOSv10.0.0\FreeRTOS\Source\portable\GCC\ARM_CM4F
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source\third_party\CMSIS\Include
+ 				* C:\ti\simplelink_msp432_sdk_1_60_00_12\source\ti\posix\gcc
  		* Entries, click GNU C, click CDT User Setting Entries
  			* Add, Preprocessor Macro from dropdown. Value of 1
  				* FREERTOS 
