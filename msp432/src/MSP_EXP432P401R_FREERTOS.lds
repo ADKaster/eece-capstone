@@ -35,7 +35,6 @@
  */
 
 STACKSIZE = 0x1000;
-NVS_REGIONS_BASE = 0x3B000;
 
 MEMORY
 {
@@ -110,7 +109,7 @@ SECTIONS {
         __data_end__ = .;
     } > REGION_DATA AT> REGION_TEXT
 
-    .nvs (NVS_REGIONS_BASE) (NOLOAD) : AT (NVS_REGIONS_BASE) {
+    .nvs (NOLOAD) : ALIGN(0x1000) {
         *(.nvs)
     } > REGION_TEXT
 

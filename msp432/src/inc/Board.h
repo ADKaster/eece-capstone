@@ -42,7 +42,6 @@ extern "C" {
 #include <ti/drivers/GPIO.h>
 #include <ti/drivers/I2C.h>
 #include <ti/drivers/PWM.h>
-#include <ti/drivers/SDSPI.h>
 #include <ti/drivers/SPI.h>
 #include <ti/drivers/UART.h>
 #include <ti/drivers/Watchdog.h>
@@ -93,8 +92,9 @@ extern "C" {
 #define Board_PWM0                  MSP_EXP432P401R_PWM_TA1_1
 #define Board_PWM1                  MSP_EXP432P401R_PWM_TA1_2
 
-#define Board_SDSPI0                MSP_EXP432P401R_SDSPIB0
+#define Board_SD0                   MSP_EXP432P401R_SDSPI0
 
+#define Board_SDFatFS0              MSP_EXP432P401R_SDSPI0
 #define Board_SPI0                  MSP_EXP432P401R_SPIB0
 #define Board_SPI1                  MSP_EXP432P401R_SPIB2
 #define Board_SPI2                  MSP_EXP432P401R_SPIB3
@@ -128,7 +128,6 @@ extern "C" {
 #define Board_initGPIO              GPIO_init
 #define Board_initI2C               I2C_init
 #define Board_initPWM               PWM_init
-#define Board_initSDSPI             SDSPI_init
 #define Board_initSPI               SPI_init
 #define Board_initUART              UART_init
 #define Board_initWatchdog          Watchdog_init

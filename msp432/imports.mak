@@ -22,7 +22,7 @@ include config.mak
 
 XDC_INSTALL_DIR        ?= $(TI_ROOT)ti/xdctools_3_50_02_20_core
 
-FREERTOS_INSTALL_DIR   ?= $(TI_ROOT)FreeRTOSv9.0.0
+FREERTOS_INSTALL_DIR   ?= $(TI_ROOT)FreeRTOSv10.0.0
 
 CCS_ARMCOMPILER        ?= $(TI_ROOT)ti/ccsv7/tools/compiler/ti-cgt-arm_16.9.3.LTS
 GCC_ARMCOMPILER        ?= $(TI_ROOT)ti/ccsv7/tools/compiler/gcc-arm-none-eabi-6-2017-q1-update

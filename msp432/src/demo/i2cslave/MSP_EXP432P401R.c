@@ -112,12 +112,18 @@ ADCBufMSP432_Channels adcBuf0MSP432Channels[MSP_EXP432P401R_ADCBUF0CHANNELCOUNT]
     {
         .adcPin = ADCBufMSP432_P5_5_A0,
         .refSource = ADCBufMSP432_VREFPOS_INTBUF_VREFNEG_VSS,
-        .refVoltage = 2500000
+        .refVoltage = 2500000,
+        .adcInputMode = ADCBufMSP432_SINGLE_ENDED,
+        .adcDifferentialPin = ADCBufMSP432_PIN_NONE,
+        .adcInternalSource = ADCBufMSP432_INTERNAL_SOURCE_MODE_OFF
     },
     {
         .adcPin = ADCBufMSP432_P5_4_A1,
         .refSource = ADCBufMSP432_VREFPOS_INTBUF_VREFNEG_VSS,
-        .refVoltage = 2500000
+        .refVoltage = 2500000,
+        .adcInputMode = ADCBufMSP432_SINGLE_ENDED,
+        .adcDifferentialPin = ADCBufMSP432_PIN_NONE,
+        .adcInternalSource = ADCBufMSP432_INTERNAL_SOURCE_MODE_OFF
     }
 };
 
@@ -126,7 +132,12 @@ const ADCBufMSP432_HWAttrs adcbufMSP432HWAttrs[MSP_EXP432P401R_ADCBUFCOUNT] = {
     {
         .intPriority =  ~0,
         .channelSetting = adcBuf0MSP432Channels,
-        .adcTimerTriggerSource = ADCBufMSP432_TIMERA0_CAPTURECOMPARE2
+        .adcTimerTriggerSource = ADCBufMSP432_TIMERA1_CAPTURECOMPARE2,
+        .useDMA = 1,
+        .dmaIntNum = DMA_INT0,
+        .adcTriggerSource = ADCBufMSP432_TIMER_TRIGGER,
+        .timerDutyCycle = 50,
+        .clockSource = ADCBufMSP432_ADC_CLOCK
     }
 };
 
@@ -207,7 +218,7 @@ const uint_least8_t Capture_count = MSP_EXP432P401R_CAPTURECOUNT;
 #elif defined(__GNUC__)
 __attribute__ ((aligned (256)))
 #endif
-static DMA_ControlTable dmaControlTable[8];
+static DMA_ControlTable dmaControlTable[16];
 
 /*
  *  ======== dmaErrorHwi ========
@@ -311,7 +322,7 @@ GPIO_PinConfig gpioPinConfigs[] = {
 
     /* Output pins */
     /* MSP_EXP432P401R_GPIO_LED1 */
-    GPIOMSP432_P1_0 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW,
+    GPIOMSP432_P1_0 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_LOW,
     /* MSP_EXP432P401R_GPIO_LED_RED */
     GPIOMSP432_P2_0 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW,
 
@@ -321,13 +332,16 @@ GPIO_PinConfig gpioPinConfigs[] = {
      * the LEDs with the GPIO driver.
      */
     /* MSP_EXP432P401R_GPIO_LED_GREEN */
-    //GPIOMSP432_P2_1 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW,
+    /* GPIOMSP432_P2_1 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW, */
     /* MSP_EXP432P401R_GPIO_LED_BLUE */
-    //GPIOMSP432_P2_2 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW
+    /* GPIOMSP432_P2_2 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_LOW */
     /* MSP_EXP432P401R_SPI_CS1 */
-    GPIOMSP432_P5_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_HIGH,
+    GPIOMSP432_P5_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_HIGH,
     /* MSP_EXP432P401R_SPI_CS2 */
-    GPIOMSP432_P5_5 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_HIGH | GPIO_CFG_OUT_HIGH,
+    GPIOMSP432_P5_5 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_HIGH,
+
+    /* MSP_EXP432P401R_SDSPI_CS */
+    GPIOMSP432_P4_6 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_HIGH,
 };
 
 /*
@@ -429,8 +443,9 @@ const uint_least8_t I2CSlave_count = MSP_EXP432P401R_I2CSLAVECOUNT;
 #include <ti/drivers/NVS.h>
 #include <ti/drivers/nvs/NVSMSP432.h>
 
-#define SECTORSIZE 0x1000
+#define SECTORSIZE       0x1000
 #define NVS_REGIONS_BASE 0x3B000
+#define REGIONSIZE       (SECTORSIZE * 4)
 
 /*
  * Reserve flash sectors for NVS driver use
@@ -444,24 +459,29 @@ const uint_least8_t I2CSlave_count = MSP_EXP432P401R_I2CSLAVECOUNT;
  */
 #pragma LOCATION(flashBuf, NVS_REGIONS_BASE);
 #pragma NOINIT(flashBuf);
-static char flashBuf[SECTORSIZE * 4];
+static char flashBuf[REGIONSIZE];
 
 #elif defined(__IAR_SYSTEMS_ICC__)
 
 /*
  * Place uninitialized array at NVS_REGIONS_BASE
  */
-__no_init static char flashBuf[SECTORSIZE * 4] @ NVS_REGIONS_BASE;
+__no_init static char flashBuf[REGIONSIZE] @ NVS_REGIONS_BASE;
 
 #elif defined(__GNUC__)
 
 /*
- * Place the reserved flash buffers in the .nvs section.
- * The nvs section will be placed at address NVS_REGIONS_BASE by
- * the gcc linker cmd file.
+ * Place the flash buffers in the .nvs section created in the gcc linker file.
+ * The .nvs section enforces alignment on a sector boundary but may
+ * be placed anywhere in flash memory.  If desired the .nvs section can be set
+ * to a fixed address by changing the following in the gcc linker file:
+ *
+ * .nvs (FIXED_FLASH_ADDR) (NOLOAD) : AT (FIXED_FLASH_ADDR) {
+ *      *(.nvs)
+ * } > REGION_TEXT
  */
 __attribute__ ((section (".nvs")))
-static char flashBuf[SECTORSIZE * 4];
+static char flashBuf[REGIONSIZE];
 
 #endif
 
@@ -470,7 +490,7 @@ NVSMSP432_Object nvsMSP432Objects[MSP_EXP432P401R_NVSCOUNT];
 const NVSMSP432_HWAttrs nvsMSP432HWAttrs[MSP_EXP432P401R_NVSCOUNT] = {
     {
         .regionBase = (void *) flashBuf,
-        .regionSize = SECTORSIZE * 4,
+        .regionSize = REGIONSIZE,
     },
 };
 
@@ -531,37 +551,55 @@ const PWM_Config PWM_config[MSP_EXP432P401R_PWMCOUNT] = {
 const uint_least8_t PWM_count = MSP_EXP432P401R_PWMCOUNT;
 
 /*
- *  =============================== SDSPI ===============================
+ *  =============================== SDFatFS ===============================
  */
-#include <ti/drivers/SDSPI.h>
-#include <ti/drivers/sdspi/SDSPIMSP432.h>
+#include <ti/drivers/SD.h>
+#include <ti/drivers/SDFatFS.h>
 
-SDSPIMSP432_Object sdspiMSP432Objects[MSP_EXP432P401R_SDSPICOUNT];
+/*
+ * Note: The SDFatFS driver provides interface functions to enable FatFs
+ * but relies on the SD driver to communicate with SD cards.  Opening a
+ * SDFatFs driver instance will internally try to open a SD driver instance
+ * reusing the same index number (opening SDFatFs driver at index 0 will try to
+ * open SD driver at index 0).  This requires that all SDFatFs driver instances
+ * have an accompanying SD driver instance defined with the same index.  It is
+ * acceptable to have more SD driver instances than SDFatFs driver instances
+ * but the opposite is not supported & the SDFatFs will fail to open.
+ */
+SDFatFS_Object sdfatfsObjects[MSP_EXP432P401R_SDFatFSCOUNT];
 
-const SDSPIMSP432_HWAttrsV1 sdspiMSP432HWAttrs[MSP_EXP432P401R_SDSPICOUNT] = {
+const SDFatFS_Config SDFatFS_config[MSP_EXP432P401R_SDFatFSCOUNT] = {
     {
-        .baseAddr = EUSCI_B0_BASE,
-        .clockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
-
-        /* CLK, MOSI & MISO ports & pins */
-        .sckPin = SDSPIMSP432_P1_5_UCB0CLK,
-        .somiPin = SDSPIMSP432_P1_7_UCB0SOMI,
-        .simoPin = SDSPIMSP432_P1_6_UCB0SIMO,
-
-        /* Chip select port & pin */
-        .csPin = SDSPIMSP432_P4_6_CS
+        .object = &sdfatfsObjects[MSP_EXP432P401R_SDFatFS0]
     }
 };
 
-const SDSPI_Config SDSPI_config[MSP_EXP432P401R_SDSPICOUNT] = {
+const uint_least8_t SDFatFS_count = MSP_EXP432P401R_SDFatFSCOUNT;
+
+/*
+ *  =============================== SD ===============================
+ */
+#include <ti/drivers/SD.h>
+#include <ti/drivers/sd/SDSPI.h>
+
+SDSPI_Object sdspiObjects[MSP_EXP432P401R_SDCOUNT];
+
+const SDSPI_HWAttrs sdspiHWAttrs[MSP_EXP432P401R_SDCOUNT] = {
     {
-        .fxnTablePtr = &SDSPIMSP432_fxnTable,
-        .object = &sdspiMSP432Objects[MSP_EXP432P401R_SDSPIB0],
-        .hwAttrs = &sdspiMSP432HWAttrs[MSP_EXP432P401R_SDSPIB0]
+        .spiIndex = MSP_EXP432P401R_SPIB0,
+        .spiCsGpioIndex = MSP_EXP432P401R_SDSPI_CS
     }
 };
 
-const uint_least8_t SDSPI_count = MSP_EXP432P401R_SDSPICOUNT;
+const SD_Config SD_config[MSP_EXP432P401R_SDCOUNT] = {
+    {
+        .fxnTablePtr = &SDSPI_fxnTable,
+        .object = &sdspiObjects[MSP_EXP432P401R_SDSPI0],
+        .hwAttrs = &sdspiHWAttrs[MSP_EXP432P401R_SDSPI0]
+    },
+};
+
+const uint_least8_t SD_count = MSP_EXP432P401R_SDCOUNT;
 
 /*
  *  =============================== SPI ===============================
@@ -571,12 +609,17 @@ const uint_least8_t SDSPI_count = MSP_EXP432P401R_SDSPICOUNT;
 
 SPIMSP432DMA_Object spiMSP432DMAObjects[MSP_EXP432P401R_SPICOUNT];
 
+/*
+ * NOTE: The SPI instances below can be used by the SD driver to communicate
+ * with a SD card via SPI.  The 'defaultTxBufValue' fields below are set to 0xFF
+ * to satisfy the SDSPI driver requirement.
+ */
 const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
     {
         .baseAddr = EUSCI_B0_BASE,
         .bitOrder = EUSCI_B_SPI_MSB_FIRST,
         .clockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
-        .defaultTxBufValue = 0,
+        .defaultTxBufValue = 0xFF,
         .dmaIntNum = INT_DMA_INT1,
         .intPriority = (~0),
         .rxDMAChannelIndex = DMA_CH1_EUSCIB0RX0,
@@ -585,14 +628,14 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .simoPin = SPIMSP432DMA_P1_6_UCB0SIMO,
         .somiPin = SPIMSP432DMA_P1_7_UCB0SOMI,
         .stePin  = SPIMSP432DMA_P1_4_UCB0STE,
-        .pinMode  = EUSCI_SPI_3PIN
-
+        .pinMode  = EUSCI_SPI_3PIN,
+        .minDmaTransferSize = 10
     },
     {
         .baseAddr = EUSCI_B2_BASE,
         .bitOrder = EUSCI_B_SPI_MSB_FIRST,
         .clockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
-        .defaultTxBufValue = 0,
+        .defaultTxBufValue = 0xFF,
         .dmaIntNum = INT_DMA_INT2,
         .intPriority = (~0),
         .rxDMAChannelIndex = DMA_CH5_EUSCIB2RX0,
@@ -601,13 +644,14 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .simoPin = SPIMSP432DMA_P3_6_UCB2SIMO,
         .somiPin = SPIMSP432DMA_P3_7_UCB2SOMI,
         .stePin  = SPIMSP432DMA_P3_4_UCB2STE,
-        .pinMode  = EUSCI_SPI_3PIN
+        .pinMode  = EUSCI_SPI_3PIN,
+        .minDmaTransferSize = 10
     },
     {
         .baseAddr = EUSCI_A1_BASE,
         .bitOrder = EUSCI_A_SPI_MSB_FIRST,
         .clockSource = EUSCI_A_SPI_CLOCKSOURCE_SMCLK,
-        .defaultTxBufValue = 0,
+        .defaultTxBufValue = 0xFF,
         .dmaIntNum = INT_DMA_INT2,
         .intPriority = (~0),
         .rxDMAChannelIndex = DMA_CH3_EUSCIA1RX,
@@ -616,14 +660,14 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .simoPin = SPIMSP432DMA_P2_6_UCA1SIMO,
         .somiPin = SPIMSP432DMA_P2_7_UCA1SOMI,
         .stePin  = SPIMSP432DMA_P2_3_UCA1STE,
-        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW
-
+        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
+        .minDmaTransferSize = 10
     },
     {
         .baseAddr = EUSCI_B2_BASE,
         .bitOrder = EUSCI_B_SPI_MSB_FIRST,
         .clockSource = EUSCI_B_SPI_CLOCKSOURCE_SMCLK,
-        .defaultTxBufValue = 0,
+        .defaultTxBufValue = 0xFF,
         .dmaIntNum = INT_DMA_INT3,
         .intPriority = (~0),
         .rxDMAChannelIndex = DMA_CH5_EUSCIB2RX0,
@@ -632,7 +676,8 @@ const SPIMSP432DMA_HWAttrsV1 spiMSP432DMAHWAttrs[MSP_EXP432P401R_SPICOUNT] = {
         .simoPin = SPIMSP432DMA_P3_6_UCB2SIMO,
         .somiPin = SPIMSP432DMA_P3_7_UCB2SOMI,
         .stePin  = SPIMSP432DMA_P2_4_UCB2STE,
-        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW
+        .pinMode  = EUSCI_SPI_4PIN_UCxSTE_ACTIVE_LOW,
+        .minDmaTransferSize = 10
     }
 };
 
@@ -783,7 +828,8 @@ const UARTMSP432_HWAttrsV1 uartMSP432HWAttrs[MSP_EXP432P401R_UARTCOUNT] = {
         .ringBufPtr  = uartMSP432RingBuffer[MSP_EXP432P401R_UARTA0],
         .ringBufSize = sizeof(uartMSP432RingBuffer[MSP_EXP432P401R_UARTA0]),
         .rxPin = UARTMSP432_P1_2_UCA0RXD,
-        .txPin = UARTMSP432_P1_3_UCA0TXD
+        .txPin = UARTMSP432_P1_3_UCA0TXD,
+        .errorFxn = NULL
     },
     {
         .baseAddr = EUSCI_A2_BASE,
@@ -797,7 +843,8 @@ const UARTMSP432_HWAttrsV1 uartMSP432HWAttrs[MSP_EXP432P401R_UARTCOUNT] = {
         .ringBufPtr  = uartMSP432RingBuffer[MSP_EXP432P401R_UARTA2],
         .ringBufSize = sizeof(uartMSP432RingBuffer[MSP_EXP432P401R_UARTA2]),
         .rxPin = UARTMSP432_P3_2_UCA2RXD,
-        .txPin = UARTMSP432_P3_3_UCA2TXD
+        .txPin = UARTMSP432_P3_3_UCA2TXD,
+        .errorFxn = NULL
     }
 };
 

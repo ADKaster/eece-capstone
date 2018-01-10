@@ -36,4 +36,5 @@ else
     TI_ROOT = $(HOME)/
 endif
 
-SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(TI_ROOT)/ti/simplelink_msp432_sdk_1_40_01_00
+SIMPLELINK_MSP432_SDK_INSTALL_DIR ?= $(TI_ROOT)ti/simplelink_msp432p4_sdk_1_60_00_12
+

@@ -17,11 +17,12 @@ AR = $(CROSS)-ar
 
 INCLUDES =  -I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source \
 			-I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/CMSIS/Include \
-			-I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/kernel/freertos/posix \
+			-I$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/posix/gcc \
 			-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/include \
 			-I$(FREERTOS_INSTALL_DIR)/FreeRTOS/Source/portable/GCC/ARM_CM4F \
 			-I$(KERNEL_BUILD) \
 			-I$(GCC_ARMCOMPILER)/arm-none-eabi/include \
+			-I$(GCC_ARMCOMPILER)/arm-none-eabi/include/newlib-nano \
 			-Isrc/damnlib/inc \
 		    -Isrc/inc \
 		    -Isrc 
@@ -35,14 +36,15 @@ CFLAGS += $(EXTRA_CFLAGS)
 
 LFLAGS := -nostartfiles
 
-LIBS := "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib" -l:display.am4fg \
+LIBS :=   "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/display/lib" -l:display.am4fg \
 		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/drivers/lib" -l:drivers_msp432p401x.am4fg \
 		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/third_party/fatfs/lib" -l:fatfs.am4fg \
 		  "-L$(BUILDDIR)" -l:freertos.lib \
-		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/devices/msp432p4xx/driverlib/gcc" -l:msp432p4xx_driverlib.a
+		  "-L$(SIMPLELINK_MSP432_SDK_INSTALL_DIR)/source/ti/devices/msp432p4xx/driverlib/gcc" -l:msp432p4xx_driverlib.a \
+		  "-L$(GCC_ARMCOMPILER)/arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard"
 
 LFLAGS += $(LIBS)
-LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -static -Wl,--gc-sections -lgcc -lc -lm -lnosys
+LFLAGS += -march=armv7e-m -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -static -Wl,--gc-sections -lgcc -lc -lm -lnosys --specs=nano.specs
 
 CFLAGS_MSP432 = $(CFLAGS) -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
 LFLAGS_MSP432 = $(LFLAGS) -Wl,-T,$(SRCDIR)/MSP_EXP432P401R_FREERTOS.lds -D__MSP432P401R__ -DDeviceFamily_MSP432P401x
