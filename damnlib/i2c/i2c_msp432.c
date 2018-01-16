@@ -32,9 +32,6 @@
 #include <ti/drivers/i2c/I2CMSP432.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
-/* Example/Board Header files */
-#include "Board.h"
-
 static I2C_Handle i2cMasterHandle;
 static I2CSlave_Handle i2cSlaveHandle;
 

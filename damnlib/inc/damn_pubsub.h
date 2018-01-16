@@ -9,7 +9,8 @@
 #define DAMN_PUBSUB_H
 
 #include "damn_msgdef.h"
-#include "Board.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 #define MAX_QUEUE_DEPTH (20) /* Needs testing. 20 seems reasonable maximum though */
 

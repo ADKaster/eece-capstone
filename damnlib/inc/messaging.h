@@ -10,7 +10,7 @@
  #define MESSAGING_H
 
 #include "damn_msgdef.h"
-#include "Board.h"
+#include <stdbool.h>
 
 #ifdef FREERTOS
     #include <FreeRTOS.h>

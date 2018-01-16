@@ -23,6 +23,7 @@ typedef enum i2c_status_tag
 
 /* Architecture selection logic. Add new architectures here */
 #ifdef __MSP432P401R__
+    #include <ti/drivers/I2C.h>
     typedef I2C_Transaction                     damn_i2c_trans_t;
     #define damn_arch_i2c_transfer(request)     i2c_msp432_master_transfer(request)
     #define damn_arch_i2c_slave_send(buf, size) i2c_msp432_slave_send(buf, size)

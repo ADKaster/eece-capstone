@@ -1,0 +1,1 @@
+"./src/MSP_EXP432P401R.o" "./src/application_init.o" "./src/application_main.o" "./src/main_freertos.o" -Wl,-T"../MSP_EXP432P401R_FREERTOS.lds" -Wl,--start-group -lgcc -lnosys -lc -Wl,--end-group 

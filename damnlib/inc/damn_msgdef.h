@@ -8,14 +8,7 @@
 
 #include <stdint.h>
 
-#ifndef NOAPPLICATION 
-    #include "DamnLibSystem.h"
-    #ifndef APPLICATION_WHOAMI
-        #error "Please define APPLICATION_WHOAMI as a valid damn_node_t value"
-    #endif 
-#else
-    #include "SampleSystem.h"
-#endif
+#include "DamnLibSystem.h"
 
 #include <mqueue.h>
 

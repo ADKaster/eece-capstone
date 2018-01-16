@@ -9,7 +9,7 @@
 #define RINGBUF_H
 
 #include <stdint.h>
-#include "Board.h"
+#include <stdbool.h>
 
 /* NOTE: Do NOT reorder the members of these types! buf MUST be at the end in order for casting */
 /* to ringbuf_t to work properly. This is intended! the size member helps protect against overflow */

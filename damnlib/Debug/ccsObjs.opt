@@ -1,0 +1,1 @@
+"./damn_config.o" "./damn_pubsub.o" "./i2c/damn_i2c_internals.o" "./i2c/i2c_msp432.o" "./i2c/msp432_i2cmaster_int.o" "./i2c/msp432_i2cslave_int.o" "./utils/messaging.o" "./utils/ringbuf.o" 
