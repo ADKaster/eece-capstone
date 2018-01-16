@@ -54,6 +54,5 @@ dkms.conf
 #Project specific files
 doxygen*
 *Debug/*
-*.metadata/*
 *RemoteSystemsTempFiles/*
 *.jxbrowser-data/*
