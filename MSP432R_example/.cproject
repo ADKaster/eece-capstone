@@ -74,7 +74,6 @@
 									<listOptionValue builtIn="false" value="&quot;${INHERITED_LIBRARIES}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;nosys&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;m&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;c_nano&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:libdamnlib.a&quot;"/>

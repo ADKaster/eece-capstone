@@ -5,6 +5,7 @@
 
 #include "damn_i2c_internals.h"
 #include "damn_msgdef.h"
+#include <stdbool.h>
 
 #ifndef I2C_MSP432_H
     #error "I2C_MSP432_H not defined!"
