@@ -20,7 +20,9 @@ void appDisplay_Init(void);
 /* Global data */
 pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
-uint32_t       currentApplication = APPLICATION_WHOAMI;
+
+/* CHANGE THIS FOR DIFFERENT APPLICATION */
+damn_node_t currentApplication = NODE_FOO;
 
 /* Initialize the entire application before the scheduler. Initialize damn library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)

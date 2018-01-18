@@ -26,11 +26,8 @@ typedef enum nodeenum_tag
 
 #define NUM_NODES BROADCAST
 
-#ifdef APPFOO
-#define APPLICATION_WHOAMI (NODE_FOO)
-#else
-#define APPLICATION_WHOAMI (NODE_BAR)
-#endif
+extern damn_node_t currentApplication;
+#define APPLICATION_WHOAMI currentApplication
 
 /*! \brief enumeration of system slave addresses
  *
