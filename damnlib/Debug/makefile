@@ -138,7 +138,7 @@ LIB_OUTPUTS__QUOTED += \
 all: libdamnlib.a
 
 dependents:
-	-cd C:/Users/Andrew/Git/eece_capstone_experimental/eece-capstone/freertos_builds_MSP_EXP432P401R_release_gcc/Debug && $(MAKE) all
+	-cd C:/Users/Andrew/Git/eece_capstone_experimental/eece-capstone/freertos_builds_MSP_EXP432P401R_release_gcc/Debug && $(MAKE) clean all
 
 # Tool invocations
 libdamnlib.a: $(OBJS) C:/Users/Andrew/Git/eece_capstone_experimental/eece-capstone/freertos_builds_MSP_EXP432P401R_release_gcc/Debug/libfreertos_builds_MSP_EXP432P401R_release_gcc.a

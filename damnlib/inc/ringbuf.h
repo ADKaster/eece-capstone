@@ -22,12 +22,7 @@
         uint32_t count;               \
         uint32_t size;                \
         uint8_t  buf[bufsize];        \
-   } prefix##_ringbuf_t;              \
-                                             \
-   inline void prefix##_ringbuf_init(volatile prefix##_ringbuf_t *rbuf)     \
-   {                                                        \
-        rbuf->size = bufsize;                               \
-   }                                                        \
+   } prefix##_ringbuf_t;
 
 
 typedef struct

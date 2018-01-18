@@ -10,8 +10,6 @@
 #include <ti/display/Display.h>
 #include <pthread.h>
 
-#define APPLICATION_WHOAMI (NODE_FOO)
-
 extern pthread_mutex_t gDisplayMuxtex;
 extern Display_Handle  gTheDisplay;
 

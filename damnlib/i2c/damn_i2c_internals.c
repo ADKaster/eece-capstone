@@ -22,6 +22,7 @@
     #error "FreeRTOS needed to do task notification for I2C Slave. Implement other notificaiton schemes (semaphore?)"
 #endif
 
+
 /******* File Defines *******/
 #define I2C_STACK_DEPTH (1024) /* 1kiB of stack */
 #define I2C_RX_BUFFER_SIZE (0x64) /* Hold 100 words of data at once */
@@ -43,6 +44,12 @@ pthread_t           i2cSlavePthread;
 
 static damn_i2c_slave_state_t Slave_Hdr_Parse(damn_pkthdr_t *hdr, uint32_t *buf, damn_nack_t *nackptr);
 static void Slave_Reverse_Hdr(damn_pkthdr_t *dest, damn_pkthdr_t *src);
+
+
+static void i2c_slave_ringbuf_init(volatile i2c_slave_ringbuf_t *rbuf, uint16_t size)
+{
+    rbuf->size = size;
+}
 
 
 /* Initalize I2C Thread and message queue  */
@@ -102,7 +109,7 @@ damn_i2c_status_t damn_i2c_init(void)
     }
 
     /* initalize ring buffer **MUST BE DONE BEFORE SLAVE INITALIZED** */
-    i2c_slave_ringbuf_init(&gI2C_SlaveRingbuf);
+    i2c_slave_ringbuf_init(&gI2C_SlaveRingbuf, I2C_SLAVE_RINGBUF_SIZE);
 
     retVal = damn_arch_i2c_init();
 

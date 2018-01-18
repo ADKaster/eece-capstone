@@ -57,3 +57,4 @@ doxygen*
 *.metadata/*
 *RemoteSystemsTempFiles/*
 *.jxbrowser-data/*
+*/.launches/*
