@@ -1,23 +1,23 @@
-/*! \file damn_config.c
+/*! \file dmcf_config.c
 
     Configuration file for the messaging library. <br>
     Should be the same file for all applications in your system.
 */
 
 
-#include "damn_msgdef.h"
+#include "dmcf_msgdef.h"
 
 /*! \var gTheMessageDefinitions 
  *  \brief An array to hold all defined message definitions
  *
  * Each message to be used in a system must be described here so that the
- * message library can understand how to send and recieve the message. Note
- * that the designated intializer format requires compiling with --std=c99 or
+ * message library can understand how to send and receive the message. Note
+ * that the designated initializer format requires compiling with --std=c99 or
  * higher. <br>
  *
  * Be sure to fill in with your custom values for message number and message source.
  */
-damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
+dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 {
     /* PING Message. For testing purposes */
     [STANDARD_PING_MSG] = 
@@ -54,7 +54,7 @@ damn_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 /*! \var gTheMasterAddresses
  *  \brief Array to hold all slave addresses of the system
  */
-damn_master_addr_t gTheMasterAddresses[NUM_NODES] =
+dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
 {
     MASTERADDR_FOO,
     MASTERADDR_BAR,
@@ -64,7 +64,7 @@ damn_master_addr_t gTheMasterAddresses[NUM_NODES] =
 /*! \var gTheSlaveAddresses
  *  \brief Array to hold all slave addresses of the system
  */
-damn_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
+dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
 {
     SLAVEADDR_FOO,
     SLAVEADDR_BAR,

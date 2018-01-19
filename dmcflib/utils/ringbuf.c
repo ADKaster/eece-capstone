@@ -13,9 +13,9 @@ bool ringbuf_isempty(volatile ringbuf_t *rbuf)
 {
     uint32_t count;
 
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     count = rbuf->count;
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
     return ( count == 0);
 }
 bool ringbuf_isfull(volatile ringbuf_t *rbuf)
@@ -23,10 +23,10 @@ bool ringbuf_isfull(volatile ringbuf_t *rbuf)
     uint32_t count;
     uint32_t size;
 
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     count = rbuf->count;
     size = rbuf->size;
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
 
     return (count >= size);
 }
@@ -35,9 +35,9 @@ uint32_t ringbuf_getcount(volatile ringbuf_t *rbuf)
 {
     uint32_t count;
 
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     count = rbuf->count;
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
 
     return count;   
 }
@@ -46,9 +46,9 @@ uint32_t ringbuf_peek(volatile ringbuf_t *rbuf)
 {
     uint32_t value;
 
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     value = rbuf->buf[rbuf->tail];
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
 
     return value;
 }
@@ -57,7 +57,7 @@ uint32_t ringbuf_get(volatile ringbuf_t *rbuf, uint8_t *getbuf, uint32_t numbyte
 {
     uint32_t bytescopied;
     /* Check how many bytes are available, then copy to getbuf */
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     if((rbuf->count) > 0)
     {
         if((rbuf->count) >= numbytes)
@@ -77,20 +77,20 @@ uint32_t ringbuf_get(volatile ringbuf_t *rbuf, uint8_t *getbuf, uint32_t numbyte
     {
         bytescopied = -1;
     }
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
     return bytescopied;
 }
 
 void ringbuf_put(volatile ringbuf_t *rbuf, uint8_t val)
 {
-    DAMN_DISABLE_INTS();
+    DMCF_DISABLE_INTS();
     if((rbuf->count) < (rbuf->size))
     {
         rbuf->buf[rbuf->head] = val;
         rbuf->head = (rbuf->head + 1) % rbuf->size;
         rbuf->count++;
     }
-    DAMN_ENABLE_INTS();
+    DMCF_ENABLE_INTS();
     return;
 }
 

@@ -1,13 +1,18 @@
 /** \file System Configuration File
  *
- * DamnLibSystem.h
+ * DmcfLibSystem.h
  *
  *  Created on: Sep 7, 2017
  *      Author: Andrew Kaster
  */
 
-#ifndef EXAMPLE_DAMNLIBSYSTEM_H_
-#define EXAMPLE_DAMNLIBSYSTEM_H_
+#ifndef EXAMPLE_DMCFLIBSYSTEM_H_
+#define EXAMPLE_DMCFLIBSYSTEM_H_
+
+
+#ifndef NULL
+#define NULL (void *)0
+#endif
 
 /*! \brief Enumeration of nodes in network
  *
@@ -22,11 +27,11 @@ typedef enum nodeenum_tag
     NODE_BAR, /**< Bar contains feature y */
     NODE_BAZ, /**< Baz contains feature z */
     BROADCAST, /**< MUST BE INCLUDED in this enum */
-} damn_node_t;
+} dmcf_node_t;
 
 #define NUM_NODES BROADCAST
 
-extern damn_node_t currentApplication;
+extern dmcf_node_t currentApplication;
 #define APPLICATION_WHOAMI currentApplication
 
 /*! \brief enumeration of system slave addresses
@@ -40,9 +45,9 @@ typedef enum slvaddr_tag
     SLAVEADDR_FOO = 0x48, /**< Address for FOO */
     SLAVEADDR_BAR = 0x49, /**< Address for BAR */
     SLAVEADDR_BAZ = 0x50, /**< Address for BAZ */
-} damn_slave_addr_t;
+} dmcf_slave_addr_t;
 
-extern damn_slave_addr_t gTheSlaveAddresses[NUM_NODES];
+extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
 
 /*! \brief enumeration of system master addresses
  *
@@ -54,9 +59,9 @@ typedef enum masaddr_tag
     MASTERADDR_FOO = 0x40, /**< Address for FOO */
     MASTERADDR_BAR = 0x41, /**< Address for BAR */
     MASTERADDR_BAZ = 0x42, /**< Address for BAZ */
-} damn_master_addr_t;
+} dmcf_master_addr_t;
 
-extern damn_master_addr_t gTheMasterAddresses[NUM_NODES];
+extern dmcf_master_addr_t gTheMasterAddresses[NUM_NODES];
 
 /*! \brief Message enumeration
 
@@ -71,7 +76,7 @@ typedef enum msgenum_tag
     /* MY_FAV_MSG_NAME, */
     BROADCAST_PING_MSG,
     NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
-} damn_msg_enum_t;
+} dmcf_msg_enum_t;
 
 
 /*! \brief Ping message length
@@ -90,4 +95,4 @@ typedef struct ping_tag
     uint8_t ping_payload[PING_MSG_LEN]; /**< The payload array, contains debug values */
 } sample_ping_msg_t;
 
-#endif /* EXAMPLE_DAMNLIBSYSTEM_H_ */
+#endif /* EXAMPLE_DMCFLIBSYSTEM_H_ */

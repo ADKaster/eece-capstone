@@ -182,7 +182,7 @@ static void primeTransfer(I2CMSP432_Object *object,
 /*
  *  Replacement for TI's hardware interrupt that handles Arbitration loss by resetting peripheral to master mode
  */
-void damn_i2cmaster_hwiIntFxn(uintptr_t arg)
+void dmcf_i2cmaster_hwiIntFxn(uintptr_t arg)
 {
     uint8_t                    intStatus;
     unsigned int               key;

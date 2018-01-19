@@ -3,19 +3,19 @@
    implements the TI MSP432 MPU specific functions for i2c
 */
 
-#include "damn_i2c_internals.h"
-#include "damn_msgdef.h"
+#include "dmcf_i2c_internals.h"
+#include "dmcf_msgdef.h"
 #include <stdbool.h>
 
 #ifndef I2C_MSP432_H
     #error "I2C_MSP432_H not defined!"
 #endif
 
-#ifndef DAMN_I2C_SLAVE_PORT
-    #define DAMN_I2C_SLAVE_PORT (0)
+#ifndef DMCF_I2C_SLAVE_PORT
+    #define DMCF_I2C_SLAVE_PORT (0)
 #endif
-#ifndef DAMN_I2C_MASTER_PORT
-    #define DAMN_I2C_MASTER_PORT (1)
+#ifndef DMCF_I2C_MASTER_PORT
+    #define DMCF_I2C_MASTER_PORT (1)
 #endif
 
 #ifdef FREERTOS 
@@ -36,7 +36,7 @@
 static I2C_Handle i2cMasterHandle;
 static I2CSlave_Handle i2cSlaveHandle;
 
-damn_i2c_status_t i2c_msp432_master_transfer(damn_i2c_trans_t *request)
+dmcf_i2c_status_t i2c_msp432_master_transfer(dmcf_i2c_trans_t *request)
 {
     bool i2cRet = false;
 
@@ -45,7 +45,7 @@ damn_i2c_status_t i2c_msp432_master_transfer(damn_i2c_trans_t *request)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL; 
 }
 
-damn_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
+dmcf_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
 {
     bool i2cRet = false;
 
@@ -54,9 +54,9 @@ damn_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL;
 }
 
-damn_i2c_status_t i2c_msp432_init(void)
+dmcf_i2c_status_t i2c_msp432_init(void)
 {
-    damn_i2c_status_t retVal = I2C_FAIL;
+    dmcf_i2c_status_t retVal = I2C_FAIL;
 
     /* Initialize master and slave i2c */
     I2C_Params masterParams;
@@ -68,12 +68,12 @@ damn_i2c_status_t i2c_msp432_init(void)
     I2C_Params_init(&masterParams);
     masterParams.transferMode = I2C_MODE_BLOCKING;
     masterParams.bitRate = I2C_100kHz;
-    i2cMasterHandle = I2C_open(DAMN_I2C_MASTER_PORT, &masterParams); 
+    i2cMasterHandle = I2C_open(DMCF_I2C_MASTER_PORT, &masterParams); 
 
     I2CSlave_Params_init(&slaveParams);
     slaveParams.transferMode = I2CSLAVE_MODE_CALLBACK;
     slaveParams.transferCallbackFxn = i2c_msp432_SlaveTransferCallback;
-    i2cSlaveHandle = I2CSlave_open(DAMN_I2C_SLAVE_PORT, &slaveParams);
+    i2cSlaveHandle = I2CSlave_open(DMCF_I2C_SLAVE_PORT, &slaveParams);
 
     if(NULL == i2cMasterHandle || NULL == i2cSlaveHandle)
     {
@@ -133,7 +133,7 @@ void i2c_msp432_enableCustomSlaveInt(I2CSlaveMSP432_HWAttrs const *hwAttrs, I2CS
     HwiP_delete(object->hwiHandle);
     /* And install ours */
     object->hwiHandle = HwiP_create( hwAttrs->intNum,
-                                     damn_i2cslave_hwiIntFxn,
+                                     dmcf_i2cslave_hwiIntFxn,
                                      &interruptParams);
 }
 
@@ -162,6 +162,6 @@ void i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP
     HwiP_delete(object->hwiHandle);
     /* And install ours */
     object->hwiHandle = HwiP_create( hwAttrs->intNum,
-                                     damn_i2cmaster_hwiIntFxn,
+                                     dmcf_i2cmaster_hwiIntFxn,
                                      &interruptParams);
 }

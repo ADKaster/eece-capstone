@@ -5,10 +5,10 @@
  *
  */
 
-#ifndef DAMN_PUBSUB_H
-#define DAMN_PUBSUB_H
+#ifndef DMCF_PUBSUB_H
+#define DMCF_PUBSUB_H
 
-#include "damn_msgdef.h"
+#include "dmcf_msgdef.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -20,7 +20,7 @@ typedef enum pub_status_tag
     PUB_FAIL,
     PUB_INVALID,
     PUB_FULL,
-} damn_pub_status_t;
+} dmcf_pub_status_t;
 
 typedef enum sub_status_tag
 {
@@ -29,7 +29,7 @@ typedef enum sub_status_tag
     SUB_INVALID,
     SUB_NONE,
     SUB_ERR
-} damn_sub_status_t;
+} dmcf_sub_status_t;
 
 typedef enum
 {
@@ -37,65 +37,65 @@ typedef enum
     FREQ_TEN_HZ,
     FREQ_TWENTY_HZ,
     FREQ_ONE_HUNDRED_HZ,
-} damn_pubsub_freq_t;
+} dmcf_pubsub_freq_t;
 
 typedef enum pubsubstat_tag
 {
     STATUS_IGNORE = 0,
     STATUS_SUBSCRIBED,
     STATUS_PUBLISHING
-} damn_pubsub_status_t;
+} dmcf_pubsub_status_t;
 
 typedef struct subinfo_tag
 {
-    damn_msgdef_t          *pmsg_def;
+    dmcf_msgdef_t          *pmsg_def;
     uint32_t                period_ms;
     mqd_t                   queue;
     uint32_t                q_width;
     uint32_t                q_depth;
-    damn_pubsub_status_t    status;
-} damn_subinfo_t, *damn_subinfo_ptr;
+    dmcf_pubsub_status_t    status;
+} dmcf_subinfo_t, *dmcf_subinfo_ptr;
 
-typedef damn_subinfo_t damn_pubinfo_t;
-typedef damn_subinfo_ptr damn_pubinfo_ptr;
+typedef dmcf_subinfo_t dmcf_pubinfo_t;
+typedef dmcf_subinfo_ptr dmcf_pubinfo_ptr;
 
 typedef struct p2pitem_tag
 {
-    damn_subinfo_ptr        psub_info;
+    dmcf_subinfo_ptr        psub_info;
     uint32_t                last_sent;
     volatile bool           completed;
     bool                    in_progress;
     volatile bool           success;
-} damn_p2p_subinfo_t;
+} dmcf_p2p_subinfo_t;
 
 //Basic idea: Broadcast -- Publisher controlled timing
 //            P2P       -- Subscriber controlled timing
 
 // If a subscriber tries to poll at a frequency faster than the publisher is
 // publishing, the publisher will notify the subscriber that it's going too fast.
-damn_pub_status_t damn_publish_configure(damn_msg_enum_t id,
-                                         damn_pubsub_freq_t frequency,
+dmcf_pub_status_t dmcf_publish_configure(dmcf_msg_enum_t id,
+                                         dmcf_pubsub_freq_t frequency,
                                          uint32_t queue_depth);
 
-damn_pub_status_t damn_pub_put(damn_msg_enum_t id,
+dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
                                void *send_buff);
 
 // When frequency is set to unlimited, the message will be populated in the
 // subscriber's recieve buffer when published by the publisher.
 // This can only happen for broadcast messages. For point to point messages,
 // the subscriber must configure a frequency to poll the publisher at.
-damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
-                                           damn_pubsub_freq_t frequency,
+dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
+                                           dmcf_pubsub_freq_t frequency,
                                            uint32_t queue_depth);
 
-damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
+dmcf_sub_status_t dmcf_sub_get(dmcf_msg_enum_t id,
                                void *recvbuff,
-                               damn_nack_t *ack_chk);
+                               dmcf_nack_t *ack_chk);
 
-void damn_init(void);
+void dmcf_init(void);
 
-extern damn_subinfo_t gTheSubscriptions[NUM_MSG_DEFINITONS];
-extern damn_pubinfo_t gThePublications[NUM_MSG_DEFINITONS];
+extern dmcf_subinfo_t gTheSubscriptions[NUM_MSG_DEFINITONS];
+extern dmcf_pubinfo_t gThePublications[NUM_MSG_DEFINITONS];
 
 
-#endif /* DAMN_PUBSUB_H */
+#endif /* DMCF_PUBSUB_H */

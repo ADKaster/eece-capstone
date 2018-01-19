@@ -3,8 +3,8 @@
 	<name>MSP432R_example</name>
 	<comment></comment>
 	<projects>
-		<project>damnlib</project>
 		<project>freertos_builds_MSP_EXP432P401R_release_gcc</project>
+		<project>dmcflib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

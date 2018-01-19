@@ -89,7 +89,7 @@
 /*********************BEGIN CHANGES*****************/
 
 #include "ringbuf.h"
-#include "damn_i2c_internals.h"
+#include "dmcf_i2c_internals.h"
 #include <FreeRTOS.h>
 #include <task.h>
 #include <pthread.h>
@@ -128,7 +128,7 @@ static void completeTransfer(I2CSlave_Handle handle)
 /*
  * Re-implementation of TI's hardware interrupt with custom features for our project
  */
-void damn_i2cslave_hwiIntFxn(uintptr_t arg)
+void dmcf_i2cslave_hwiIntFxn(uintptr_t arg)
 {
     int32_t                     xHigherPriorityTaskWoken = pdFALSE;
 /*****************************END CHANGES****************************************/

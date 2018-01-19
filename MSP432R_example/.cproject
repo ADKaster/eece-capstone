@@ -47,8 +47,8 @@
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/arm-none-eabi/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${CG_TOOL_ROOT}/arm-none-eabi/include/newlib-nano&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/freertos_builds_MSP_EXP432P401R_release_gcc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/damnlib}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/damnlib/inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/dmcflib}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/dmcflib/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
@@ -76,7 +76,7 @@
 									<listOptionValue builtIn="false" value="&quot;nosys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;m&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;c_nano&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;:libdamnlib.a&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;:libdmcflib.a&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:libfreertos_builds_MSP_EXP432P401R_release_gcc.a&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:display.am4fg&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:drivers_msp432p401x.am4fg&quot;"/>
@@ -85,7 +85,7 @@
 								</option>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.linkerID.SEARCH_PATH.2094688816" name="Library search path (-L, --library-path)" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.linkerID.SEARCH_PATH" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${INHERITED_LIBRARY_PATH}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/damnlib/Debug}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/dmcflib/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/freertos_builds_MSP_EXP432P401R_release_gcc/Debug}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${COM_TI_SIMPLELINK_MSP432_SDK_INSTALL_DIR}/source/ti/display/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${COM_TI_SIMPLELINK_MSP432_SDK_INSTALL_DIR}/source/ti/drivers/lib&quot;"/>
@@ -107,8 +107,8 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="damnlib;com.ti.ccstudio.buildDefinitions.MSP432.Debug.1889946927" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 				<externalSettings containerId="freertos_builds_MSP_EXP432P401R_release_gcc;com.ti.ccstudio.buildDefinitions.MSP432.Debug.1466170097" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
+				<externalSettings containerId="dmcflib;com.ti.ccstudio.buildDefinitions.MSP432.Debug.1889946927" factoryId="org.eclipse.cdt.core.cfg.export.settings.sipplier"/>
 			</storageModule>
 		</cconfiguration>
 		<cconfiguration id="com.ti.ccstudio.buildDefinitions.MSP432.Release.1931927416">

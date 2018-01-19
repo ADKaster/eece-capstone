@@ -9,13 +9,13 @@
 
 #include <ti/display/Display.h>
 #include <pthread.h>
-#include "DamnLibSystem.h"
+#include "DmcfLibSystem.h"
 
 extern pthread_mutex_t gDisplayMuxtex;
 extern Display_Handle  gTheDisplay;
 
 #define APP_QUEUE_DEPTH (10)
 
-extern damn_node_t currentApplication;
+extern dmcf_node_t currentApplication;
 
 #endif

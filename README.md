@@ -3,7 +3,7 @@ Repository to store software work products for capstone.
 
 ## Project Overview
 
-The communication library is the Distributed Application Microcontroller Network Library (damnlib for short).
+The communication library is the Distributed Microcontroller Communication Framework Library (dmcflib for short).
 
 The end goal is to enable an application developer to use the publish-subscribe API presented in the library to easily send messages
 between different microcontrollers in a system over I2C. The real demo application will be a telemetry system for an amateur rocket

@@ -12,8 +12,8 @@
 #include <unistd.h>
 #include <time.h>
 #include "appdefs.h"
-#include "damn_msgdef.h"
-#include "damn_pubsub.h"
+#include "dmcf_msgdef.h"
+#include "dmcf_pubsub.h"
 #include <stdio.h>
 
 static uint8_t txBuffer[PING_MSG_LEN];
@@ -26,9 +26,9 @@ void *mainThread(void *arg0)
     TickType_t xFrequency = portTICK_PERIOD_MS * 10;
 #endif
     struct timespec currtime;
-    //damn_pub_status_t       pubstatus;
-    damn_sub_status_t       substatus;
-    damn_nack_t             nack;
+    //dmcf_pub_status_t       pubstatus;
+    dmcf_sub_status_t       substatus;
+    dmcf_nack_t             nack;
 
     sprintf((void *)txBuffer, "ImNode%d", APPLICATION_WHOAMI);
 
@@ -38,13 +38,13 @@ void *mainThread(void *arg0)
 
         if(NODE_FOO == currentApplication)
         {
-            (void)damn_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
-            substatus = damn_sub_get(STANDARD_PING_MSG, (void *)rxBuffer, &nack);
+            (void)dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
+            substatus = dmcf_sub_get(STANDARD_PING_MSG, (void *)rxBuffer, &nack);
         }
         else
         {
-            (void)damn_pub_put(STANDARD_PING_MSG, (void *)txBuffer);
-            substatus = damn_sub_get(BROADCAST_PING_MSG, (void *)rxBuffer, &nack);
+            (void)dmcf_pub_put(STANDARD_PING_MSG, (void *)txBuffer);
+            substatus = dmcf_sub_get(BROADCAST_PING_MSG, (void *)rxBuffer, &nack);
         }
 
         pthread_mutex_lock(&gDisplayMuxtex);

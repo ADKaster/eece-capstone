@@ -1,13 +1,13 @@
 /*! \file Application Initialization
 
-    Contains task initalization and library initialization
+    Contains task initialization and library initialization
 */  
 
 
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
-#include "damn_pubsub.h"
+#include "dmcf_pubsub.h"
 #include "appdefs.h"
 
 /* Stack size in bytes */
@@ -22,12 +22,12 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-damn_node_t currentApplication = NODE_FOO;
+dmcf_node_t currentApplication = NODE_FOO;
 
-/* Initialize the entire application before the scheduler. Initialize damn library BEFORE application subscribes to anything!!! */
+/* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    damn_init();
+    dmcf_init();
 
     createMainThread();
 
@@ -35,21 +35,21 @@ void ApplicationInit(void)
 
     if(NODE_FOO == currentApplication)
      {
-        damn_subscribe_configure(STANDARD_PING_MSG,
+        dmcf_subscribe_configure(STANDARD_PING_MSG,
                                  FREQ_TEN_HZ,
                                  APP_QUEUE_DEPTH);
 
-        damn_publish_configure(BROADCAST_PING_MSG,
+        dmcf_publish_configure(BROADCAST_PING_MSG,
                                FREQ_UNLIMITED,
                                APP_QUEUE_DEPTH);
     }
     else
     {
-        damn_subscribe_configure(BROADCAST_PING_MSG,
+        dmcf_subscribe_configure(BROADCAST_PING_MSG,
                                  FREQ_UNLIMITED,
                                  APP_QUEUE_DEPTH);
 
-        damn_publish_configure(STANDARD_PING_MSG,
+        dmcf_publish_configure(STANDARD_PING_MSG,
                                FREQ_TEN_HZ,
                                APP_QUEUE_DEPTH);
     }
@@ -58,7 +58,7 @@ void ApplicationInit(void)
 }
 
 /* This thread is made using TI's implementation of the POSIX API. */
-/* Using POSIX ensures compatability with TI_RTOS */
+/* Using POSIX ensures compatibility with TI_RTOS */
 void createMainThread(void)
 {
     pthread_t           thread;
@@ -94,7 +94,7 @@ void createMainThread(void)
 
 }
 
-/* Intialize the display and create a mutex for it */
+/* Initialize the display and create a mutex for it */
 void appDisplay_Init(void)
 {
     int retc = 0;

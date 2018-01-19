@@ -3,7 +3,7 @@
  *
  * \brief System template configuration. 
  *
- * Use this file as a template for your file named DamnLibSystem.h. That file
+ * Use this file as a template for your file named DmcfLibSystem.h. That file
  * Will contain the necessary configuration and message definitions for the library
  * to process your publish-subscribe things properly.
  *
@@ -25,7 +25,7 @@ typedef enum nodeenum_tag
 	NODE_BAR, /**< Bar contains feature y */
 	NODE_BAZ, /**< Baz contains feature z */
 	BROADCAST, /**< MUST BE INCLUDED in this enum */
-} damn_node_t;
+} dmcf_node_t;
 
 #define NUM_NODES BROADCAST
 
@@ -40,9 +40,9 @@ typedef enum slvaddr_tag
     SLAVEADDR_FOO = 0x48, /**< Address for FOO */
     SLAVEADDR_BAR = 0x49, /**< Address for BAR */
     SLAVEADDR_BAZ = 0x50, /**< Address for BAZ */
-} damn_slave_addr_t;
+} dmcf_slave_addr_t;
 
-extern damn_slave_addr_t gTheSlaveAddresses[NUM_NODES];
+extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
 
 /*! \brief enumeration of system master addresses
  *
@@ -54,9 +54,9 @@ typedef enum masaddr_tag
     MASTERADDR_FOO = 0x40, /**< Address for FOO */
     MASTERADDR_BAR = 0x41, /**< Address for BAR */
     MASTERADDR_BAZ = 0x42, /**< Address for BAZ */
-} damn_master_addr_t;
+} dmcf_master_addr_t;
 
-extern damn_master_addr_t gTheMasterAddresses[NUM_NODES];
+extern dmcf_master_addr_t gTheMasterAddresses[NUM_NODES];
 
 #define APPLICATION_WHOAMI (NODE_FOO)
 
@@ -73,7 +73,7 @@ typedef enum msgenum_tag
     /* MY_FAV_MSG_NAME, */
 
     NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
-} damn_msg_enum_t;
+} dmcf_msg_enum_t;
 
 
 /*! \brief Ping message length

@@ -1,13 +1,13 @@
 /*
- * damn_pubsub.c
+ * dmcf_pubsub.c
  *
  *  Created on: Aug 26, 2017
  *      Author: Andrew Kaster
  */
 
-#include "damn_msgdef.h"
-#include "damn_pubsub.h"
-#include "damn_i2c_internals.h"
+#include "dmcf_msgdef.h"
+#include "dmcf_pubsub.h"
+#include "dmcf_i2c_internals.h"
 #include "messaging.h"
 #include <pthread.h>
 #include <unistd.h>
@@ -32,30 +32,30 @@ void *p2p_sub_scheduler_task(void *arg0);
 
 /******* Globals *****/
 pthread_t       p2pSchedPthread;
-damn_subinfo_t gTheSubscriptions[NUM_MSG_DEFINITONS];
-damn_pubinfo_t gThePublications[NUM_MSG_DEFINITONS];
+dmcf_subinfo_t gTheSubscriptions[NUM_MSG_DEFINITONS];
+dmcf_pubinfo_t gThePublications[NUM_MSG_DEFINITONS];
 
-static damn_p2p_subinfo_t p2p_sublist[NUM_MSG_DEFINITONS + 1];
-static uint32_t damn_p2p_sub_rxbuf[NUM_MSG_DEFINITONS][P2P_BUFSIZE];
-static damn_pkthdr_t p2p_hdrs[NUM_MSG_DEFINITONS];
+static dmcf_p2p_subinfo_t p2p_sublist[NUM_MSG_DEFINITONS + 1];
+static uint32_t dmcf_p2p_sub_rxbuf[NUM_MSG_DEFINITONS][P2P_BUFSIZE];
+static dmcf_pkthdr_t p2p_hdrs[NUM_MSG_DEFINITONS];
 static uint32_t sub_holding_buf[SUB_BUFSIZE];
 static uint32_t pub_holding_buf[NUM_MSG_DEFINITONS][PUB_BUFSIZE];
 static volatile bool throwaway_bcast_bool;
 
-static uint32_t check_frequency(damn_pubsub_freq_t freq, damn_tx_type_t type);
+static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type);
 
-void damn_init(void)
+void dmcf_init(void)
 {
     pthread_attr_t      threadAttr;
     struct sched_param  priorityParams;
     int32_t             detachState;
     int32_t             retc;
     uint32_t            i;
-    damn_msgdef_t       *msgdefptr;
+    dmcf_msgdef_t       *msgdefptr;
 
-    if(I2C_FAIL == damn_i2c_init())
+    if(I2C_FAIL == dmcf_i2c_init())
     {
-        /* damn_i2c_init failed */
+        /* dmcf_i2c_init failed */
         while(1);
     }
 
@@ -101,7 +101,7 @@ void damn_init(void)
 }
 
 
-static uint32_t check_frequency(damn_pubsub_freq_t freq, damn_tx_type_t type)
+static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type)
 {
     uint32_t period_ms = -1;
 
@@ -136,11 +136,11 @@ static uint32_t check_frequency(damn_pubsub_freq_t freq, damn_tx_type_t type)
 // If a subscriber tries to poll at a frequency faster than the publisher is
 // publishing, the publisher will notify the subscriber that it's going too fast.
 // by way of a NO_MSG NACK response
-damn_pub_status_t damn_publish_configure(damn_msg_enum_t id,
-                                         damn_pubsub_freq_t frequency,
+dmcf_pub_status_t dmcf_publish_configure(dmcf_msg_enum_t id,
+                                         dmcf_pubsub_freq_t frequency,
                                          uint32_t queue_depth)
 {
-    damn_pub_status_t status = PUB_FAIL;
+    dmcf_pub_status_t status = PUB_FAIL;
     uint32_t period_ms = -1;
     struct mq_attr  queueAttr;
     char q_name[10];
@@ -187,11 +187,11 @@ damn_pub_status_t damn_publish_configure(damn_msg_enum_t id,
 // subscriber's receive buffer when published by the publisher.
 // This can only happen for broadcast messages. For point to point messages,
 // the subscriber must configure a frequency to poll the publisher at.
-damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
-                                           damn_pubsub_freq_t frequency,
+dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
+                                           dmcf_pubsub_freq_t frequency,
                                            uint32_t queue_depth)
 {
-    damn_sub_status_t status = SUB_FAIL;
+    dmcf_sub_status_t status = SUB_FAIL;
     uint32_t period_ms = -1;
     struct mq_attr  queueAttr;
     char q_name[10];
@@ -206,7 +206,7 @@ damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
             gTheSubscriptions[id].period_ms = period_ms;
             /* gThePublications[id].pmsg_def set during initialization */
             gTheSubscriptions[id].q_depth = queue_depth;
-            gTheSubscriptions[id].q_width = DAMN_MSG_HDR_BYTES + gTheSubscriptions[id].pmsg_def->message_length;
+            gTheSubscriptions[id].q_width = DMCF_MSG_HDR_BYTES + gTheSubscriptions[id].pmsg_def->message_length;
             gTheSubscriptions[id].status = STATUS_SUBSCRIBED;
             /* Setup Transmit queue, ie. application wants to initiate transmimssion to someone */
             queueAttr.mq_flags = 0; /* flags are set by mq_open based on second argument */
@@ -231,22 +231,22 @@ damn_sub_status_t damn_subscribe_configure(damn_msg_enum_t id,
 }
 
 /* send_buff contains the payload ONLY */
-damn_pub_status_t damn_pub_put(damn_msg_enum_t id,
+dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
                                void *send_buff)
 {
     /* Assume P2P for locals, broadcast will set them if needed */
-    damn_pub_status_t status = PUB_FAIL;
-    damn_msgdef_t *pmsgdef = gThePublications[id].pmsg_def;
-    damn_tx_type_t type = pmsgdef->message_type;
+    dmcf_pub_status_t status = PUB_FAIL;
+    dmcf_msgdef_t *pmsgdef = gThePublications[id].pmsg_def;
+    dmcf_tx_type_t type = pmsgdef->message_type;
     char *queue_payload = (char *)send_buff;
     uint32_t queuemsg_size = pmsgdef->message_length;
     size_t q_ret;
 
     /* used for broadcast */
-    damn_pkthdr_t *hdr;
+    dmcf_pkthdr_t *hdr;
     uint32_t *msgloc = pub_holding_buf[id];
-    damn_master_action_t action;
-    damn_i2c_trans_t *trans = &(action.transaction);
+    dmcf_master_action_t action;
+    dmcf_i2c_trans_t *trans = &(action.transaction);
 
     mqd_t queue = (TX_TYPE_P2P == type) ? gThePublications[id].queue : gI2C_MasterActionQueue;
 
@@ -258,27 +258,27 @@ damn_pub_status_t damn_pub_put(damn_msg_enum_t id,
     {
         if(TX_TYPE_BROADCAST == type)
         {
-            memset((void *)msgloc, 0, DAMN_MSG_HDR_BYTES + pmsgdef->message_length);
-            hdr = (damn_pkthdr_t *)&(pub_holding_buf[id]);
-            damn_msg_create_header(hdr, APPLICATION_WHOAMI, pmsgdef->message_dest, id, pmsgdef->message_length);
-            msgloc = &(pub_holding_buf[id][DAMN_MSG_HDR_WORDS]);
+            memset((void *)msgloc, 0, DMCF_MSG_HDR_BYTES + pmsgdef->message_length);
+            hdr = (dmcf_pkthdr_t *)&(pub_holding_buf[id]);
+            dmcf_msg_create_header(hdr, APPLICATION_WHOAMI, pmsgdef->message_dest, id, pmsgdef->message_length);
+            msgloc = &(pub_holding_buf[id][DMCF_MSG_HDR_WORDS]);
 
             memcpy((void *)msgloc, send_buff, pmsgdef->message_length - 1);
 
-            damn_calculate_checksum(msgloc, pmsgdef->message_length);
+            dmcf_calculate_checksum(msgloc, pmsgdef->message_length);
 
             trans->arg = NULL;
             trans->readBuf = NULL;
             trans->readCount = 0;
             trans->writeBuf = pub_holding_buf[id];
-            trans->writeCount  = DAMN_MSG_HDR_WORDS + pmsgdef->message_length;
+            trans->writeCount  = DMCF_MSG_HDR_WORDS + pmsgdef->message_length;
             trans->slaveAddress = gTheSlaveAddresses[pmsgdef->message_dest];
 
             action.completed = &throwaway_bcast_bool;
             action.success = &throwaway_bcast_bool;
 
             queue_payload = (char *)&action;
-            queuemsg_size = sizeof(damn_master_action_t);
+            queuemsg_size = sizeof(dmcf_master_action_t);
         } /* broadcast :) */
 
         q_ret = mq_send(queue, queue_payload, queuemsg_size, 0);
@@ -298,19 +298,19 @@ damn_pub_status_t damn_pub_put(damn_msg_enum_t id,
 }
 
 /* recvbuff expects the payload ONLY */
-damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
+dmcf_sub_status_t dmcf_sub_get(dmcf_msg_enum_t id,
                                void *recvbuff,
-                               damn_nack_t *ack_chk)
+                               dmcf_nack_t *ack_chk)
 {
-    damn_sub_status_t status = SUB_FAIL;
+    dmcf_sub_status_t status = SUB_FAIL;
     ssize_t q_ret = 0;
-    damn_pkthdr_t hdr;
+    dmcf_pkthdr_t hdr;
     bool msg_status = false;
     uint32_t bytes_to_copy;
 
     /********************FORMAT*****************
      *
-     *  DAMN_MSG_HDR_BYTES|  hdr.message_len
+     *  DMCF_MSG_HDR_BYTES|  hdr.message_len
      *  -------------------------------------------
      *  | HDR |hdrchksum  |    PAYLOAD    | chksum|
      *  -------------------------------------------
@@ -333,19 +333,19 @@ damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
         else
         {
             /* verify header */
-            memcpy((void *)&hdr, (void *)sub_holding_buf, DAMN_MSG_HDR_BYTES);
+            memcpy((void *)&hdr, (void *)sub_holding_buf, DMCF_MSG_HDR_BYTES);
 
-            if(damn_msg_verify_header(&hdr))
+            if(dmcf_msg_verify_header(&hdr))
             {
                 /* verify message */
-                msg_status = damn_msg_verify_msg(&(sub_holding_buf[DAMN_MSG_HDR_WORDS]), (hdr.msg_size >> 2));
+                msg_status = dmcf_msg_verify_msg(&(sub_holding_buf[DMCF_MSG_HDR_WORDS]), (hdr.msg_size >> 2));
                 msg_status &= ((hdr.dest == APPLICATION_WHOAMI) || (hdr.dest = BROADCAST));
 
                 if(msg_status)
                 {
                     /* don't send checksum!!! msg_size includes checksum*/
                     bytes_to_copy = (hdr.msg_size) - 4;
-                    memcpy(recvbuff, (void *)&(sub_holding_buf[DAMN_MSG_HDR_WORDS]), bytes_to_copy);
+                    memcpy(recvbuff, (void *)&(sub_holding_buf[DMCF_MSG_HDR_WORDS]), bytes_to_copy);
                     status = SUB_SUCCESS;
                 }
                 else
@@ -364,7 +364,7 @@ damn_sub_status_t damn_sub_get(damn_msg_enum_t id,
 void p2p_sub_sched_init(void)
 {
     uint32_t        sublist_idx = 0;
-    damn_msgdef_t  *item;
+    dmcf_msgdef_t  *item;
     uint32_t        i;
 
     for(i = 0; i < NUM_MSG_DEFINITONS; i++)
@@ -381,7 +381,7 @@ void p2p_sub_sched_init(void)
             sublist_idx++;
         }
     }
-    p2p_sublist[sublist_idx].psub_info = (damn_subinfo_ptr)-1;
+    p2p_sublist[sublist_idx].psub_info = (dmcf_subinfo_ptr)-1;
 }
 
 
@@ -389,12 +389,12 @@ void *p2p_sub_scheduler_task(void *arg0)
 {
     uint32_t i;
     struct timespec currtime;
-    damn_subinfo_ptr subptr;
+    dmcf_subinfo_ptr subptr;
     uint32_t time_ms = 0;
-    damn_master_action_t currAction;
-    damn_i2c_trans_t    *currTrans = &(currAction.transaction);
-    damn_msg_enum_t     id;
-    damn_node_t         dest;
+    dmcf_master_action_t currAction;
+    dmcf_i2c_trans_t    *currTrans = &(currAction.transaction);
+    dmcf_msg_enum_t     id;
+    dmcf_node_t         dest;
     uint32_t            len;
 
     sleep(5);
@@ -406,21 +406,21 @@ void *p2p_sub_scheduler_task(void *arg0)
 
     for(;;)
     {
-        for(i = 0; p2p_sublist[i].psub_info != (damn_subinfo_ptr)-1; i++)
+        for(i = 0; p2p_sublist[i].psub_info != (dmcf_subinfo_ptr)-1; i++)
         {
             (void)clock_gettime(CLOCK_REALTIME, &currtime);
             time_ms = (currtime.tv_sec * 1000) + (currtime.tv_nsec/1000000);
 
             subptr = p2p_sublist[i].psub_info;
 
-            DAMN_DISABLE_INTS();
+            DMCF_DISABLE_INTS();
             if(true == p2p_sublist[i].completed)
             {
                 if(true == p2p_sublist[i].in_progress && true == p2p_sublist[i].success)
                 {
                     /* Send the message to be available for sub_get */
                     mq_send(subptr->queue,
-                            (char *)&(damn_p2p_sub_rxbuf[subptr->pmsg_def->message_number]),
+                            (char *)&(dmcf_p2p_sub_rxbuf[subptr->pmsg_def->message_number]),
                             subptr->q_width,
                             0);
                     p2p_sublist[i].in_progress = false;
@@ -431,22 +431,22 @@ void *p2p_sub_scheduler_task(void *arg0)
                     /* No success or invalid state */
                     p2p_sublist[i].completed = false;
                 }
-                DAMN_ENABLE_INTS();
+                DMCF_ENABLE_INTS();
             }
             else
             {
 
                 if((time_ms - p2p_sublist[i].last_sent) >= p2p_sublist[i].psub_info->period_ms)
                 {
-                    DAMN_ENABLE_INTS();
+                    DMCF_ENABLE_INTS();
                     p2p_sublist[i].in_progress = true;
 
                     dest = subptr->pmsg_def->message_dest;
                     id = subptr->pmsg_def->message_number;
-                    len = DAMN_MSG_HDR_BYTES + subptr->pmsg_def->message_length;
+                    len = DMCF_MSG_HDR_BYTES + subptr->pmsg_def->message_length;
 
                     /* Create transaction */
-                    damn_msg_create_header(&(p2p_hdrs[id]),
+                    dmcf_msg_create_header(&(p2p_hdrs[id]),
                                            APPLICATION_WHOAMI,
                                            dest,
                                            id,
@@ -455,9 +455,9 @@ void *p2p_sub_scheduler_task(void *arg0)
                     currTrans->arg = NULL;
 
                     currTrans->writeBuf = (void *)&(p2p_hdrs[id]);
-                    currTrans->writeCount = sizeof(damn_pkthdr_t);
+                    currTrans->writeCount = sizeof(dmcf_pkthdr_t);
 
-                    currTrans->readBuf = (void *)&(damn_p2p_sub_rxbuf[id]);
+                    currTrans->readBuf = (void *)&(dmcf_p2p_sub_rxbuf[id]);
                     currTrans->readCount = len;
 
 #ifdef FREERTOS
@@ -469,13 +469,13 @@ void *p2p_sub_scheduler_task(void *arg0)
                     currAction.success = &(p2p_sublist[i].success);
 
                     /* If master action queue is full, need to increase depth or decrease rate of messages. timing analysis needed..... */
-                    (void)mq_send(gI2C_MasterActionQueue, (char *)&(currAction), sizeof(damn_master_action_t), 0);
+                    (void)mq_send(gI2C_MasterActionQueue, (char *)&(currAction), sizeof(dmcf_master_action_t), 0);
 
                     p2p_sublist[i].last_sent = time_ms;
                 } /* time to send */
                 else
                 {
-                    DAMN_ENABLE_INTS();
+                    DMCF_ENABLE_INTS();
                 } /* not time to send */
             } /* check for master telling us it's done */
         } /* end loop over pubs to request */
