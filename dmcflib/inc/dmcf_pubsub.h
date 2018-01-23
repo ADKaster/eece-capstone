@@ -16,19 +16,19 @@
 
 typedef enum pub_status_tag
 {
-    PUB_SUCCESS,
     PUB_FAIL,
+    PUB_SUCCESS,
     PUB_INVALID,
     PUB_FULL,
 } dmcf_pub_status_t;
 
 typedef enum sub_status_tag
 {
+    SUB_ERR,
     SUB_SUCCESS,
     SUB_FAIL,
     SUB_INVALID,
-    SUB_NONE,
-    SUB_ERR
+    SUB_NONE
 } dmcf_sub_status_t;
 
 typedef enum

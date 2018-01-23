@@ -42,7 +42,7 @@ static uint32_t sub_holding_buf[SUB_BUFSIZE];
 static uint32_t pub_holding_buf[NUM_MSG_DEFINITONS][PUB_BUFSIZE];
 static volatile bool throwaway_bcast_bool;
 
-static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type);
+static int32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type);
 
 void dmcf_init(void)
 {
@@ -101,9 +101,9 @@ void dmcf_init(void)
 }
 
 
-static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type)
+static int32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type)
 {
-    uint32_t period_ms = -1;
+    int32_t period_ms = -1;
 
     if(TX_TYPE_P2P == type)
     {
@@ -192,7 +192,7 @@ dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
                                            uint32_t queue_depth)
 {
     dmcf_sub_status_t status = SUB_FAIL;
-    uint32_t period_ms = -1;
+    int32_t period_ms = -1;
     struct mq_attr  queueAttr;
     char q_name[10];
 
