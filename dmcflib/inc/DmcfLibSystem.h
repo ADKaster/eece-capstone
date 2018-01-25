@@ -95,4 +95,7 @@ typedef struct ping_tag
     uint8_t ping_payload[PING_MSG_LEN]; /**< The payload array, contains debug values */
 } sample_ping_msg_t;
 
+
+#define BROADCAST_ADDRESS (0x00)
+
 #endif /* EXAMPLE_DMCFLIBSYSTEM_H_ */

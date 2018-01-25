@@ -101,7 +101,7 @@ dmcf_i2c_status_t dmcf_i2c_init(void)
 
     /* RTOS implementation only cares about O_CREAT, O_EXCL and O_NONBLOCK */
     /* RTOS implementation discards third argument, mode. */
-    gI2C_MasterActionQueue = mq_open(I2C_TXQUEUE_NAME, (O_CREAT | O_NONBLOCK), 0, &queueAttr);
+    gI2C_MasterActionQueue = mq_open(I2C_TXQUEUE_NAME, (O_CREAT), 0, &queueAttr);
     /* mq_open returns (mqd_t)-1 on error */
     if((mqd_t)-1 == gI2C_MasterActionQueue)
     {
@@ -131,7 +131,7 @@ void *i2cMasterThread(void *arg0)
         /* argument 4, msg_prio completely ignored by TI's implementation for FreeRTOS */
         txBytes = mq_receive(gI2C_MasterActionQueue, (char *)&currTrans, I2C_TXQUEUE_WIDTH, NULL);
 
-        dmcf_debugprintf("Action Queue item %d retrieved", masterActionRxCount);
+        dmcf_debugprintf("Master Action Queue %d: %d bytes", masterActionRxCount, txBytes);
 
         masterActionRxCount++;
 

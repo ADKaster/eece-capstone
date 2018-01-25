@@ -272,7 +272,7 @@ dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
             trans->readCount = 0;
             trans->writeBuf = pub_holding_buf[id];
             trans->writeCount  = DMCF_MSG_HDR_WORDS + pmsgdef->message_length;
-            trans->slaveAddress = gTheSlaveAddresses[pmsgdef->message_dest];
+            trans->slaveAddress = BROADCAST_ADDRESS;
 
             action.completed = &throwaway_bcast_bool;
             action.success = &throwaway_bcast_bool;
