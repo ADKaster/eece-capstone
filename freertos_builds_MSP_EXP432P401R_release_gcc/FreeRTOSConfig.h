@@ -110,6 +110,10 @@
     #define xPortSysTickHandler SysTick_Handler
 #endif
 
+#ifndef NULL
+#define NULL (void *)0
+#endif
+
 #define configCPU_CLOCK_HZ              CS_getMCLK()
 
 #define configUSE_PREEMPTION            1

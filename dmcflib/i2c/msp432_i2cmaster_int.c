@@ -45,7 +45,7 @@
 #define DebugP_ASSERT_ENABLED 0
 #endif
 #ifndef DebugP_LOG_ENABLED
-#define DebugP_LOG_ENABLED 0
+#define DebugP_LOG_ENABLED 4
 #endif
 
 #include <ti/devices/DeviceFamily.h>

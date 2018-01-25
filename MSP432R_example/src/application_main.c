@@ -30,6 +30,8 @@ void *mainThread(void *arg0)
     //dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
+    static uint32_t pubcount = 0;
+
     sprintf((void *)txBuffer, "ImNode%d", APPLICATION_WHOAMI);
 
     for(;;)
@@ -51,14 +53,16 @@ void *mainThread(void *arg0)
 
         if(PUB_SUCCESS == pubstatus)
         {
-            Display_printf(gTheDisplay, 0, 0, "Pub sent successfully\n");
+            Display_printf(gTheDisplay, 0, 0, "Pub %d sent successfully\n", pubcount);
         }
         else
         {
-            Display_printf(gTheDisplay, 0, 0, "Pub Status: %d\n", pubstatus);
+          //  Display_printf(gTheDisplay, 0, 0, "Pub Status: %d\n", pubstatus);
         }
 
-        Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
+        pubcount++;
+
+        //Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
 
         pthread_mutex_unlock(&gDisplayMuxtex);
 

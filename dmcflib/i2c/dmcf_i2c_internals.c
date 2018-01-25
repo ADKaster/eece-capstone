@@ -9,6 +9,7 @@
 #include "dmcf_msgdef.h"
 #include "dmcf_pubsub.h"
 #include "messaging.h"
+#include "dmcf_debug.h"
 
 #include <pthread.h>
 #include <mqueue.h>
@@ -122,12 +123,17 @@ void *i2cMasterThread(void *arg0)
     dmcf_master_action_t    backupTrans;
     dmcf_i2c_status_t   reqStatus;
     ssize_t             txBytes;
+    static uint32_t masterActionRxCount = 0;
 
     for(;;)
     {
         /* block waiting for application tx messages */
         /* argument 4, msg_prio completely ignored by TI's implementation for FreeRTOS */
         txBytes = mq_receive(gI2C_MasterActionQueue, (char *)&currTrans, I2C_TXQUEUE_WIDTH, NULL);
+
+        dmcf_debugprintf("Action Queue item %d retrieved", masterActionRxCount);
+
+        masterActionRxCount++;
 
         if(txBytes >= 0)
         {

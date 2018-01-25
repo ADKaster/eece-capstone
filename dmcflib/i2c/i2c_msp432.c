@@ -87,10 +87,10 @@ dmcf_i2c_status_t i2c_msp432_init(void)
     if(retVal == I2C_SUCCESS)
     {
         /* Install our own interrupt on the I2C Slave, enable general call */
-        i2c_msp432_slaveFixups();
+        //i2c_msp432_slaveFixups();
 
         /* Enable multi-master mode, install our own interrupt */
-        i2c_msp432_masterFixups();   
+        //i2c_msp432_masterFixups();
     }
     
     return retVal;
