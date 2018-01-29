@@ -114,6 +114,8 @@ static void completeTransfer(I2CSlave_Handle handle)
     DebugP_log1("I2CSlave:(%p) ISR Transfer Complete",
         ((I2CSlaveMSP432_HWAttrs const *)(handle->hwAttrs))->baseAddr);
 
+    I2CSlaveMSP432_HWAttrs const *hwAttrs = handle->hwAttrs;
+
     object->transferInProgress = false;
     /*
      * Perform callback in a HWI context, thus any tasks or SWIs
@@ -122,7 +124,8 @@ static void completeTransfer(I2CSlave_Handle handle)
      */
     object->transferCallbackFxn(handle, (object->mode == I2CSLAVE_IDLE_MODE));
 
-    /* never disallow deep sleep, we want to always listen */
+    /* re-enable read interrupts we want to always listen */
+    MAP_I2C_enableInterrupt(hwAttrs->baseAddr, ALL_READ_INTERRUPTS);
 }
 
 /*

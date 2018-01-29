@@ -7,6 +7,15 @@
 #include "dmcf_msgdef.h"
 #include <stdbool.h>
 
+/* Driver Header files */
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/I2CSlave.h>
+#include <ti/drivers/dpl/HwiP.h>
+#include <ti/drivers/i2cslave/I2CSlaveMSP432.h>
+#include <ti/drivers/i2c/I2CMSP432.h>
+#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#include <ti/devices/msp432p4xx/driverlib/i2c.h>
+
 #ifndef I2C_MSP432_H
     #error "I2C_MSP432_H not defined!"
 #endif
@@ -25,13 +34,9 @@
     #error "FreeRTOS needed to do task notification for I2C Slave. Implement other notificaiton schemes (semaphore?)"
 #endif
 
-/* Driver Header files */
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/I2CSlave.h>
-#include <ti/drivers/dpl/HwiP.h>
-#include <ti/drivers/i2cslave/I2CSlaveMSP432.h>
-#include <ti/drivers/i2c/I2CMSP432.h>
-#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#define ALL_READ_INTERRUPTS (EUSCI_B_I2C_RECEIVE_INTERRUPT0  | \
+    EUSCI_B_I2C_ARBITRATIONLOST_INTERRUPT | EUSCI_B_I2C_STOP_INTERRUPT | \
+    EUSCI_B_I2C_START_INTERRUPT )
 
 static I2C_Handle i2cMasterHandle;
 static I2CSlave_Handle i2cSlaveHandle;
@@ -110,10 +115,13 @@ void i2c_msp432_slaveFixups(void)
 
     /* re-enable by clearing UCSoftWareReSeTinConTroLWord0 */
     MAP_I2C_enableModule(hwAttrs->baseAddr);
+
+    /* Enable read interrupts, we always want to listen */
+    MAP_I2C_enableInterrupt(hwAttrs->baseAddr, ALL_READ_INTERRUPTS);
 }
 
 
-/* Enable the genreral call register on the i2cSlave. Don't want i2c master as gcen because then it will
+/* Enable the general call register on the i2cSlave. Don't want i2c master as gcen because then it will
  * reply to general call if arbitration lost (not what we want)
  */
 void i2c_msp432_enableGeneralCall(I2CSlaveMSP432_HWAttrs const *hwAttrs)
