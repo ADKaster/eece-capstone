@@ -18,11 +18,11 @@
 #include <ti/drivers/i2cslave/I2CSlaveMSP432.h>
 #include <ti/drivers/i2c/I2CMSP432.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
-
+#include <stdbool.h>
 
 dmcf_i2c_status_t i2c_msp432_master_transfer(dmcf_i2c_trans_t *request);
 dmcf_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size);
-
+dmcf_i2c_status_t i2c_msp432_slave_read(void *buf, size_t size);
 dmcf_i2c_status_t i2c_msp432_init(void);
 
 extern void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status);

@@ -25,8 +25,8 @@
 
 
 /******* File Defines *******/
-#define I2C_STACK_DEPTH (1024) /* 1kiB of stack */
-#define I2C_RX_BUFFER_SIZE (0x64) /* Hold 100 words of data at once */
+#define I2C_STACK_DEPTH (2048) /* 1kiB of stack */
+#define I2C_RX_BUFFER_SIZE (0x100) /* Hold 256  words of data at once */
 #define I2C_PUB_BUFFER_SIZE (0x80) /* Hold 128 words of data at once */
 #define I2C_TXQUEUE_NAME ("I2C TX QUEUE")
 #define I2C_TXQUEUE_DEPTH (0x14)  /* Hold 20 i2c transactions at once */
@@ -34,8 +34,7 @@
 
 /******* Global Data *******/
 mqd_t gI2C_MasterActionQueue;
-volatile i2c_slave_ringbuf_t gI2C_SlaveRingbuf;
-dmcf_i2c_slave_state_t gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
+dmcf_i2c_slave_state_t gI2C_SlaveState = I2C_SLAVE_READ;
 
 static uint32_t slaveRxHoldingBuf[I2C_RX_BUFFER_SIZE];
 static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
@@ -43,14 +42,11 @@ static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
 pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
 
-static dmcf_i2c_slave_state_t Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf, dmcf_nack_t *nackptr);
+static bool Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf);
 static void Slave_Reverse_Hdr(dmcf_pkthdr_t *dest, dmcf_pkthdr_t *src);
-
-
-static void i2c_slave_ringbuf_init(volatile i2c_slave_ringbuf_t *rbuf, uint16_t size)
-{
-    rbuf->size = size;
-}
+static dmcf_i2c_slave_state_t Slave_Process_Bytes(void);
+static void dmcf_i2c_slave_send_resp(void);
+static void dmcf_i2c_slave_nack(dmcf_nack_t nack_byte);
 
 
 /* Initialize I2C Thread and message queue  */
@@ -109,9 +105,6 @@ dmcf_i2c_status_t dmcf_i2c_init(void)
         while(1);
     }
 
-    /* Initialize ring buffer **MUST BE DONE BEFORE SLAVE INITALIZED** */
-    i2c_slave_ringbuf_init(&gI2C_SlaveRingbuf, I2C_SLAVE_RINGBUF_SIZE);
-
     retVal = dmcf_arch_i2c_init();
 
     return retVal;
@@ -166,145 +159,111 @@ void *i2cMasterThread(void *arg0)
 
 void *i2cSlaveThread(void *arg0)
 {
-    /* Use the thread stack to store some variables we'll need often */
-    volatile ringbuf_t      *pSlaveRingbuf = (volatile ringbuf_t *)&gI2C_SlaveRingbuf;
-    uint32_t                rbufCount = 0;
-    dmcf_pkthdr_t           *currHdr = (dmcf_pkthdr_t *)slaveRxHoldingBuf; /* Need header to be able to be sent to pubsub layer */
-    uint32_t                num_words_avail = 0;
-    uint32_t                rbufRead;
-    uint32_t                rbufFirstWord;
-    dmcf_nack_t             slaveNack = ACK;
-    dmcf_pkthdr_t           *pubHdr = (dmcf_pkthdr_t *)slavePubHoldingBuf;
-
     for(;;)
     {
         switch(gI2C_SlaveState)
         {
-            case I2C_SLAVE_WAIT_HDR:
-                /* Take data available semaphore, gets released by ISR (callback, to be precise) */
+        case I2C_SLAVE_READ:
+            /* initiate read request */
+            dmcf_arch_i2c_slave_read(slaveRxHoldingBuf, I2C_RX_BUFFER_SIZE);
+
+            /* Pend on transition to ERROR or IDLE */
 #ifdef FREERTOS
-                /* Block indefinitely waiting for ISR to tell us a new word is available */
-                num_words_avail += ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+            ulTaskNotifyTake( pdTRUE, /* Clear the notification value before exiting. */
+                              500 / portTICK_PERIOD_MS ); /* Block for 500ms */
+#else
+            #error "FREERTOS Not defined and no task notification exists"
 #endif
-                /* Wait for enough words to be available in the ring buffer.
-                   Keep analyzing the words until we see the start of a valid packet.
-                   I2C slave interrupt will manage any expected responses we miss.
-                 */
-                while (num_words_avail >= DMCF_MSG_HDR_WORDS)
-                {
-                    rbufFirstWord = ringbuf_peek(pSlaveRingbuf);
-                    /* Buffer contains valid header at beginning */
-                    if(rbufFirstWord == DMCF_HDR_SYNCWORD)
-                    {
-                        /* Retrieve the header from the ring buffer */
-                        rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)currHdr, DMCF_MSG_HDR_BYTES);
-                        /* Recalculate how many words are available */
-                        num_words_avail = (rbufCount - rbufRead) >> 2;
-                        /* Proceed to the next state */
-                        gI2C_SlaveState = I2C_SLAVE_PARSE_HDR;
-                    }
-                    else
-                    {
-                        /* Discard first byte, it's not the start of a packet */
-                        rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)&rbufFirstWord, 1);
-                        /* guaranteed to have more than 1 word in the ring buffer. */
-                        num_words_avail -= 1;
-                    }
-                } /* DMCF_MSG_HDR_WORDS in buffer */
-                break;
 
-            case I2C_SLAVE_PARSE_HDR:
-                /* Check how many words are available */
-                /* verify header --> if fail, tell master on this mcu to send nack packet and flush slave ring buffer */
-                if(dmcf_msg_verify_header(currHdr) && (currHdr->msg_size <= I2C_RX_BUFFER_SIZE))
-                {
-                    /* HDR is verified and We have space for message */
-                    gI2C_SlaveState = I2C_SLAVE_WAIT_MSG;
-                }
-                else
-                {
-                    /* Ignore that shit and go to the beginning. 
-                     * Ain't nobody got time for packets that are too big or with invalid checksums
-                    */
-                    gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
-                }
-                break;
-
-            case I2C_SLAVE_WAIT_MSG:
-                /* Wait until enough words are available, waking up one word at a time */
-                if(num_words_avail < ((currHdr->msg_size) >> 2))
-                {
+            /* Handle bytes coming in */
+            gI2C_SlaveState = Slave_Process_Bytes();
+            break;
+        case I2C_SLAVE_WRITE:
+            /* wait for slave write to complete */
 #ifdef FREERTOS
-                    /* Wait until we've got words enough for the message */
-                    num_words_avail += ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+            ulTaskNotifyTake( pdTRUE, /* Clear the notification value before exiting. */
+                              500 / portTICK_PERIOD_MS ); /* Block for 500ms */
+#else
+            #error "FREERTOS Not defined and no task notification exists"
 #endif
-                }
-                else
-                {
-                    /* doublecheck how many bytes are available in case someone was bad and put */
-                    /* non-word aligned number of bytes in their message  */
-                    rbufCount = ringbuf_getcount(pSlaveRingbuf);
-                    num_words_avail = rbufCount >> 2;
-                    if(rbufCount >= currHdr->msg_size)
-                    {
-                        gI2C_SlaveState = I2C_SLAVE_PROCESS_MSG;
-                    }
-                }
-                break;
-
-            case I2C_SLAVE_PROCESS_MSG:
-                /* read whole packet */
-                rbufRead = ringbuf_get(pSlaveRingbuf, (uint8_t *)&(slaveRxHoldingBuf[DMCF_MSG_HDR_WORDS]), currHdr->msg_size);
-
-                /* Update number of words available */
-                num_words_avail = ringbuf_getcount(pSlaveRingbuf) >> 2;
-
-                /* Only verify the checksum of p2p messages, where the master is expecting a reply. */
-                if( (TX_TYPE_P2P == gTheMessageDefinitions[currHdr->id].message_type) &&
-                    (!dmcf_msg_verify_msg(&(slaveRxHoldingBuf[DMCF_MSG_HDR_WORDS]), (currHdr->msg_size >> 2))))
-                {
-                    slaveNack = NACK_BAD_CHECKSUM;
-                    gI2C_SlaveState = I2C_SLAVE_SEND_NACK;
-                }
-                else
-                {
-                    gI2C_SlaveState = Slave_Hdr_Parse(currHdr, slaveRxHoldingBuf, &slaveNack);
-                }
-                break;
-
-            case I2C_SLAVE_SEND_RESP:
-                /* create response packet using slavePubHoldingBuf, and message info data. */
-                Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
-                /* Send the completed message */
-                dmcf_arch_i2c_slave_send((void *)slavePubHoldingBuf, DMCF_MSG_HDR_BYTES + pubHdr->msg_size);
-                break;
-
-            case I2C_SLAVE_SEND_NACK:
-                Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
-                currHdr->ack = slaveNack;
-                dmcf_arch_i2c_slave_send((void *)slavePubHoldingBuf, DMCF_MSG_HDR_BYTES);
-                gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
-                break;
-
-            default:
-                gI2C_SlaveState = I2C_SLAVE_WAIT_HDR;
-                break;
-
-        } /* Switch gI2C_SlaveState */
+            break;
+        } /* switch i2c slave state */
     } /* Infinite task loop */
-    /* If we get here there's some serious problems */
-    return NULL; 
+
+    return NULL;
 } /* i2cSlaveThread() */
 
-/* Determines what state to go to after the message has been read */
-static dmcf_i2c_slave_state_t Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf, dmcf_nack_t *nackptr)
+
+static dmcf_i2c_slave_state_t Slave_Process_Bytes(void)
 {
-    dmcf_i2c_slave_state_t newState = I2C_SLAVE_PROCESS_MSG;
+    dmcf_pkthdr_t          *currHdr = (dmcf_pkthdr_t *)slaveRxHoldingBuf; /* Need header to be able to be sent to pubsub layer */
+    dmcf_i2c_slave_state_t  nextState = I2C_SLAVE_READ;
+    bool                    messageSent = false;
+
+    if(slaveRxHoldingBuf[0] == DMCF_HDR_SYNCWORD)
+    {
+        if(dmcf_msg_verify_header(currHdr) && (currHdr->msg_size <= I2C_RX_BUFFER_SIZE))
+        {
+            /* Only verify the checksum of p2p messages, where the master is expecting a reply. */
+            if( (TX_TYPE_P2P == gTheMessageDefinitions[currHdr->id].message_type) )
+            {
+                if( dmcf_msg_verify_msg(&(slaveRxHoldingBuf[DMCF_MSG_HDR_WORDS]), (currHdr->msg_size >> 2)) )
+                {
+                    messageSent = Slave_Hdr_Parse(currHdr, slaveRxHoldingBuf);
+                }
+                else
+                {
+                    dmcf_i2c_slave_nack(NACK_BAD_CHECKSUM);
+                    messageSent = true;
+                } /* Bad checksum */
+            } /* TX_TYPE_P2P */
+            else
+            {
+                messageSent = Slave_Hdr_Parse(currHdr, slaveRxHoldingBuf);
+            } /* TX_TYPE_BCAST */
+        } /* header valid, message fits in buffer */
+    } /* Sync word */
+    if(messageSent){
+        nextState = I2C_SLAVE_WRITE;
+    }
+
+    return nextState;
+}
+
+static void dmcf_i2c_slave_nack(dmcf_nack_t nack_byte)
+{
+    dmcf_pkthdr_t           *pubHdr = (dmcf_pkthdr_t *)slavePubHoldingBuf;
+    dmcf_pkthdr_t           *currHdr = (dmcf_pkthdr_t *)slaveRxHoldingBuf; /* Need header to be able to be sent to pubsub layer */
+
+    Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
+
+    currHdr->ack = nack_byte;
+
+    dmcf_arch_i2c_slave_send((void *)slavePubHoldingBuf, DMCF_MSG_HDR_BYTES);
+
+}
+
+static void dmcf_i2c_slave_send_resp(void)
+{
+    dmcf_pkthdr_t           *pubHdr = (dmcf_pkthdr_t *)slavePubHoldingBuf;
+    dmcf_pkthdr_t           *currHdr = (dmcf_pkthdr_t *)slaveRxHoldingBuf; /* Need header to be able to be sent to pubsub layer */
+
+    /* create response packet using slavePubHoldingBuf, and message info data. */
+    Slave_Reverse_Hdr(pubHdr, currHdr); /* Copy header from rx to tx */
+    /* Send the completed message */
+    dmcf_arch_i2c_slave_send((void *)slavePubHoldingBuf, DMCF_MSG_HDR_BYTES + pubHdr->msg_size);
+
+}
+
+/* Parses header and sends response, if necessary */
+static bool Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf)
+{
     dmcf_msg_enum_t             id = hdr->id;
     ssize_t                     bytes_rx = -1;
     size_t                      bytes_to_send;
     mqd_t                       queue;
     uint32_t                    queue_width;
+    bool                        messageSent = false;
 
     if(APPLICATION_WHOAMI == hdr->dest)
     {
@@ -319,17 +278,13 @@ static dmcf_i2c_slave_state_t Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf,
             
             if(-1 != bytes_rx)
             {
-                newState = I2C_SLAVE_SEND_RESP;
+                dmcf_i2c_slave_send_resp();
             }
             else
             {
-                *nackptr = NACK_NO_MSG;
-                newState = I2C_SLAVE_SEND_NACK;
+                dmcf_i2c_slave_nack(NACK_NO_MSG);
             }
-        }
-        else
-        {
-            newState = I2C_SLAVE_SEND_NACK;
+            messageSent = true;
         }
     }
     else if(BROADCAST == hdr->dest)
@@ -351,15 +306,14 @@ static dmcf_i2c_slave_state_t Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf,
             /* Ignore return value. msg_prio is ignored by function. */
             (void)mq_send(queue, (char *)buf, bytes_to_send, 0);
         }
-
-        newState = I2C_SLAVE_WAIT_HDR;
     }
     else
     {
-        *nackptr = NACK_INVLD_DEST;
-        newState = I2C_SLAVE_SEND_NACK;
+        dmcf_i2c_slave_nack(NACK_INVLD_DEST);
+        messageSent = true;
     }
-    return newState;
+
+    return messageSent;
 }
 
 static void Slave_Reverse_Hdr(dmcf_pkthdr_t *dest, dmcf_pkthdr_t *src)
