@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>unitTests</name>
+	<name>unitTest</name>
 	<comment></comment>
 	<projects>
-		<project>freertos_builds_MSP_EXP432P401R_release_gcc</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
