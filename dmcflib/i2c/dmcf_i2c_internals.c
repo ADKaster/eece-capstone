@@ -159,6 +159,8 @@ void *i2cMasterThread(void *arg0)
 
 void *i2cSlaveThread(void *arg0)
 {
+    sleep(5);
+
     for(;;)
     {
         switch(gI2C_SlaveState)
@@ -171,8 +173,6 @@ void *i2cSlaveThread(void *arg0)
 #ifdef FREERTOS
             ulTaskNotifyTake( pdTRUE, /* Clear the notification value before exiting. */
                               500 / portTICK_PERIOD_MS ); /* Block for 500ms */
-#else
-            #error "FREERTOS Not defined and no task notification exists"
 #endif
 
             /* Handle bytes coming in */
@@ -183,8 +183,6 @@ void *i2cSlaveThread(void *arg0)
 #ifdef FREERTOS
             ulTaskNotifyTake( pdTRUE, /* Clear the notification value before exiting. */
                               500 / portTICK_PERIOD_MS ); /* Block for 500ms */
-#else
-            #error "FREERTOS Not defined and no task notification exists"
 #endif
             break;
         } /* switch i2c slave state */

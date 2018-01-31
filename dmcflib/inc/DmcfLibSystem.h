@@ -81,9 +81,9 @@ typedef enum msgenum_tag
 
 /*! \brief Ping message length
 
-    How long the ping message is, in bytes.
+    How long the ping message is, in bytes INCLUDES CHECKSUM (4 bytes).
 */
-#define PING_MSG_LEN (8)
+#define PING_MSG_LEN (12)
 
 /*! \brief A simple ping message
  *

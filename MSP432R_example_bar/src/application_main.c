@@ -54,12 +54,11 @@ void *mainThread(void *arg0)
             rxBuffer[PING_MSG_LEN] = '\0';
             Display_printf(gTheDisplay, 0, 0, "Ping message received: %s\n", rxBuffer);
         }
-        else
-        {
-            Display_printf(gTheDisplay, 0, 0, "Sub Status: %d\n", substatus);
-        }
 
-        Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
+        if(0 == currtime.tv_nsec)
+        {
+            Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
+        }
 
         pthread_mutex_unlock(&gDisplayMuxtex);
 

@@ -263,15 +263,16 @@ dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
             dmcf_msg_create_header(hdr, APPLICATION_WHOAMI, pmsgdef->message_dest, id, pmsgdef->message_length);
             msgloc = &(pub_holding_buf[id][DMCF_MSG_HDR_WORDS]);
 
-            memcpy((void *)msgloc, send_buff, pmsgdef->message_length - 1);
+            memcpy((void *)msgloc, send_buff, pmsgdef->message_length - sizeof(uint32_t));
 
-            dmcf_calculate_checksum(msgloc, pmsgdef->message_length);
+            /* message_length is in bytes, convert to words */
+            msgloc[(pmsgdef->message_length / sizeof(uint32_t)) - 1] = dmcf_calculate_checksum(msgloc, pmsgdef->message_length / sizeof(uint32_t));
 
             trans->arg = NULL;
             trans->readBuf = NULL;
             trans->readCount = 0;
             trans->writeBuf = pub_holding_buf[id];
-            trans->writeCount  = DMCF_MSG_HDR_WORDS + pmsgdef->message_length;
+            trans->writeCount  = DMCF_MSG_HDR_BYTES + pmsgdef->message_length;
             trans->slaveAddress = BROADCAST_ADDRESS;
 
             action.completed = &throwaway_bcast_bool;
