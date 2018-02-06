@@ -6915,8 +6915,8 @@ ScopedTrace::~ScopedTrace()
 # if GTEST_OS_WINDOWS
 #  include <windows.h>
 # else
-#  include <sys/mman.h>
-#  include <sys/wait.h>
+//#  include <sys/mman.h>
+//#  include <sys/wait.h>
 # endif  // GTEST_OS_WINDOWS
 
 # if GTEST_OS_QNX
@@ -7009,7 +7009,6 @@ bool ExitedWithCode::operator()(int exit_status) const {
   return exit_status == exit_code_;
 
 # else
-
   return WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == exit_code_;
 
 # endif  // GTEST_OS_WINDOWS

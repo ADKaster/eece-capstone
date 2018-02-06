@@ -412,6 +412,8 @@
 #define GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 
 // Determines the platform on which Google Test is compiled.
+#define __CYGWIN__
+
 #ifdef __CYGWIN__
 # define GTEST_OS_CYGWIN 1
 #elif defined __SYMBIAN32__
@@ -472,6 +474,8 @@
 #elif defined __QNX__
 # define GTEST_OS_QNX 1
 #endif  // __CYGWIN__
+
+#undef __CYGWIN__
 
 #endif  // GTEST_INCLUDE_GTEST_INTERNAL_GTEST_PORT_ARCH_H_
 // Copyright 2015, Google Inc.
@@ -2076,6 +2080,7 @@ using ::std::tuple_size;
 
 #endif  // GTEST_HAS_CLONE
 
+#define GTEST_HAS_STREAM_REDIRECTION 0
 // Determines whether to support stream redirection. This is used to test
 // output correctness and to implement death tests.
 #ifndef GTEST_HAS_STREAM_REDIRECTION

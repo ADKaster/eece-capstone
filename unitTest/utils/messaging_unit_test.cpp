@@ -4,7 +4,7 @@
  *  Created on: Jan 30, 2018
  *      Author: Brian
  */
-#include "messaging.hpp"
+#include <messaging_unit_test.hpp>
 
 TEST(CheckSumUnitTest, ZeroCase)
 {

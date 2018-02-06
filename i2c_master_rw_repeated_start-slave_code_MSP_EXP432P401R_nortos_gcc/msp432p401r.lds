@@ -32,13 +32,13 @@
 *
 * GCC linker script for Texas Instruments MSP432P401R
 *
-* File creation date: 10/13/17
+* File creation date: 08/03/17
 *
 ******************************************************************************/
 
 MEMORY
 {
-    MAIN_FLASH (RX) : ORIGIN = 0x00000000, LENGTH = 0x00100000
+    MAIN_FLASH (RX) : ORIGIN = 0x00000000, LENGTH = 0x00040000
     INFO_FLASH (RX) : ORIGIN = 0x00200000, LENGTH = 0x00004000
     SRAM_CODE  (RWX): ORIGIN = 0x01000000, LENGTH = 0x00010000
     SRAM_DATA  (RW) : ORIGIN = 0x20000000, LENGTH = 0x00010000
