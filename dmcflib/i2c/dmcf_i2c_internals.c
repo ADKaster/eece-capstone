@@ -129,7 +129,7 @@ void *i2cMasterThread(void *arg0)
         /* argument 4, msg_prio completely ignored by TI's implementation for FreeRTOS */
         txBytes = mq_receive(gI2C_MasterActionQueue, (char *)&currTrans, I2C_TXQUEUE_WIDTH, NULL);
 
-        dmcf_debugprintf("Master Action Queue %d: %d bytes", masterActionRxCount, txBytes);
+        //dmcf_debugprintf("Master Action Queue %d: %d bytes", masterActionRxCount, txBytes);
 
         masterActionRxCount++;
 

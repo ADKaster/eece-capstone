@@ -75,6 +75,7 @@ typedef enum msgenum_tag
     /* Insert your message names here */
     /* MY_FAV_MSG_NAME, */
     BROADCAST_PING_MSG,
+    BROADCAST_PING_MSG_2,
     NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
 } dmcf_msg_enum_t;
 

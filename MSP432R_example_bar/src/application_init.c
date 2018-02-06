@@ -34,24 +34,24 @@ void ApplicationInit(void)
     appDisplay_Init();
 
     if(NODE_FOO == currentApplication)
-    {
-        // dmcf_subscribe_configure(STANDARD_PING_MSG,
-        //                          FREQ_TEN_HZ,
-        //                          APP_QUEUE_DEPTH);
+     {
+        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
+                                 FREQ_UNLIMITED,
+                                 APP_QUEUE_DEPTH);
 
         dmcf_publish_configure(BROADCAST_PING_MSG,
-                                   FREQ_UNLIMITED,
-                                   APP_QUEUE_DEPTH);
+                               FREQ_UNLIMITED,
+                               APP_QUEUE_DEPTH);
     }
     else
     {
         dmcf_subscribe_configure(BROADCAST_PING_MSG,
-                                     FREQ_UNLIMITED,
-                                     APP_QUEUE_DEPTH);
+                                 FREQ_UNLIMITED,
+                                 APP_QUEUE_DEPTH);
 
-        //dmcf_publish_configure(STANDARD_PING_MSG,
-        //                         FREQ_TEN_HZ,
-        //                         APP_QUEUE_DEPTH);
+        dmcf_publish_configure(BROADCAST_PING_MSG_2,
+                               FREQ_UNLIMITED,
+                               APP_QUEUE_DEPTH);
     }
 
     return;

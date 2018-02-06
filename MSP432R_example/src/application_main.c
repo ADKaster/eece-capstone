@@ -16,8 +16,8 @@
 #include "dmcf_pubsub.h"
 #include <stdio.h>
 
-static uint8_t txBuffer[PING_MSG_LEN];
-static uint8_t rxBuffer[PING_MSG_LEN];
+char txBuffer[PING_MSG_LEN];
+char rxBuffer[PING_MSG_LEN];
 
 void *mainThread(void *arg0)
 {
@@ -26,46 +26,32 @@ void *mainThread(void *arg0)
     TickType_t xFrequency = portTICK_PERIOD_MS * 100;
 #endif
     struct timespec         currtime;
-    dmcf_pub_status_t       pubstatus;
-    //dmcf_sub_status_t       substatus;
+    //dmcf_pub_status_t       pubstatus;
+    dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
     static uint32_t pubcount = 0;
 
-
-
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
-        sprintf((void *)txBuffer, "MSG%lu", pubcount%1000);
-        if(NODE_FOO == currentApplication)
-        {
-            pubstatus = dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
-            //substatus = dmcf_sub_get(STANDARD_PING_MSG, (void *)rxBuffer, &nack);
-        }
-        else
-        {
-            //(void)dmcf_pub_put(STANDARD_PING_MSG, (void *)txBuffer);
-            (void)dmcf_sub_get(BROADCAST_PING_MSG, (void *)rxBuffer, &nack);
-        }
+        sprintf((void *)txBuffer, "FOO%lu", pubcount%1000);
+
+        (void)dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
+        substatus = dmcf_sub_get(BROADCAST_PING_MSG_2, (void *)rxBuffer, &nack);
 
         pthread_mutex_lock(&gDisplayMuxtex);
 
-        if(PUB_SUCCESS == pubstatus)
+        if(SUB_SUCCESS == substatus)
         {
-            Display_printf(gTheDisplay, 0, 0, "Pub %d sent successfully\n", pubcount);
+            rxBuffer[PING_MSG_LEN] = '\0';
+            Display_printf(gTheDisplay, 0, 0, "Ping message received. Time %d.%d", currtime.tv_sec, currtime.tv_nsec);
+            Display_printf(gTheDisplay, 0, 0, rxBuffer);
         }
-        else
-        {
-          //  Display_printf(gTheDisplay, 0, 0, "Pub Status: %d\n", pubstatus);
-        }
-
-        pubcount++;
-
-        //Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
 
         pthread_mutex_unlock(&gDisplayMuxtex);
 
+        pubcount++;
 
 #ifdef FREERTOS
         vTaskDelayUntil( &xLastWaketime, xFrequency );
