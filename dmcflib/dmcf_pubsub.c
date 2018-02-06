@@ -9,12 +9,14 @@
 #include "dmcf_pubsub.h"
 #include "dmcf_i2c_internals.h"
 #include "messaging.h"
+#include "dmcf_debug.h"
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
 #include <mqueue.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #ifdef FREERTOS
     #include <FreeRTOS.h>
@@ -163,7 +165,7 @@ dmcf_pub_status_t dmcf_publish_configure(dmcf_msg_enum_t id,
                 /* Setup Transmit queue, ie. application wants to initiate transmimssion to someone */
                 queueAttr.mq_flags = 0; /* flags are set by mq_open based on second argument */
                 queueAttr.mq_maxmsg = gThePublications[id].q_depth;
-                queueAttr.mq_msgsize = gThePublications[id].q_width + sizeof(bool); /* Last word is used to store "completed" */
+                queueAttr.mq_msgsize = gThePublications[id].q_width;
                 queueAttr.mq_curmsgs = 0;
                 /* RTOS implementaiton only cares about O_CREAT, O_EXCL and O_NONBLOCK */
                 /* RTOS implemenation discards third argument, mode. */
@@ -211,8 +213,9 @@ dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
             /* Setup Transmit queue, ie. application wants to initiate transmimssion to someone */
             queueAttr.mq_flags = 0; /* flags are set by mq_open based on second argument */
             queueAttr.mq_maxmsg = gTheSubscriptions[id].q_depth;
-            queueAttr.mq_msgsize = gTheSubscriptions[id].q_width + sizeof(bool); /* Last word is used to store "completed" */
+            queueAttr.mq_msgsize = gTheSubscriptions[id].q_width;
             queueAttr.mq_curmsgs = 0;
+
             /* RTOS implementaiton only cares about O_CREAT, O_EXCL and O_NONBLOCK */
             /* RTOS implemenation discards third argument, mode. */
             sprintf(q_name, "SUB_Q_%d", id);
@@ -286,6 +289,7 @@ dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
 
         if(q_ret == -1)
         {
+            dmcf_debugprintf("Pub Put failed: %d", errno);
             status = PUB_FULL;
         }
         else
@@ -329,6 +333,7 @@ dmcf_sub_status_t dmcf_sub_get(dmcf_msg_enum_t id,
                            gTheSubscriptions[id].q_width, 0);
         if(q_ret == -1)
         {
+            //dmcf_debugprintf("mq_receive in sub_get failed: %d", errno);
             status = SUB_NONE;
         }
         else

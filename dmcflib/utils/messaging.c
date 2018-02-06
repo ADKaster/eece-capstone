@@ -52,8 +52,11 @@ bool dmcf_msg_verify_header(dmcf_pkthdr_t *hdr)
 bool dmcf_msg_verify_msg(uint32_t *buf, uint32_t len)
 {
     bool retVal = false;
-
-    if( 0 == dmcf_calculate_checksum(buf, len))
+    if(!buf)
+    {
+        retVal = false;
+    }
+    else if( 0 == dmcf_calculate_checksum(buf, len))
     {
         retVal = true;
     }

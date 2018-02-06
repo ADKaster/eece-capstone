@@ -32,12 +32,12 @@ void *mainThread(void *arg0)
 
     static uint32_t pubcount = 0;
 
-    sprintf((void *)txBuffer, "ImNode%d", APPLICATION_WHOAMI);
+
 
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
-
+        sprintf((void *)txBuffer, "MSG%lu", pubcount%1000);
         if(NODE_FOO == currentApplication)
         {
             pubstatus = dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);

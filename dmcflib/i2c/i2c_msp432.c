@@ -108,11 +108,9 @@ dmcf_i2c_status_t i2c_msp432_init(void)
 
 void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
 {
-
-    volatile TaskHandle_t *slaveTaskPtr = (TaskHandle_t *)(&i2cSlavePthread);
     int32_t                     xHigherPriorityTaskWoken = pdFALSE;
 
-    vTaskNotifyGiveFromISR(*slaveTaskPtr, &xHigherPriorityTaskWoken);
+    vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 

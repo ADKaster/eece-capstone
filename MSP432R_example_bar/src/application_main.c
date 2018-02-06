@@ -16,8 +16,8 @@
 #include "dmcf_pubsub.h"
 #include <stdio.h>
 
-static uint8_t txBuffer[PING_MSG_LEN];
-static uint8_t rxBuffer[PING_MSG_LEN];
+char txBuffer[PING_MSG_LEN];
+char rxBuffer[PING_MSG_LEN];
 
 void *mainThread(void *arg0)
 {
@@ -52,14 +52,9 @@ void *mainThread(void *arg0)
         if(SUB_SUCCESS == substatus)
         {
             rxBuffer[PING_MSG_LEN] = '\0';
-            Display_printf(gTheDisplay, 0, 0, "Ping message received: %s\n", rxBuffer);
+            Display_printf(gTheDisplay, 0, 0, "Ping message received. Time %d.%d", currtime.tv_sec, currtime.tv_nsec);
+            Display_printf(gTheDisplay, 0, 0, rxBuffer);
         }
-
-        if(0 == currtime.tv_nsec)
-        {
-            Display_printf(gTheDisplay, 0, 0, "Hello from main: Time: %dsec, %d ns\n", currtime.tv_sec, currtime.tv_nsec);
-        }
-
         pthread_mutex_unlock(&gDisplayMuxtex);
 
 

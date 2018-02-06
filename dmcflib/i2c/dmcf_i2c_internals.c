@@ -15,6 +15,7 @@
 #include <mqueue.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #ifdef FREERTOS 
     #include <FreeRTOS.h>
@@ -41,6 +42,10 @@ static uint32_t slavePubHoldingBuf[I2C_PUB_BUFFER_SIZE];
 
 pthread_t           i2cMasterPthread;
 pthread_t           i2cSlavePthread;
+
+#ifdef FREERTOS
+TaskHandle_t  slaveNotificationHandle = NULL;
+#endif
 
 static bool Slave_Hdr_Parse(dmcf_pkthdr_t *hdr, uint32_t *buf);
 static void Slave_Reverse_Hdr(dmcf_pkthdr_t *dest, dmcf_pkthdr_t *src);
@@ -159,7 +164,9 @@ void *i2cMasterThread(void *arg0)
 
 void *i2cSlaveThread(void *arg0)
 {
-    sleep(5);
+#ifdef FREERTOS
+    slaveNotificationHandle = xTaskGetCurrentTaskHandle();
+#endif
 
     for(;;)
     {
