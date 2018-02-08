@@ -29,17 +29,17 @@ uint32_t dmcf_calculate_checksum(uint32_t *buf, uint32_t size)
 bool dmcf_msg_verify_header(dmcf_pkthdr_t *hdr)
 {
     bool retVal = false;
-    dmcf_msgdef_t msg_check;
+    dmcf_msgdef_t *msg_check;
 
     if ( (hdr->syncword == DMCF_HDR_SYNCWORD) &&
          (0 == dmcf_calculate_checksum((uint32_t *)hdr, DMCF_MSG_HDR_WORDS)) &&
          (hdr->id < NUM_MSG_DEFINITONS) )
     {
-        msg_check = gTheMessageDefinitions[hdr->id];
+        msg_check = &(gTheMessageDefinitions[hdr->id]);
 
-        if( (msg_check.message_source == hdr->src) &&
-            (msg_check.message_dest == hdr->dest) &&
-            (msg_check.message_length == hdr->msg_size))
+        if( (msg_check->message_source == hdr->src) &&
+            (msg_check->message_dest == hdr->dest) &&
+            (msg_check->message_length == hdr->msg_size))
         {
             retVal = true;
         }
@@ -52,8 +52,11 @@ bool dmcf_msg_verify_header(dmcf_pkthdr_t *hdr)
 bool dmcf_msg_verify_msg(uint32_t *buf, uint32_t len)
 {
     bool retVal = false;
-
-    if( 0 == dmcf_calculate_checksum(buf, len))
+    if(!buf)
+    {
+        retVal = false;
+    }
+    else if( 0 == dmcf_calculate_checksum(buf, len))
     {
         retVal = true;
     }
@@ -68,7 +71,7 @@ void dmcf_msg_create_header(dmcf_pkthdr_t *hdr, dmcf_node_t src, dmcf_node_t des
     hdr->dest = dest;
     hdr->id = id;
     hdr->msg_size = msg_size;
-    hdr->ack = 0;
+    hdr->ack = ACK;
     hdr->hdr_chksum = 0;
 
     hdr->hdr_chksum = dmcf_calculate_checksum((uint32_t *)hdr, DMCF_MSG_HDR_WORDS);

@@ -45,7 +45,7 @@
 #define DebugP_ASSERT_ENABLED 0
 #endif
 #ifndef DebugP_LOG_ENABLED
-#define DebugP_LOG_ENABLED 0
+#define DebugP_LOG_ENABLED 4
 #endif
 
 #include <ti/devices/DeviceFamily.h>
@@ -213,7 +213,7 @@ void dmcf_i2cmaster_hwiIntFxn(uintptr_t arg)
 /******** BEGIN CHANGES ********/
         if((intStatus & EUSCI_B_I2C_ARBITRATIONLOST_INTERRUPT))
         {
-            /* Check for abitration lost and re-enable UCMST bit in CTLW0 */
+            /* Check for arbitration lost and re-enable UCMST bit in CTLW0 */
             EUSCI_B_CMSIS(hwAttrs->baseAddr)->CTLW0 |= EUSCI_B_CTLW0_MST;
         }
 /******** END CHANGES ********/

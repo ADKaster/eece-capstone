@@ -25,7 +25,7 @@ void *mainThread(void *arg0)
     TickType_t xLastWaketime = xTaskGetTickCount();
     TickType_t xFrequency = portTICK_PERIOD_MS * 100;
 #endif
-    struct timespec         currtime;
+    struct timespec currtime;
     //dmcf_pub_status_t       pubstatus;
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
@@ -35,10 +35,10 @@ void *mainThread(void *arg0)
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
-        sprintf((void *)txBuffer, "FOO%lu", pubcount%1000);
+        sprintf((void *)txBuffer, "BAR%lu", pubcount%1000);
 
-        (void)dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
-        substatus = dmcf_sub_get(BROADCAST_PING_MSG_2, (void *)rxBuffer, &nack);
+        (void)dmcf_pub_put(BROADCAST_PING_MSG_2, (void *)txBuffer);
+        substatus = dmcf_sub_get(BROADCAST_PING_MSG, (void *)rxBuffer, &nack);
 
         pthread_mutex_lock(&gDisplayMuxtex);
 

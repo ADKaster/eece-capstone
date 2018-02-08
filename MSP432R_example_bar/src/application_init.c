@@ -22,7 +22,7 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-dmcf_node_t currentApplication = NODE_FOO;
+dmcf_node_t currentApplication = NODE_BAR;
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)

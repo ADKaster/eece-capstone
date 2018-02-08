@@ -9,12 +9,14 @@
 #include "dmcf_pubsub.h"
 #include "dmcf_i2c_internals.h"
 #include "messaging.h"
+#include "dmcf_debug.h"
 #include <pthread.h>
 #include <unistd.h>
 #include <time.h>
 #include <mqueue.h>
 #include <string.h>
 #include <stdio.h>
+#include <errno.h>
 
 #ifdef FREERTOS
     #include <FreeRTOS.h>
@@ -42,7 +44,7 @@ static uint32_t sub_holding_buf[SUB_BUFSIZE];
 static uint32_t pub_holding_buf[NUM_MSG_DEFINITONS][PUB_BUFSIZE];
 static volatile bool throwaway_bcast_bool;
 
-static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type);
+static int32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type);
 
 void dmcf_init(void)
 {
@@ -101,9 +103,9 @@ void dmcf_init(void)
 }
 
 
-static uint32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type)
+static int32_t check_frequency(dmcf_pubsub_freq_t freq, dmcf_tx_type_t type)
 {
-    uint32_t period_ms = -1;
+    int32_t period_ms = -1;
 
     if(TX_TYPE_P2P == type)
     {
@@ -163,7 +165,7 @@ dmcf_pub_status_t dmcf_publish_configure(dmcf_msg_enum_t id,
                 /* Setup Transmit queue, ie. application wants to initiate transmimssion to someone */
                 queueAttr.mq_flags = 0; /* flags are set by mq_open based on second argument */
                 queueAttr.mq_maxmsg = gThePublications[id].q_depth;
-                queueAttr.mq_msgsize = gThePublications[id].q_width + sizeof(bool); /* Last word is used to store "completed" */
+                queueAttr.mq_msgsize = gThePublications[id].q_width;
                 queueAttr.mq_curmsgs = 0;
                 /* RTOS implementaiton only cares about O_CREAT, O_EXCL and O_NONBLOCK */
                 /* RTOS implemenation discards third argument, mode. */
@@ -192,7 +194,7 @@ dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
                                            uint32_t queue_depth)
 {
     dmcf_sub_status_t status = SUB_FAIL;
-    uint32_t period_ms = -1;
+    int32_t period_ms = -1;
     struct mq_attr  queueAttr;
     char q_name[10];
 
@@ -211,8 +213,9 @@ dmcf_sub_status_t dmcf_subscribe_configure(dmcf_msg_enum_t id,
             /* Setup Transmit queue, ie. application wants to initiate transmimssion to someone */
             queueAttr.mq_flags = 0; /* flags are set by mq_open based on second argument */
             queueAttr.mq_maxmsg = gTheSubscriptions[id].q_depth;
-            queueAttr.mq_msgsize = gTheSubscriptions[id].q_width + sizeof(bool); /* Last word is used to store "completed" */
+            queueAttr.mq_msgsize = gTheSubscriptions[id].q_width;
             queueAttr.mq_curmsgs = 0;
+
             /* RTOS implementaiton only cares about O_CREAT, O_EXCL and O_NONBLOCK */
             /* RTOS implemenation discards third argument, mode. */
             sprintf(q_name, "SUB_Q_%d", id);
@@ -263,16 +266,17 @@ dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
             dmcf_msg_create_header(hdr, APPLICATION_WHOAMI, pmsgdef->message_dest, id, pmsgdef->message_length);
             msgloc = &(pub_holding_buf[id][DMCF_MSG_HDR_WORDS]);
 
-            memcpy((void *)msgloc, send_buff, pmsgdef->message_length - 1);
+            memcpy((void *)msgloc, send_buff, pmsgdef->message_length - sizeof(uint32_t));
 
-            dmcf_calculate_checksum(msgloc, pmsgdef->message_length);
+            /* message_length is in bytes, convert to words */
+            msgloc[(pmsgdef->message_length / sizeof(uint32_t)) - 1] = dmcf_calculate_checksum(msgloc, pmsgdef->message_length / sizeof(uint32_t));
 
             trans->arg = NULL;
             trans->readBuf = NULL;
             trans->readCount = 0;
             trans->writeBuf = pub_holding_buf[id];
-            trans->writeCount  = DMCF_MSG_HDR_WORDS + pmsgdef->message_length;
-            trans->slaveAddress = gTheSlaveAddresses[pmsgdef->message_dest];
+            trans->writeCount  = DMCF_MSG_HDR_BYTES + pmsgdef->message_length;
+            trans->slaveAddress = BROADCAST_ADDRESS;
 
             action.completed = &throwaway_bcast_bool;
             action.success = &throwaway_bcast_bool;
@@ -285,6 +289,7 @@ dmcf_pub_status_t dmcf_pub_put(dmcf_msg_enum_t id,
 
         if(q_ret == -1)
         {
+            dmcf_debugprintf("Pub Put failed: %d", errno);
             status = PUB_FULL;
         }
         else
@@ -328,6 +333,7 @@ dmcf_sub_status_t dmcf_sub_get(dmcf_msg_enum_t id,
                            gTheSubscriptions[id].q_width, 0);
         if(q_ret == -1)
         {
+            //dmcf_debugprintf("mq_receive in sub_get failed: %d", errno);
             status = SUB_NONE;
         }
         else

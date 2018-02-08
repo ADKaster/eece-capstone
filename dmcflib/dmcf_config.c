@@ -31,13 +31,22 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     },
     [BROADCAST_PING_MSG] =
     {
-         .message_number =   STANDARD_PING_MSG,
+         .message_number =   BROADCAST_PING_MSG,
          .message_source =   NODE_FOO,
-         .message_dest =     NODE_BAR,
-         .message_type =     TX_TYPE_P2P,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
          .message_length =   PING_MSG_LEN,
     },
+    [BROADCAST_PING_MSG_2] =
+        {
+             .message_number =   BROADCAST_PING_MSG_2,
+             .message_source =   NODE_BAR,
+             .message_dest =     BROADCAST,
+             .message_type =     TX_TYPE_BROADCAST,
+             .message_bus =      BUS_TYPE_I2C,
+             .message_length =   PING_MSG_LEN,
+        },
     /* Insert your message definitions here         */
     /* [MY_FAV_MSG_NAME] =                          */
     /* {                                            */

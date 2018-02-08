@@ -75,15 +75,16 @@ typedef enum msgenum_tag
     /* Insert your message names here */
     /* MY_FAV_MSG_NAME, */
     BROADCAST_PING_MSG,
+    BROADCAST_PING_MSG_2,
     NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
 } dmcf_msg_enum_t;
 
 
 /*! \brief Ping message length
 
-    How long the ping message is, in bytes.
+    How long the ping message is, in bytes INCLUDES CHECKSUM (4 bytes).
 */
-#define PING_MSG_LEN (8)
+#define PING_MSG_LEN (12)
 
 /*! \brief A simple ping message
  *
@@ -94,5 +95,8 @@ typedef struct ping_tag
 {
     uint8_t ping_payload[PING_MSG_LEN]; /**< The payload array, contains debug values */
 } sample_ping_msg_t;
+
+
+#define BROADCAST_ADDRESS (0x00)
 
 #endif /* EXAMPLE_DMCFLIBSYSTEM_H_ */

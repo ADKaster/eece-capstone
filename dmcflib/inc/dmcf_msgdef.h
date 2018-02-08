@@ -76,14 +76,14 @@ typedef struct dmcf_pkthdr_s
     dmcf_node_t         dest;           /**< Enum of the destination node */  
     dmcf_msg_enum_t     id;             /**< Packet id from dmcf_config.c */  
     uint32_t            msg_size;       /**< Message size in *BYTES* */
-    dmcf_nack_t         ack;           /**< ACK/NACK Status */
+    dmcf_nack_t         ack;            /**< ACK/NACK Status */
     uint32_t            hdr_chksum;     /**< 32-bit version of IP header checksum */  
-}__attribute__((aligned(4))) dmcf_pkthdr_t ;
+}__attribute__((aligned(4))) dmcf_pkthdr_t;
 
 
 
 #define DMCF_MSG_HDR_BYTES (sizeof(dmcf_pkthdr_t))
 #define DMCF_MSG_HDR_WORDS (DMCF_MSG_HDR_BYTES/4)
-#define DMCF_HDR_SYNCWORD (0x5A5ACAFE)
+#define DMCF_HDR_SYNCWORD (0x5A5ACAFEUL)
 
 #endif

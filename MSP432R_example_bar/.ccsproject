@@ -7,10 +7,11 @@
 	<deviceEndianness value="little"/>
 	<codegenToolVersion value="GNU_6.3.1:Linaro"/>
 	<isElfFormat value="true"/>
+	<connection value="common/targetdb/connections/TIXDS110_Connection.xml"/>
+	<linkerCommandFile value="MSP_EXP432P401R_FREERTOS.lds"/>
+	<rts value="libc.a"/>
 	<createSlaveProjects value=""/>
-	<ignoreDefaultDeviceSettings value="true"/>
-	<templateProperties value="id=freertos_builds_MSP_EXP432P401R_release_gcc.projectspec.freertos_builds_MSP_EXP432P401R_release_gcc,products=com.ti.SIMPLELINK_MSP432_SDK,buildProfile=release,"/>
-	<origin value="C:\ti\simplelink_msp432p4_sdk_1_60_00_12\kernel\freertos\builds\MSP_EXP432P401R\release\gcc\freertos_builds_MSP_EXP432P401R_release_gcc.projectspec"/>
+	<templateProperties value="id=com.ti.common.project.core.emptyProjectTemplate_gnu_msp432,"/>
 	<filesToOpen value=""/>
 	<isTargetManual value="false"/>
 </projectOptions>
