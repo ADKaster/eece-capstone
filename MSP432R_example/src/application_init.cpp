@@ -9,6 +9,7 @@
 #include "Board.h"
 #include "dmcf.hpp"
 #include "dmcf_msp432.hpp"
+#include "dmcf_debug.h"
 #include "appdefs.h"
 
 /* Stack size in bytes */

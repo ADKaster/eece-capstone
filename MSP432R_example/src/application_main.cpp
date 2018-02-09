@@ -15,7 +15,8 @@
 #include "dmcf.hpp"
 #include "dmcf_msgdef.hpp"
 #include "dmcf_pubsub.hpp"
-#include <stdio.h>
+#include "dmcf_debug.h"
+#include <cstdio>
 #include <stddef.h>
 
 char txBuffer[PING_MSG_LEN];
@@ -34,10 +35,13 @@ void *mainThread(void *arg0)
 
     static uint32_t pubcount = 0;
 
+
+    dmcf_debugprintf(const_cast<char*>("Hello from mainThread"));
+
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
-        sprintf(txBuffer, "FOO%lu", pubcount%1000);
+        snprintf(txBuffer, PING_MSG_LEN,"FOO%lu", pubcount);
 
         (void)dmcf_obj.pub_put(DMCF::BROADCAST_PING_MSG, (void *)txBuffer);
         substatus = dmcf_obj.sub_get(DMCF::BROADCAST_PING_MSG_2, (void *)rxBuffer, &nack);
@@ -46,7 +50,6 @@ void *mainThread(void *arg0)
 
         if(DMCF::SUB_SUCCESS == substatus)
         {
-            rxBuffer[PING_MSG_LEN] = '\0';
             Display_printf(gTheDisplay, 0, 0, const_cast<char *>("Ping message received. Time %d.%d"), currtime.tv_sec, currtime.tv_nsec);
             Display_printf(gTheDisplay, 0, 0, rxBuffer);
         }

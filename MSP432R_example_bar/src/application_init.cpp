@@ -22,7 +22,7 @@ void appDisplay_Init(void);
 pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
-DMCF::node_t currentApplication = DMCF::NODE_FOO;
+DMCF::node_t currentApplication = DMCF::NODE_BAR;
 
 DMCF::dmcf_msp432 dmcf_obj(currentApplication);
 

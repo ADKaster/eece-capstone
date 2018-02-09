@@ -326,6 +326,8 @@ void *dmcf::p2p_sub_scheduler_task(void *arg0)
     node_t         dest;
     uint32_t       len;
 
+    pthread_barrier_wait(&startThreadBarrier);
+
     sleep(5);
 
     /* MUST be done after application has a chance to subscribe.

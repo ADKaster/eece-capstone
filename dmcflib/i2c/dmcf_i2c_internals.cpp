@@ -38,6 +38,8 @@ void *dmcf::i2cMasterThread(void *arg0)
     ssize_t            txBytes;
     static uint32_t masterActionRxCount = 0;
 
+    pthread_barrier_wait(&startThreadBarrier);
+
     for(;;)
     {
         /* block waiting for application tx messages */
@@ -80,6 +82,8 @@ void *dmcf::i2cMasterThread(void *arg0)
 void *dmcf::i2cSlaveThread(void *arg0)
 {
     slaveNotificationHandle = getSlaveTaskHandle();
+
+    pthread_barrier_wait(&startThreadBarrier);
 
     for(;;)
     {

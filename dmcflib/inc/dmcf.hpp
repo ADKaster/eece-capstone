@@ -142,6 +142,7 @@ private:
     pthread_t    i2cMasterPthread;
     pthread_t    i2cSlavePthread;
     pthread_t    p2pSchedPthread;
+    pthread_barrier_t startThreadBarrier;
 
     /******* Pubsub variables *****/
     p2p_subinfo_t p2p_sublist[NUM_MSG_DEFINITONS + 1];

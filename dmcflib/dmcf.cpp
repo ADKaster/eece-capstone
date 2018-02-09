@@ -45,12 +45,6 @@ dmcf::dmcf(node_t appName, bus_type_t busType)
     uint32_t            i;
     msgdef_t       *msgdefptr;
 
-    if(I2C_FAIL == i2c_init())
-    {
-        /* dmcf_i2c_init failed */
-        while(1);
-    }
-
     /* Set priority and stack size attributes */
     pthread_attr_init(&threadAttr);
     priorityParams.sched_priority = 1;
@@ -95,7 +89,6 @@ dmcf::dmcf(node_t appName, bus_type_t busType)
 /* Initialize I2C Threads and message queue  */
 i2c_status_t dmcf::i2c_init(void)
 {
-    i2c_status_t        retVal = I2C_FAIL;
     struct mq_attr      queueAttr;
     pthread_attr_t      i2cAttr;
     struct sched_param  priorityParams;
@@ -124,6 +117,11 @@ i2c_status_t dmcf::i2c_init(void)
     }
 
     retc = pthread_create(&i2cMasterPthread, &i2cAttr, i2cM_threadWrapper, this);
+
+    /* give slave thread higher priority than master thread */
+    priorityParams.sched_priority = 2;
+    pthread_attr_setschedparam(&i2cAttr, &priorityParams);
+
     retc |= pthread_create(&i2cSlavePthread, &i2cAttr, i2cS_threadWrapper, this);
 
     if (retc != 0)
@@ -148,7 +146,16 @@ i2c_status_t dmcf::i2c_init(void)
         while(1);
     }
 
-    return retVal;
+
+    retc = pthread_barrier_init(&startThreadBarrier, NULL, 3);
+
+    if(retc)
+    {
+        /* pthread_barrier_init failed */
+        while(1);
+    }
+
+    return retc ? I2C_FAIL : I2C_SUCCESS;
 }
 
 } /* namespace DMCF */
