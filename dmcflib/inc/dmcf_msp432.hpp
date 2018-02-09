@@ -30,7 +30,9 @@ class dmcf_msp432 : public dmcf
 {
 public:
     dmcf_msp432(node_t appName);
-    ~dmcf_msp432();
+    ~dmcf_msp432() { /* TODO do we need to do anything here or what */ }
+
+    bool init(void) { return i2c_init() == I2C_SUCCESS; }
 
 private:
     kernel_task_handle_t getSlaveTaskHandle(void) { return xTaskGetCurrentTaskHandle(); }

@@ -12,9 +12,11 @@
 #include <unistd.h>
 #include <time.h>
 #include "appdefs.h"
-#include "dmcf_msgdef.h"
-#include "dmcf_pubsub.h"
+#include "dmcf.hpp"
+#include "dmcf_msgdef.hpp"
+#include "dmcf_pubsub.hpp"
 #include <stdio.h>
+#include <stddef.h>
 
 char txBuffer[PING_MSG_LEN];
 char rxBuffer[PING_MSG_LEN];
@@ -25,27 +27,27 @@ void *mainThread(void *arg0)
     TickType_t xLastWaketime = xTaskGetTickCount();
     TickType_t xFrequency = portTICK_PERIOD_MS * 100;
 #endif
-    struct timespec         currtime;
+    struct timespec currtime;
     //dmcf_pub_status_t       pubstatus;
-    dmcf_sub_status_t       substatus;
-    dmcf_nack_t             nack;
+    DMCF::sub_status_t       substatus;
+    DMCF::nack_t             nack;
 
     static uint32_t pubcount = 0;
 
     for(;;)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
-        sprintf((void *)txBuffer, "FOO%lu", pubcount%1000);
+        sprintf(txBuffer, "BAR%lu", pubcount%1000);
 
-        (void)dmcf_pub_put(BROADCAST_PING_MSG, (void *)txBuffer);
-        substatus = dmcf_sub_get(BROADCAST_PING_MSG_2, (void *)rxBuffer, &nack);
+        (void)dmcf_obj.pub_put(DMCF::BROADCAST_PING_MSG_2, (void *)txBuffer);
+        substatus = dmcf_obj.sub_get(DMCF::BROADCAST_PING_MSG, (void *)rxBuffer, &nack);
 
         pthread_mutex_lock(&gDisplayMuxtex);
 
-        if(SUB_SUCCESS == substatus)
+        if(DMCF::SUB_SUCCESS == substatus)
         {
             rxBuffer[PING_MSG_LEN] = '\0';
-            Display_printf(gTheDisplay, 0, 0, "Ping message received. Time %d.%d", currtime.tv_sec, currtime.tv_nsec);
+            Display_printf(gTheDisplay, 0, 0, const_cast<char*>("Ping message received. Time %d.%d"), currtime.tv_sec, currtime.tv_nsec);
             Display_printf(gTheDisplay, 0, 0, rxBuffer);
         }
 
@@ -59,5 +61,5 @@ void *mainThread(void *arg0)
         usleep(10000);
 #endif
     }
-    return NULL;
+    return nullptr;
 }

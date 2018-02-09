@@ -5,10 +5,10 @@
 */
 
 
+#include "DmcfSystem.h"
 #include "dmcf.hpp"
 #include "dmcf_msgdef.hpp"
 #include "dmcf_i2c_internals.hpp"
-#include "DmcfSystem.hpp"
 
 namespace DMCF
 {

@@ -1,15 +1,19 @@
 /*
- * DmcfSystem.hpp
+ * DmcfSystem.h
  *
  *  Created on: Feb 8, 2018
  *      Author: Andrew
  */
 
-#ifndef INC_DMCFSYSTEM_HPP_
-#define INC_DMCFSYSTEM_HPP_
+#ifndef INC_DMCFSYSTEM_H_
+#define INC_DMCFSYSTEM_H_
 
+#include <stdint.h>
+
+#ifdef __cplusplus
 namespace DMCF
 {
+#endif
 
 /*! \brief Enumeration of nodes in network
  *
@@ -17,7 +21,6 @@ namespace DMCF
  * Each application must define which node it is as well.
  *
  */
-
 typedef enum nodeenum_tag
 {
     NODE_FOO, /**< Foo contains feature x */
@@ -93,7 +96,8 @@ typedef struct ping_tag
 
 #define BROADCAST_ADDRESS (0x00)
 
-}
+#ifdef __cplusplus
+} /* namespace */
+#endif
 
-
-#endif /* INC_DMCFSYSTEM_HPP_ */
+#endif /* INC_DMCFSYSTEM_H_ */

@@ -52,6 +52,10 @@ extern "C" {
 #define NULL 0
 #endif
 
+#ifndef true
+#define true 1
+#endif
+
 #define Board_initGeneral           MSP_EXP432P401R_initGeneral
 
 #define Board_ADC0                  MSP_EXP432P401R_ADC0

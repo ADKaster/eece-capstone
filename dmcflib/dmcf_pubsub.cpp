@@ -5,7 +5,7 @@
  *      Author: Andrew Kaster
  */
 
-#include <dmcf.cpp>
+#include "dmcf.hpp"
 #include "dmcf_msgdef.hpp"
 #include "dmcf_pubsub.hpp"
 #include "dmcf_i2c_internals.hpp"

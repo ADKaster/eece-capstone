@@ -44,8 +44,7 @@
 
 /* Example/Board Header files */
 #include "Board.h"
-
-extern void ApplicationInit(void);
+#include "appDefs.h"
 
 /*
  *  ======== main ========

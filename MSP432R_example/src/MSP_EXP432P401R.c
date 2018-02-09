@@ -60,9 +60,8 @@
 #include <ti/devices/msp432p4xx/driverlib/wdt_a.h>
 
 #include "MSP_EXP432P401R.h"
-
-#include "DmcfLibSystem.h"
-
+#include "Board.h"
+#include "DmcfSystem.h"
 /*
  *  =============================== ADC ===============================
  */

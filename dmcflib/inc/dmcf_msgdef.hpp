@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 #include <mqueue.h>
-#include "DmcfSystem.hpp"
+#include "DmcfSystem.h"
 
 namespace DMCF
 {

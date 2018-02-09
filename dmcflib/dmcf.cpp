@@ -17,21 +17,18 @@ namespace DMCF
 void *p2p_threadWrapper(void *arg0)
 {
     dmcf *obj = reinterpret_cast<dmcf *>(arg0);
-    obj->p2p_sub_scheduler_task(NULL);
-    return NULL;
+    return obj->p2p_sub_scheduler_task(NULL);
 }
 
 void *i2cM_threadWrapper(void *arg0)
 {
     dmcf *obj = reinterpret_cast<dmcf *>(arg0);
-    obj->i2cMasterThread(NULL);
-    return NULL;
+    return obj->i2cMasterThread(NULL);
 }
 void *i2cS_threadWrapper(void *arg0)
 {
     dmcf *obj = reinterpret_cast<dmcf *>(arg0);
-    obj->i2cSlaveThread(NULL);
-    return NULL;
+    return obj->i2cSlaveThread(NULL);
 }
 
 

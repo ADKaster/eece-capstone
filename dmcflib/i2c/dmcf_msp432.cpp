@@ -9,6 +9,8 @@
 #include "dmcf_msgdef.hpp"
 #include "dmcf_msp432.hpp"
 #include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
 #include <pthread.h>
 
 /* Driver Header files */

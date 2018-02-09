@@ -24,6 +24,8 @@
     #error "FreeRTOS needed to do task notification for I2C Slave. Implement other notificaiton schemes (semaphore?)"
 #endif
 
+/* MUST be visible from internal C code. Do not touch from application!!!! */
+kernel_task_handle_t slaveNotificationHandle = NULL;
 
 namespace DMCF
 {
