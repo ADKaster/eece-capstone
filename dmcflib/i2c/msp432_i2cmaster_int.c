@@ -34,8 +34,14 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
+#include <FreeRTOS.h>
+#include <task.h>
 
 /*
  * By default disable both asserts and log for this module.
@@ -51,6 +57,7 @@
 #include <ti/devices/DeviceFamily.h>
 
 #include <ti/drivers/I2C.h>
+#include <ti/drivers/I2CSlave.h>
 #include <ti/drivers/i2c/I2CMSP432.h>
 #include <ti/drivers/dpl/DebugP.h>
 #include <ti/drivers/dpl/HwiP.h>
@@ -74,6 +81,17 @@
 static void completeTransfer(I2C_Handle handle);
 static void primeTransfer(I2CMSP432_Object *object,
     I2CMSP432_HWAttrsV1 const *hwAttrs, I2C_Transaction *transaction);
+
+extern TaskHandle_t slaveNotificationHandle;
+
+void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
+{
+    int32_t                     xHigherPriorityTaskWoken = pdFALSE;
+
+    vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
 
 /*
  *  ======== completeTransfer =======
@@ -354,3 +372,7 @@ void dmcf_i2cmaster_hwiIntFxn(uintptr_t arg)
             break;
     }
 }
+
+#ifdef __cplusplus
+}
+#endif

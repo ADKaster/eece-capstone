@@ -5,8 +5,9 @@
 
 #ifdef __MSP432P401R__
 
-#include "dmcf_i2c_internals.h"
-#include "dmcf_msgdef.h"
+#include "dmcf_i2c_internals.hpp"
+#include "dmcf_msgdef.hpp"
+#include "dmcf_msp432.hpp"
 #include <stdbool.h>
 #include <pthread.h>
 
@@ -22,6 +23,8 @@
 #include <FreeRTOS.h>
 #include <task.h>
 
+namespace DMCF
+{
 
 #define ALL_READ_INTERRUPTS (EUSCI_B_I2C_RECEIVE_INTERRUPT0  | \
     EUSCI_B_I2C_ARBITRATIONLOST_INTERRUPT | EUSCI_B_I2C_STOP_INTERRUPT | \
@@ -34,10 +37,13 @@
     #define DMCF_I2C_MASTER_PORT (1)
 #endif
 
-static I2C_Handle i2cMasterHandle;
-static I2CSlave_Handle i2cSlaveHandle;
 
-dmcf_i2c_status_t i2c_msp432_master_transfer(dmcf_i2c_trans_t *request)
+dmcf_msp432::dmcf_msp432(node_t appName) : dmcf(appName, BUS_TYPE_I2C)
+{
+
+}
+
+i2c_status_t dmcf_msp432::arch_i2c_master_transfer(i2c_trans_t *request)
 {
     bool i2cRet = false;
 
@@ -46,7 +52,7 @@ dmcf_i2c_status_t i2c_msp432_master_transfer(dmcf_i2c_trans_t *request)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL; 
 }
 
-dmcf_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
+i2c_status_t dmcf_msp432::arch_i2c_slave_send(void *buf, size_t size)
 {
     bool i2cRet = false;
 
@@ -55,7 +61,7 @@ dmcf_i2c_status_t i2c_msp432_slave_send(void *buf, size_t size)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL;
 }
 
-dmcf_i2c_status_t i2c_msp432_slave_read(void *buf, size_t size)
+i2c_status_t dmcf_msp432::arch_i2c_slave_read(void *buf, size_t size)
 {
     bool i2cRet = false;
 
@@ -64,9 +70,15 @@ dmcf_i2c_status_t i2c_msp432_slave_read(void *buf, size_t size)
     return (true == i2cRet) ? I2C_SUCCESS : I2C_FAIL;
 }
 
-dmcf_i2c_status_t i2c_msp432_init(void)
+i2c_status_t dmcf_msp432::i2c_init(void)
 {
-    dmcf_i2c_status_t retVal = I2C_FAIL;
+
+    i2c_status_t retVal = I2C_FAIL;
+
+    retVal = dmcf::i2c_init();
+
+    if(retVal != I2C_SUCCESS)
+        while(1);
 
     /* Initialize master and slave i2c */
     I2C_Params masterParams;
@@ -106,17 +118,9 @@ dmcf_i2c_status_t i2c_msp432_init(void)
     return retVal;
 }
 
-void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
+void dmcf_msp432::i2c_msp432_slaveFixups(void)
 {
-    int32_t                     xHigherPriorityTaskWoken = pdFALSE;
-
-    vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
-
-void i2c_msp432_slaveFixups(void)
-{
-    I2CSlaveMSP432_HWAttrs const *hwAttrs = ((I2CSlave_Handle) i2cSlaveHandle)->hwAttrs;
+    I2CSlaveMSP432_HWAttrs const *hwAttrs = reinterpret_cast<I2CSlaveMSP432_HWAttrs const *>(((I2CSlave_Handle) i2cSlaveHandle)->hwAttrs);
 
     /* Disable module by setting UCSoftWareReSeT = 1 in ConTroLWord0 */
     MAP_I2C_disableModule(hwAttrs->baseAddr);
@@ -134,16 +138,16 @@ void i2c_msp432_slaveFixups(void)
 /* Enable the general call register on the i2cSlave. Don't want i2c master as gcen because then it will
  * reply to general call if arbitration lost (not what we want)
  */
-void i2c_msp432_enableGeneralCall(I2CSlaveMSP432_HWAttrs const *hwAttrs)
+void dmcf_msp432::i2c_msp432_enableGeneralCall(I2CSlaveMSP432_HWAttrs const *hwAttrs)
 {
     /* Set General Call Response Enable in I2COwnAddress0 */
     HWREG16((uint32_t) &EUSCI_B_CMSIS(hwAttrs->baseAddr)->I2COA0) |= EUSCI_B_I2COA0_GCEN;
 }
 
-void i2c_msp432_masterFixups(void)
+void dmcf_msp432::i2c_msp432_masterFixups(void)
 {
-    I2CMSP432_HWAttrsV1 const *hwAttrs = ((I2C_Handle) i2cMasterHandle)->hwAttrs;
-    I2CMSP432_Object *object = ((I2C_Handle) i2cMasterHandle)->object;
+    I2CMSP432_HWAttrsV1 const *hwAttrs = reinterpret_cast<I2CMSP432_HWAttrsV1 const *>(((I2C_Handle) i2cMasterHandle)->hwAttrs);
+    I2CMSP432_Object *object = reinterpret_cast<I2CMSP432_Object *>(((I2C_Handle) i2cMasterHandle)->object);
 
     MAP_I2C_disableModule(hwAttrs->baseAddr);
 
@@ -154,7 +158,7 @@ void i2c_msp432_masterFixups(void)
     MAP_I2C_enableModule(hwAttrs->baseAddr);  
 }
 
-void i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP432_Object *object)
+void dmcf_msp432::i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP432_Object *object)
 {
     HwiP_Params     interruptParams;
 
@@ -168,5 +172,7 @@ void i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP
                                      dmcf_i2cmaster_hwiIntFxn,
                                      &interruptParams);
 }
+
+} /* namespace DMCF */
 
 #endif /* __MSP432P401R__ */

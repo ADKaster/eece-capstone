@@ -9,6 +9,10 @@
  *
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef SAMPLE_SYSTEM_H
 #define SAMPLE_SYSTEM_H
 
@@ -91,5 +95,9 @@ typedef struct ping_tag
 {
 	uint8_t ping_payload[PING_MSG_LEN]; /**< The payload array, contains debug values */
 } sample_ping_msg_t;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

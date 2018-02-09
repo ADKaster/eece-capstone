@@ -1,11 +1,17 @@
-/*! \file dmcf_config.c
+/*! \file dmcf_config.cpp
 
     Configuration file for the messaging library. <br>
     Should be the same file for all applications in your system.
 */
 
 
-#include "dmcf_msgdef.h"
+#include "dmcf.hpp"
+#include "dmcf_msgdef.hpp"
+#include "dmcf_i2c_internals.hpp"
+#include "DmcfSystem.hpp"
+
+namespace DMCF
+{
 
 /*! \var gTheMessageDefinitions 
  *  \brief An array to hold all defined message definitions
@@ -17,7 +23,7 @@
  *
  * Be sure to fill in with your custom values for message number and message source.
  */
-dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
+msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 {
     /* PING Message. For testing purposes */
     [STANDARD_PING_MSG] = 
@@ -63,7 +69,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 /*! \var gTheMasterAddresses
  *  \brief Array to hold all slave addresses of the system
  */
-dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
+master_addr_t gTheMasterAddresses[NUM_NODES] =
 {
     MASTERADDR_FOO,
     MASTERADDR_BAR,
@@ -73,10 +79,11 @@ dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
 /*! \var gTheSlaveAddresses
  *  \brief Array to hold all slave addresses of the system
  */
-dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
+slave_addr_t gTheSlaveAddresses[NUM_NODES] =
 {
     SLAVEADDR_FOO,
     SLAVEADDR_BAR,
     SLAVEADDR_BAZ
 };
 
+} /* namespace DMCF */
