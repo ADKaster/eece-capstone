@@ -23,9 +23,16 @@ void appDisplay_Init(void);
 pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
+#ifndef DMCF_I2C_SLAVE_PORT
+    #define DMCF_I2C_SLAVE_PORT (0)
+#endif
+#ifndef DMCF_I2C_MASTER_PORT
+    #define DMCF_I2C_MASTER_PORT (1)
+#endif
+
 DMCF::node_t currentApplication = DMCF::NODE_FOO;
 
-DMCF::dmcf_msp432 dmcf_obj(currentApplication);
+DMCF::dmcf_msp432 dmcf_obj(currentApplication, DMCF_I2C_SLAVE_PORT, DMCF_I2C_MASTER_PORT);
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)

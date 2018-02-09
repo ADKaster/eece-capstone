@@ -29,7 +29,7 @@ namespace DMCF
 class dmcf_msp432 : public dmcf
 {
 public:
-    dmcf_msp432(node_t appName);
+    dmcf_msp432(node_t appName, uint8_t slaveId, uint8_t masterId);
     ~dmcf_msp432() { /* TODO do we need to do anything here or what */ }
 
     bool init(void) { return i2c_init() == I2C_SUCCESS; }
@@ -50,6 +50,9 @@ private:
 
     I2C_Handle i2cMasterHandle;
     I2CSlave_Handle i2cSlaveHandle;
+
+    uint8_t slaveInstance;
+    uint8_t masterInstance;
 
 }; /* class DMCF_msp432 */
 

@@ -32,17 +32,11 @@ namespace DMCF
     EUSCI_B_I2C_ARBITRATIONLOST_INTERRUPT | EUSCI_B_I2C_STOP_INTERRUPT | \
     EUSCI_B_I2C_START_INTERRUPT )
 
-#ifndef DMCF_I2C_SLAVE_PORT
-    #define DMCF_I2C_SLAVE_PORT (0)
-#endif
-#ifndef DMCF_I2C_MASTER_PORT
-    #define DMCF_I2C_MASTER_PORT (1)
-#endif
 
-
-dmcf_msp432::dmcf_msp432(node_t appName) : dmcf(appName, BUS_TYPE_I2C)
+dmcf_msp432::dmcf_msp432(node_t appName, uint8_t slaveId, uint8_t masterId) : dmcf(appName, BUS_TYPE_I2C)
 {
-
+    this->slaveInstance = slaveId;
+    this->masterInstance = masterId;
 }
 
 i2c_status_t dmcf_msp432::arch_i2c_master_transfer(i2c_trans_t *request)
@@ -92,12 +86,12 @@ i2c_status_t dmcf_msp432::i2c_init(void)
     I2C_Params_init(&masterParams);
     masterParams.transferMode = I2C_MODE_BLOCKING;
     masterParams.bitRate = I2C_100kHz;
-    i2cMasterHandle = I2C_open(DMCF_I2C_MASTER_PORT, &masterParams); 
+    i2cMasterHandle = I2C_open(masterInstance, &masterParams);
 
     I2CSlave_Params_init(&slaveParams);
     slaveParams.transferMode = I2CSLAVE_MODE_CALLBACK;
     slaveParams.transferCallbackFxn = i2c_msp432_SlaveTransferCallback;
-    i2cSlaveHandle = I2CSlave_open(DMCF_I2C_SLAVE_PORT, &slaveParams);
+    i2cSlaveHandle = I2CSlave_open(slaveInstance, &slaveParams);
 
     if(NULL == i2cMasterHandle || NULL == i2cSlaveHandle)
     {
