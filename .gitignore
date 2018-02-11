@@ -59,3 +59,10 @@ doxygen*
 *.jxbrowser-data/*
 */.launches/*
 */.settings/*
+
+# Kicad stuff
+hardware/**/*.kicad_pcb-bak
+hardware/**/*.bak
+hardware/**/*-cache.lib
+hardware/**/_autosave*
+hardware/**/_saved*
