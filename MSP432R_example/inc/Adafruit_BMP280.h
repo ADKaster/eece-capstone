@@ -7,7 +7,7 @@
   These sensors use I2C to communicate, 2 pins are required to interface.
 
   Adafruit invests time and resources providing this open source code,
-  please support Adafruit andopen-source hardware by purchasing products
+  please support Adafruit and open-source hardware by purchasing products
   from Adafruit!
 
   Written by Kevin Townsend for Adafruit Industries.
@@ -149,6 +149,7 @@ class Adafruit_BMP280
     uint16_t  read16_LE(byte reg); // little endian
     int16_t   readS16_LE(byte reg); // little endian
 
+    int8_t _cs;
     uint8_t   _i2caddr;
     int32_t   _sensorID;
     int32_t t_fine;

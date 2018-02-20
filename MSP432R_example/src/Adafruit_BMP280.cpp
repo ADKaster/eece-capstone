@@ -7,7 +7,7 @@
   These sensors use I2C to communicate, 2 pins are required to interface.
 
   Adafruit invests time and resources providing this open source code,
-  please support Adafruit andopen-source hardware by purchasing products
+  please support Adafruit and open-source hardware by purchasing products
   from Adafruit!
 
   Written by Kevin Townsend for Adafruit Industries.
@@ -16,6 +16,7 @@
 //#include "Arduino.h"
 //#include <Wire.h>
 //#include <SPI.h>
+#include <math.h>
 #include "Adafruit_BMP280.h"
 
 
@@ -27,6 +28,7 @@
 Adafruit_BMP280::Adafruit_BMP280(I2C_Handle *bus)
 {
     _bus = bus;
+    _cs = -1;
 }
 
 //Adafruit_BMP280::Adafruit_BMP280(int8_t cspin)
@@ -41,10 +43,11 @@ Adafruit_BMP280::Adafruit_BMP280(I2C_Handle *bus)
 bool Adafruit_BMP280::begin(uint8_t a, uint8_t chipid) {
   _i2caddr = a;
 
-//  if (_cs == -1) {
-//    // i2c
-//    Wire.begin();
-//  } else {
+  if (_cs == -1) {
+    // i2c
+    Wire.begin();
+  }
+//  else {
 //    digitalWrite(_cs, HIGH);
 //    pinMode(_cs, OUTPUT);
 //
