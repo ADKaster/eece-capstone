@@ -18,6 +18,7 @@
 //#include <SPI.h>
 #include <math.h>
 #include "Adafruit_BMP280.h"
+#include <ti/drivers/I2C.h>
 
 
 /***************************************************************************
@@ -31,146 +32,80 @@ Adafruit_BMP280::Adafruit_BMP280(I2C_Handle *bus)
     _cs = -1;
 }
 
-//Adafruit_BMP280::Adafruit_BMP280(int8_t cspin)
-//  : _cs(cspin), _mosi(-1), _miso(-1), _sck(-1)
-//{ }
-//
-//Adafruit_BMP280::Adafruit_BMP280(int8_t cspin, int8_t mosipin, int8_t misopin, int8_t sckpin)
-//  : _cs(cspin), _mosi(mosipin), _miso(misopin), _sck(sckpin)
-//{ }
-
-
 bool Adafruit_BMP280::begin(uint8_t a, uint8_t chipid) {
-  _i2caddr = a;
+    _i2caddr = a;
 
-  if (_cs == -1) {
-    // i2c
-    Wire.begin();
-  }
-//  else {
-//    digitalWrite(_cs, HIGH);
-//    pinMode(_cs, OUTPUT);
-//
-//    if (_sck == -1) {
-//      // hardware SPI
-//      SPI.begin();
-//    } else {
-//      // software SPI
-//      pinMode(_sck, OUTPUT);
-//      pinMode(_mosi, OUTPUT);
-//      pinMode(_miso, INPUT);
-//    }
-//  }
+//  Wire.begin();
 
-  if (read8(BMP280_REGISTER_CHIPID) != chipid)
-    return false;
+    if (read8(BMP280_REGISTER_CHIPID) != chipid)
+        return false;
 
-  readCoefficients();
-  write8(BMP280_REGISTER_CONTROL, 0x3F);
-  return true;
+    readCoefficients();
+    write8(BMP280_REGISTER_CONTROL, 0x3F);
+    return true;
 }
-
-//uint8_t Adafruit_BMP280::spixfer(uint8_t x) {
-////  if (_sck == -1)
-////    return SPI.transfer(x);
-//
-//  // software spi
-//  //Serial.println("Software SPI");
-//  uint8_t reply = 0;
-//  for (int i=7; i>=0; i--) {
-//    reply <<= 1;
-//    digitalWrite(_sck, LOW);
-//    digitalWrite(_mosi, x & (1<<i));
-//    digitalWrite(_sck, HIGH);
-//    if (digitalRead(_miso))
-//      reply |= 1;
-//  }
-//  return reply;
-//}
 
 /**************************************************************************/
 /*!
-    @brief  Writes an 8 bit value over I2C/SPI
+    @brief  Writes an 8 bit value over I2C
 */
 /**************************************************************************/
 void Adafruit_BMP280::write8(byte reg, byte value)
 {
-  if (_cs == -1) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    Wire.write((uint8_t)reg);
-    Wire.write((uint8_t)value);
-    Wire.endTransmission();
-  }
-//  else {
-//    if (_sck == -1)
-//      SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
-//    digitalWrite(_cs, LOW);
-//    spixfer(reg & ~0x80); // write, bit 7 low
-//    spixfer(value);
-//    digitalWrite(_cs, HIGH);
-//    if (_sck == -1)
-//      SPI.endTransaction();              // release the SPI bus
-//  }
+  I2C_Transaction trans;
+  uint8_t buf[2];
+  buf[0] = reg;
+  buf[1] = value;
+
+  trans.slaveAddress = _i2caddr;
+  trans.writeBuf = (void *)&buf;
+  trans.readBuf = NULL;
+  trans.writeCount = 2;
+  trans.readCount = 0;
+  trans.arg = NULL;
+
+  I2C_transfer(*_bus, &trans);
 }
 
 /**************************************************************************/
 /*!
-    @brief  Reads an 8 bit value over I2C/SPI
+    @brief  Reads an 8 bit value over I2C
 */
 /**************************************************************************/
 uint8_t Adafruit_BMP280::read8(byte reg)
 {
-  uint8_t value;
+  I2C_Transaction trans;
+  uint8_t value = 0;
 
-  if (_cs == -1) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
-    Wire.requestFrom((uint8_t)_i2caddr, (byte)1);
-    value = Wire.read();
+  trans.slaveAddress = _i2caddr;
+  trans.writeBuf = (void *)&reg;
+  trans.readBuf = (void *)&value;
+  trans.writeCount = 1;
+  trans.readCount = 1;
+  trans.arg = NULL;
 
-  }
-//  else {
-//    if (_sck == -1)
-//      SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
-//    digitalWrite(_cs, LOW);
-//    spixfer(reg | 0x80); // read, bit 7 high
-//    value = spixfer(0);
-//    digitalWrite(_cs, HIGH);
-//    if (_sck == -1)
-//      SPI.endTransaction();              // release the SPI bus
-//  }
+  value = I2C_transfer(*_bus, &trans);
   return value;
 }
 
 /**************************************************************************/
 /*!
-    @brief  Reads a 16 bit value over I2C/SPI
+    @brief  Reads a 16 bit value over I2C
 */
 /**************************************************************************/
 uint16_t Adafruit_BMP280::read16(byte reg)
 {
-  uint16_t value;
+  I2C_Transaction trans;
+  uint16_t value = 0;
 
-  if (_cs == -1) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
-    Wire.requestFrom((uint8_t)_i2caddr, (byte)2);
-    value = (Wire.read() << 8) | Wire.read();
+  trans.slaveAddress = _i2caddr;
+  trans.writeBuf = (void *)&reg;
+  trans.readBuf = (void *)&value;
+  trans.writeCount = 1;
+  trans.readCount = 2;
+  trans.arg = NULL;
 
-  }
-//  else {
-//    if (_sck == -1)
-//      SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
-//    digitalWrite(_cs, LOW);
-//    spixfer(reg | 0x80); // read, bit 7 high
-//    value = (spixfer(0) << 8) | spixfer(0);
-//    digitalWrite(_cs, HIGH);
-//    if (_sck == -1)
-//      SPI.endTransaction();              // release the SPI bus
-//  }
-
+  value = (I2C_transfer(*_bus, &trans) << 8) | I2C_transfer(*_bus, &trans);
   return value;
 }
 
@@ -182,7 +117,7 @@ uint16_t Adafruit_BMP280::read16_LE(byte reg) {
 
 /**************************************************************************/
 /*!
-    @brief  Reads a signed 16 bit value over I2C/SPI
+    @brief  Reads a signed 16 bit value over I2C
 */
 /**************************************************************************/
 int16_t Adafruit_BMP280::readS16(byte reg)
@@ -200,44 +135,24 @@ int16_t Adafruit_BMP280::readS16_LE(byte reg)
 
 /**************************************************************************/
 /*!
-    @brief  Reads a 24 bit value over I2C/SPI
+    @brief  Reads a 24 bit value over I2C
 */
 /**************************************************************************/
 uint32_t Adafruit_BMP280::read24(byte reg)
 {
-  uint32_t value;
+    I2C_Transaction trans;
+    uint32_t value = 0;
 
-  if (_cs == -1) {
-    Wire.beginTransmission((uint8_t)_i2caddr);
-    Wire.write((uint8_t)reg);
-    Wire.endTransmission();
-    Wire.requestFrom((uint8_t)_i2caddr, (byte)3);
-    
-    value = Wire.read();
-    value <<= 8;
-    value |= Wire.read();
-    value <<= 8;
-    value |= Wire.read();
+    trans.slaveAddress = _i2caddr;
+    trans.writeBuf = (void *)&reg;
+    trans.readBuf = (void *)&value;
+    trans.writeCount = 1;
+    trans.readCount = 3;
+    trans.arg = NULL;
 
-  }
-//  else {
-//    if (_sck == -1)
-//      SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
-//    digitalWrite(_cs, LOW);
-//    spixfer(reg | 0x80); // read, bit 7 high
-//
-//    value = spixfer(0);
-//    value <<= 8;
-//    value |= spixfer(0);
-//    value <<= 8;
-//    value |= spixfer(0);
-//
-//    digitalWrite(_cs, HIGH);
-//    if (_sck == -1)
-//      SPI.endTransaction();              // release the SPI bus
-//  }
+    value = I2C_transfer(*_bus, &trans);
 
-  return value;
+    return value;
 }
 
 /**************************************************************************/
