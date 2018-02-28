@@ -15,6 +15,7 @@
 #include "dmcf_msgdef.h"
 #include "dmcf_pubsub.h"
 #include <stdio.h>
+#include <PyroDriver_interface.hpp>
 
 char txBuffer[PING_MSG_LEN];
 char rxBuffer[PING_MSG_LEN];
@@ -29,6 +30,9 @@ void *mainThread(void *arg0)
     //dmcf_pub_status_t       pubstatus;
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
+
+    PyroDriverHandle pyro = newPyroDriver();
+    PyroDriver_activate(pyro);
 
     static uint32_t pubcount = 0;
 
