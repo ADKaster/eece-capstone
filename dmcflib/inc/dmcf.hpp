@@ -96,9 +96,9 @@ protected:
     ~dmcf() { /* TODO do we need to do anything here or what */ }
 
    virtual kernel_task_handle_t getSlaveTaskHandle(void) = 0;
-   virtual i2c_status_t arch_i2c_master_transfer(i2c_trans_t *request) { while(1); /* master transfer unimplemented in base class */ }
-   virtual i2c_status_t arch_i2c_slave_send(void *buf, size_t size) { while(1); /* slave send unimplemented in base class */ }
-   virtual i2c_status_t arch_i2c_slave_read(void *buf, size_t size) { while(1); /* slave read unimplemented in base class */ }
+   virtual i2c_status_t arch_i2c_master_transfer(i2c_trans_t *request) = 0;
+   virtual i2c_status_t arch_i2c_slave_send(void *buf, size_t size) = 0;
+   virtual i2c_status_t arch_i2c_slave_read(void *buf, size_t size) = 0;
    virtual i2c_status_t i2c_init(void);
 
 private:

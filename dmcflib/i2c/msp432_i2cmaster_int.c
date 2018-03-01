@@ -88,8 +88,11 @@ void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
 {
     int32_t                     xHigherPriorityTaskWoken = pdFALSE;
 
-    vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    if(slaveNotificationHandle)
+    {
+        vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
 }
 
 

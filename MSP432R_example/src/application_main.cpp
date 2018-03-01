@@ -36,6 +36,7 @@ void *mainThread(void *arg0)
     static uint32_t pubcount = 0;
 
 
+
     dmcf_debugprintf(const_cast<char*>("Hello from mainThread"));
 
     for(;;)
