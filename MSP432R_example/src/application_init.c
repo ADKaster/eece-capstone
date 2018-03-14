@@ -9,6 +9,7 @@
 #include "Board.h"
 #include "dmcf_pubsub.h"
 #include "appdefs.h"
+#include "IMUTask.h"
 
 /* Stack size in bytes */
 #define THREADSTACKSIZE   1024
@@ -27,12 +28,14 @@ dmcf_node_t currentApplication = NODE_FOO;
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    dmcf_init();
+//    dmcf_init();
 
     createMainThread();
 
     appDisplay_Init();
 
+    I2C_init();
+/*
     if(NODE_FOO == currentApplication)
      {
         dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
@@ -53,6 +56,7 @@ void ApplicationInit(void)
                                FREQ_UNLIMITED,
                                APP_QUEUE_DEPTH);
     }
+    */
 
     return;
 }
@@ -91,6 +95,13 @@ void createMainThread(void)
         /* pthread_create() failed */
         while (1);
     }
+
+    retc = pthread_create(&thread, &attrs, IMUTask, NULL);
+        if (retc != 0) {
+            /* pthread_create() failed */
+            while (1);
+        }
+
 
 }
 

@@ -20,12 +20,8 @@
 #ifndef _ADAFRUIT_SENSOR_H
 #define _ADAFRUIT_SENSOR_H
 
-#if ARDUINO >= 100
- #include "Arduino.h"
- #include "Print.h"
-#else
- #include "WProgram.h"
-#endif
+#include <stddef.h>
+#include <stdint.h>
 
 /* Intentionally modeled after sensors.h in the Android API:
  * https://github.com/android/platform_hardware_libhardware/blob/master/include/hardware/sensors.h */
@@ -40,6 +36,8 @@
 #define SENSORS_PRESSURE_SEALEVELHPA      (1013.25F)              /**< Average sea level pressure is 1013.25 hPa */
 #define SENSORS_DPS_TO_RADS               (0.017453293F)          /**< Degrees/s to rad/s multiplier */
 #define SENSORS_GAUSS_TO_MICROTESLA       (100)                   /**< Gauss to micro-Tesla multiplier */
+
+#define byte    uint8_t
 
 /** Sensor types */
 typedef enum

@@ -17,16 +17,27 @@
   MIT license, all text above must be included in any redistribution
  ***************************************************************************/
 
-#if ARDUINO >= 100
- #include "Arduino.h"
-#else
- #include "WProgram.h"
-#endif
-
 #include <math.h>
 #include <limits.h>
 
-#include "Adafruit_BNO055.h"
+#include "inc/Adafruit_BNO055.h"
+
+#include <unistd.h>
+#include <time.h>
+
+static inline void delay(unsigned long ms)
+{
+    usleep(ms * 1000);
+}
+
+static int32_t millis(void)
+{
+    struct timespec ts;
+
+    (void)clock_gettime(CLOCK_REALTIME, &ts);
+
+    return ((ts.tv_sec * 1000) + (ts.tv_nsec / 1000000));
+}
 
 /***************************************************************************
  CONSTRUCTOR
@@ -37,10 +48,11 @@
     @brief  Instantiates a new Adafruit_BNO055 class
 */
 /**************************************************************************/
-Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address)
+Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address, I2C_Handle bus)
 {
   _sensorID = sensorID;
   _address = address;
+  _bus = bus;
 }
 
 /***************************************************************************
@@ -54,14 +66,6 @@ Adafruit_BNO055::Adafruit_BNO055(int32_t sensorID, uint8_t address)
 /**************************************************************************/
 bool Adafruit_BNO055::begin(adafruit_bno055_opmode_t mode)
 {
-  /* Enable I2C */
-  Wire.begin();
-
-  // BNO055 clock stretches for 500us or more!
-#ifdef ESP8266
-  Wire.setClockStretchLimit(1000); // Allow for 1000us of clock stretching
-#endif
-
   /* Make sure we have the right device */
   uint8_t id = read8(BNO055_CHIP_ID_ADDR);
   if(id != BNO055_ID)
@@ -171,7 +175,7 @@ void Adafruit_BNO055::setAxisSign( adafruit_bno055_axis_remap_sign_t remapsign )
     @brief  Use the external 32.768KHz crystal
 */
 /**************************************************************************/
-void Adafruit_BNO055::setExtCrystalUse(boolean usextal)
+void Adafruit_BNO055::setExtCrystalUse(bool usextal)
 {
   adafruit_bno055_opmode_t modeback = _mode;
 
@@ -629,15 +633,19 @@ bool Adafruit_BNO055::isFullyCalibrated(void)
 /**************************************************************************/
 bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 {
-  Wire.beginTransmission(_address);
-  #if ARDUINO >= 100
-    Wire.write((uint8_t)reg);
-    Wire.write((uint8_t)value);
-  #else
-    Wire.send(reg);
-    Wire.send(value);
-  #endif
-  Wire.endTransmission();
+    I2C_Transaction trans;
+    uint8_t buf[2];
+    buf[0] = reg;
+    buf[1] = value;
+
+    trans.slaveAddress = _address;
+    trans.writeBuf = (void *)&buf;
+    trans.readBuf = NULL;
+    trans.writeCount = 2;
+    trans.readCount = 0;
+    trans.arg = NULL;
+
+    I2C_transfer(_bus, &trans);
 
   /* ToDo: Check for error! */
   return true;
@@ -650,23 +658,18 @@ bool Adafruit_BNO055::write8(adafruit_bno055_reg_t reg, byte value)
 /**************************************************************************/
 byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 {
-  byte value = 0;
+    I2C_Transaction trans;
+    uint8_t value = 0;
 
-  Wire.beginTransmission(_address);
-  #if ARDUINO >= 100
-    Wire.write((uint8_t)reg);
-  #else
-    Wire.send(reg);
-  #endif
-  Wire.endTransmission();
-  Wire.requestFrom(_address, (byte)1);
-  #if ARDUINO >= 100
-    value = Wire.read();
-  #else
-    value = Wire.receive();
-  #endif
+    trans.slaveAddress = _address;
+    trans.writeBuf = (void *)&reg;
+    trans.readBuf = (void *)&value;
+    trans.writeCount = 1;
+    trans.readCount = 1;
+    trans.arg = NULL;
 
-  return value;
+    value = I2C_transfer(_bus, &trans);
+    return value;
 }
 
 /**************************************************************************/
@@ -676,24 +679,16 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
 /**************************************************************************/
 bool Adafruit_BNO055::readLen(adafruit_bno055_reg_t reg, byte * buffer, uint8_t len)
 {
-  Wire.beginTransmission(_address);
-  #if ARDUINO >= 100
-    Wire.write((uint8_t)reg);
-  #else
-    Wire.send(reg);
-  #endif
-  Wire.endTransmission();
-  Wire.requestFrom(_address, (byte)len);
+    I2C_Transaction trans;
 
-  for (uint8_t i = 0; i < len; i++)
-  {
-    #if ARDUINO >= 100
-      buffer[i] = Wire.read();
-    #else
-      buffer[i] = Wire.receive();
-    #endif
-  }
+    uint8_t theReg = reg;
 
-  /* ToDo: Check for errors! */
-  return true;
+    trans.slaveAddress = _address;
+    trans.writeBuf = (void *)&theReg;
+    trans.readBuf = (void *)buffer;
+    trans.writeCount = 1;
+    trans.readCount = len;
+    trans.arg = NULL;
+
+    return I2C_transfer(_bus, &trans);
 }

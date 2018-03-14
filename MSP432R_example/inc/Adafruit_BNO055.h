@@ -20,21 +20,14 @@
 #ifndef __ADAFRUIT_BNO055_H__
 #define __ADAFRUIT_BNO055_H__
 
-#if (ARDUINO >= 100)
- #include "Arduino.h"
-#else
- #include "WProgram.h"
-#endif
-
-#ifdef __AVR_ATtiny85__
- #include <TinyWireM.h>
- #define Wire TinyWireM
-#else
- #include <Wire.h>
-#endif
-
 #include <Adafruit_Sensor.h>
 #include <utility/imumaths.h>
+#include <ti/drivers/I2C.h>
+#include <string.h>
+
+#ifndef NULL
+#define NULL    ((void *) 0)
+#endif
 
 #define BNO055_ADDRESS_A (0x28)
 #define BNO055_ADDRESS_B (0x29)
@@ -278,20 +271,16 @@ class Adafruit_BNO055 : public Adafruit_Sensor
       VECTOR_LINEARACCEL   = BNO055_LINEAR_ACCEL_DATA_X_LSB_ADDR,
       VECTOR_GRAVITY       = BNO055_GRAVITY_DATA_X_LSB_ADDR
     } adafruit_vector_type_t;
+;
+    Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_A, I2C_Handle bus = NULL );
 
-#if defined (ARDUINO_SAMD_ZERO) && ! (ARDUINO_SAMD_FEATHER_M0)
-#error "On an arduino Zero, BNO055's ADR pin must be high. Fix that, then delete this line."
-    Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_B );
-#else
-    Adafruit_BNO055 ( int32_t sensorID = -1, uint8_t address = BNO055_ADDRESS_A );
-#endif
     bool  begin               ( adafruit_bno055_opmode_t mode = OPERATION_MODE_NDOF );
     void  setMode             ( adafruit_bno055_opmode_t mode );
     void  setAxisRemap        ( adafruit_bno055_axis_remap_config_t remapcode );
     void  setAxisSign         ( adafruit_bno055_axis_remap_sign_t remapsign );
     void  getRevInfo          ( adafruit_bno055_rev_info_t* );
     void  displayRevInfo      ( void );
-    void  setExtCrystalUse    ( boolean usextal );
+    void  setExtCrystalUse    ( bool usextal );
     void  getSystemStatus     ( uint8_t *system_status,
                                 uint8_t *self_test_result,
                                 uint8_t *system_error);
@@ -312,6 +301,7 @@ class Adafruit_BNO055 : public Adafruit_Sensor
     void  setSensorOffsets(const uint8_t* calibData);
     void  setSensorOffsets(const adafruit_bno055_offsets_t &offsets_type);
     bool  isFullyCalibrated(void);
+    void  setBus(I2C_Handle newBus) { _bus = newBus; }
 
   private:
     byte  read8   ( adafruit_bno055_reg_t );
@@ -321,6 +311,7 @@ class Adafruit_BNO055 : public Adafruit_Sensor
     uint8_t _address;
     int32_t _sensorID;
     adafruit_bno055_opmode_t _mode;
+    I2C_Handle _bus;
 };
 
 #endif

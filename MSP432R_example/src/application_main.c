@@ -21,6 +21,7 @@ char rxBuffer[PING_MSG_LEN];
 
 void *mainThread(void *arg0)
 {
+#if 0
 #ifdef FREERTOS
     TickType_t xLastWaketime = xTaskGetTickCount();
     TickType_t xFrequency = portTICK_PERIOD_MS * 100;
@@ -59,5 +60,6 @@ void *mainThread(void *arg0)
         usleep(10000);
 #endif
     }
+#endif
     return NULL;
 }
