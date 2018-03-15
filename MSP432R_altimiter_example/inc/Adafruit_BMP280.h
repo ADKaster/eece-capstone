@@ -123,8 +123,7 @@ class Adafruit_BMP280_Unified : public Adafruit_Sensor
 
 */
 
-class Adafruit_BMP280
-{
+class Adafruit_BMP280{
   public:
     Adafruit_BMP280(I2C_Handle *bus);
 //    Adafruit_BMP280(int8_t cspin);

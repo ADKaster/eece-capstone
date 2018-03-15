@@ -18,4 +18,10 @@ extern Display_Handle  gTheDisplay;
 
 extern dmcf_node_t currentApplication;
 
+#ifdef __cplusplus
+extern "C" void *mainThread(void *arg0);
+#else
+extern void *mainThread(void *arg0);
+#endif
+
 #endif

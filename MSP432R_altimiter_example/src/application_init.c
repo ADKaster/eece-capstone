@@ -13,7 +13,7 @@
 /* Stack size in bytes */
 #define THREADSTACKSIZE   1024
 
-extern void *mainThread(void *arg0);
+
 void createMainThread(void);
 void appDisplay_Init(void);
 
@@ -27,32 +27,32 @@ dmcf_node_t currentApplication = NODE_FOO;
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    dmcf_init();
+//    dmcf_init();
 
     createMainThread();
 
     appDisplay_Init();
 
-    if(NODE_FOO == currentApplication)
-     {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
-
-        dmcf_publish_configure(BROADCAST_PING_MSG,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
-    else
-    {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
-
-        dmcf_publish_configure(BROADCAST_PING_MSG_2,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
+//    if(NODE_FOO == currentApplication)
+//     {
+//        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
+//                                 FREQ_UNLIMITED,
+//                                 APP_QUEUE_DEPTH);
+//
+//        dmcf_publish_configure(BROADCAST_PING_MSG,
+//                               FREQ_UNLIMITED,
+//                               APP_QUEUE_DEPTH);
+//    }
+//    else
+//    {
+//        dmcf_subscribe_configure(BROADCAST_PING_MSG,
+//                                 FREQ_UNLIMITED,
+//                                 APP_QUEUE_DEPTH);
+//
+//        dmcf_publish_configure(BROADCAST_PING_MSG_2,
+//                               FREQ_UNLIMITED,
+//                               APP_QUEUE_DEPTH);
+//    }
 
     return;
 }
