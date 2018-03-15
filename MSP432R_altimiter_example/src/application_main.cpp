@@ -46,19 +46,28 @@ void *mainThread(void *arg0)
     I2C_Handle i2cHandle = I2C_open(0, &params);
 
     Adafruit_BMP280 bmp(&i2cHandle);
+    bmp.begin();
+
+    char printbuffer[256];
+    float temp;
 
     for (;;)
     {
-        char printbuffer[256];
 
         clock_gettime(CLOCK_REALTIME, &currtime);
         sprintf(printbuffer, "Time = %ld\n", currtime.tv_sec);
 
-        sprintf(printbuffer + strlen(printbuffer), "Temperature = %g*C\n", bmp.readTemperature());
+        temp = bmp.readTemperature();
 
-        sprintf(printbuffer + strlen(printbuffer), "Pressure = %gPa\n", bmp.readPressure());
+        sprintf(printbuffer + strlen(printbuffer), "Temperature = %f *C\n", temp);
 
-        sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %gm\n", bmp.readAltitude(1013.25));  // this should be adjusted to your local forecast
+        temp = bmp.readPressure();
+
+        sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", temp);
+
+        temp = bmp.readAltitude(1013.25);
+
+        sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", temp);  // this should be adjusted to your local forecast
 
         Display_printf(gTheDisplay, 0, 0, printbuffer);
 

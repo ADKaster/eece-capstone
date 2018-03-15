@@ -11,7 +11,7 @@
 #include "appdefs.h"
 
 /* Stack size in bytes */
-#define THREADSTACKSIZE   1024
+#define THREADSTACKSIZE 4096
 
 
 void createMainThread(void);

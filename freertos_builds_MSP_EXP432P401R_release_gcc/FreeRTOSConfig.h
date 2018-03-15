@@ -185,7 +185,7 @@
 
 #elif defined(__GNUC__)
 /* note: system locks required by newlib are not implemented */
-#define configUSE_NEWLIB_REENTRANT 1
+//#define configUSE_NEWLIB_REENTRANT 1
 #endif
 
 /*

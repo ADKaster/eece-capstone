@@ -84,7 +84,7 @@ uint8_t Adafruit_BMP280::read8(byte reg)
   trans.readCount = 1;
   trans.arg = NULL;
 
-  value = I2C_transfer(*_bus, &trans);
+  I2C_transfer(*_bus, &trans);
   return value;
 }
 
@@ -105,7 +105,7 @@ uint16_t Adafruit_BMP280::read16(byte reg)
   trans.readCount = 2;
   trans.arg = NULL;
 
-  value = (I2C_transfer(*_bus, &trans) << 8) | I2C_transfer(*_bus, &trans);
+  I2C_transfer(*_bus, &trans);
   return value;
 }
 
@@ -150,7 +150,7 @@ uint32_t Adafruit_BMP280::read24(byte reg)
     trans.readCount = 3;
     trans.arg = NULL;
 
-    value = I2C_transfer(*_bus, &trans);
+    I2C_transfer(*_bus, &trans);
 
     return value;
 }

@@ -29,7 +29,7 @@
 							<option id="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION.1846966189" name="Compiler version" superClass="com.ti.ccstudio.buildDefinitions.core.OPT_CODEGEN_VERSION" value="GNU_6.3.1:Linaro" valueType="string"/>
 							<targetPlatform id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.targetPlatformDebug.923381927" name="Platform" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.targetPlatformDebug"/>
 							<builder buildPath="${BuildDirectory}" id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.builderDebug.1178589388" keepEnvironmentInBuildfile="false" name="GNU Make" parallelBuildOn="false" stopOnErr="true" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.builderDebug"/>
-							<tool command="&quot;${CG_TOOL_GCC}&quot; -c" id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.compilerDebug.364295552" name="GNU Compiler" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.compilerDebug">
+							<tool command="&quot;${CG_TOOL_GCC}&quot; -c" commandLinePattern="${command} ${flags} ${output_flag}${output} ${inputs}" id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.compilerDebug.364295552" name="GNU Compiler" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.exe.compilerDebug">
 								<option id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.CODE_STATE.304749646" name="Code state" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.CODE_STATE" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.CODE_STATE.THUMB" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.MCPU.981119722" name="Target CPU (-mcpu)" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.MCPU" useByScannerDiscovery="false" value="cortex-m4" valueType="string"/>
 								<option id="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.MARCH.1402994786" name="Specify the name of the target architecture (-march)" superClass="com.ti.ccstudio.buildDefinitions.MSP432_GNU_6.0.compilerID.MARCH" useByScannerDiscovery="false" value="armv7e-m" valueType="string"/>
@@ -79,8 +79,8 @@
 									<listOptionValue builtIn="false" value="&quot;gcc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;nosys&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;m&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;stdc++_nano&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;c_nano&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;stdc++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;c&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:libdmcflib.a&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:libfreertos_builds_MSP_EXP432P401R_release_gcc.a&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;:display.am4fg&quot;"/>
