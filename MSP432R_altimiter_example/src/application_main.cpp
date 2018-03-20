@@ -28,7 +28,7 @@ void *mainThread(void *arg0)
 {
 #ifdef FREERTOS
     TickType_t xLastWaketime = xTaskGetTickCount();
-    TickType_t xFrequency = portTICK_PERIOD_MS * 100;
+    TickType_t xFrequency = portTICK_PERIOD_MS * 1000;
 #endif
     struct timespec currtime;
 //    dmcf_pub_status_t       pubstatus;
@@ -65,7 +65,7 @@ void *mainThread(void *arg0)
 
         sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", temp);
 
-        temp = bmp.readAltitude(1013.25);
+        temp = bmp.readAltitude(1013.00); //in hPa, equivalent to mb
 
         sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", temp);  // this should be adjusted to your local forecast
 

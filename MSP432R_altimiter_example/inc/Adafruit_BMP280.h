@@ -139,7 +139,6 @@ class Adafruit_BMP280{
     void readCoefficients(void);
     uint8_t spixfer(uint8_t x);
 
-// todo: reimplement these
     void      write8(byte reg, byte value);
     uint8_t   read8(byte reg);
     uint16_t  read16(byte reg);
@@ -147,6 +146,8 @@ class Adafruit_BMP280{
     int16_t   readS16(byte reg);
     uint16_t  read16_LE(byte reg); // little endian
     int16_t   readS16_LE(byte reg); // little endian
+    uint32_t  read24_LE(byte reg);  // little endian
+
 
     int8_t _cs;
     uint8_t   _i2caddr;

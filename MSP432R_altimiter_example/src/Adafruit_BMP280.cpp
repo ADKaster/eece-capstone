@@ -155,6 +155,13 @@ uint32_t Adafruit_BMP280::read24(byte reg)
     return value;
 }
 
+uint32_t Adafruit_BMP280::read24_LE(byte reg)
+{
+    uint32_t value = read24(reg);
+    value = (((value >> 16) & 0x0000FF) | ((value << 16) & 0xFF0000) | (value & 0x00FF00));
+    return value;
+}
+
 /**************************************************************************/
 /*!
     @brief  Reads the factory-set coefficients
@@ -162,19 +169,19 @@ uint32_t Adafruit_BMP280::read24(byte reg)
 /**************************************************************************/
 void Adafruit_BMP280::readCoefficients(void)
 {
-    _bmp280_calib.dig_T1 = read16_LE(BMP280_REGISTER_DIG_T1);
-    _bmp280_calib.dig_T2 = readS16_LE(BMP280_REGISTER_DIG_T2);
-    _bmp280_calib.dig_T3 = readS16_LE(BMP280_REGISTER_DIG_T3);
+    _bmp280_calib.dig_T1 = read16(BMP280_REGISTER_DIG_T1);
+    _bmp280_calib.dig_T2 = readS16(BMP280_REGISTER_DIG_T2);
+    _bmp280_calib.dig_T3 = readS16(BMP280_REGISTER_DIG_T3);
 
-    _bmp280_calib.dig_P1 = read16_LE(BMP280_REGISTER_DIG_P1);
-    _bmp280_calib.dig_P2 = readS16_LE(BMP280_REGISTER_DIG_P2);
-    _bmp280_calib.dig_P3 = readS16_LE(BMP280_REGISTER_DIG_P3);
-    _bmp280_calib.dig_P4 = readS16_LE(BMP280_REGISTER_DIG_P4);
-    _bmp280_calib.dig_P5 = readS16_LE(BMP280_REGISTER_DIG_P5);
-    _bmp280_calib.dig_P6 = readS16_LE(BMP280_REGISTER_DIG_P6);
-    _bmp280_calib.dig_P7 = readS16_LE(BMP280_REGISTER_DIG_P7);
-    _bmp280_calib.dig_P8 = readS16_LE(BMP280_REGISTER_DIG_P8);
-    _bmp280_calib.dig_P9 = readS16_LE(BMP280_REGISTER_DIG_P9);
+    _bmp280_calib.dig_P1 = read16(BMP280_REGISTER_DIG_P1);
+    _bmp280_calib.dig_P2 = readS16(BMP280_REGISTER_DIG_P2);
+    _bmp280_calib.dig_P3 = readS16(BMP280_REGISTER_DIG_P3);
+    _bmp280_calib.dig_P4 = readS16(BMP280_REGISTER_DIG_P4);
+    _bmp280_calib.dig_P5 = readS16(BMP280_REGISTER_DIG_P5);
+    _bmp280_calib.dig_P6 = readS16(BMP280_REGISTER_DIG_P6);
+    _bmp280_calib.dig_P7 = readS16(BMP280_REGISTER_DIG_P7);
+    _bmp280_calib.dig_P8 = readS16(BMP280_REGISTER_DIG_P8);
+    _bmp280_calib.dig_P9 = readS16(BMP280_REGISTER_DIG_P9);
 }
 
 /**************************************************************************/
@@ -186,7 +193,7 @@ float Adafruit_BMP280::readTemperature(void)
 {
   int32_t var1, var2;
 
-  int32_t adc_T = read24(BMP280_REGISTER_TEMPDATA);
+  int32_t adc_T = read24_LE(BMP280_REGISTER_TEMPDATA);
   adc_T >>= 4;
 
   var1  = ((((adc_T>>3) - ((int32_t)_bmp280_calib.dig_T1 <<1))) *
@@ -213,7 +220,7 @@ float Adafruit_BMP280::readPressure(void) {
   // Must be done first to get the t_fine variable set up
   readTemperature();
 
-  int32_t adc_P = read24(BMP280_REGISTER_PRESSUREDATA);
+  int32_t adc_P = read24_LE(BMP280_REGISTER_PRESSUREDATA);
   adc_P >>= 4;
 
   var1 = ((int64_t)t_fine) - 128000;
