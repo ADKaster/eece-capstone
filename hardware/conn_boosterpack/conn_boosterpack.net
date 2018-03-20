@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /home/adespopoulos/Development/eece-capstone/hardware/conn_boosterpack/conn_boosterpack.sch)
-    (date "Tue 06 Feb 2018 10:25:57 AM EST")
+    (date "Mon 19 Mar 2018 08:53:52 PM EDT")
     (tool "Eeschema 4.0.7-e2-6376~58~ubuntu16.04.1")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
