@@ -28,7 +28,6 @@ extern "C" void timerCallbackFunc(Timer_Handle myHandle)
         {
             GPIO_toggle(pyroGpioValues[i]);
         }
-
     }
 
 }
@@ -73,35 +72,18 @@ PyroDriver::PyroDriver(void)
         /* Failed to initialized timer */
         while (1);
     }
-
-    if (Timer_start(timer0) == Timer_STATUS_ERROR) {
-        /* Failed to start timer */
-        while (1);
-    }
 }
 
 void PyroDriver::activate(int pyroGpio)
 {
-    if (pyroGpio == GPIO_PYRO_FIRST) {
-        pyroIdx[0] = 1;
-        GPIO_toggle(GPIO_PYRO_FIRST);
-    }
-    else if (pyroGpio == GPIO_PYRO_SECOND)
+    if(pyroGpio < 3)
     {
-        pyroIdx[1] = 1;
-        GPIO_toggle(GPIO_PYRO_SECOND);
-    }
-    else if (pyroGpio == GPIO_PYRO_THIRD)
-    {
-        pyroIdx[2] = 1;
-        GPIO_toggle(GPIO_PYRO_THIRD);
-    }
-    else if (pyroGpio == GPIO_PYRO_FOURTH)
-    {
-        pyroIdx[3] = 1;
-        GPIO_toggle(GPIO_PYRO_FOURTH);
-    }
+        pyroIdx[pyroGpio] = 1;
 
+        GPIO_toggle(pyroGpioValues[pyroGpio]);
+
+        Timer_start(timer0);
+    }
 }
 
 PyroDriver::~PyroDriver(void)

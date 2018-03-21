@@ -1,6 +1,6 @@
 #include "PyroDriver_interface.hpp"
 
-static PyroDriver pyro = PyroDriver();
+static PyroDriver pyro;
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,7 +13,7 @@ extern "C" {
 //                return v->activate(idx);
 //        }
 
-        void PyroDriver_setTime(int pyroIndex) {
+        void PyroDriver_activate(int pyroIndex) {
             pyro.activate(pyroIndex);
 
         }

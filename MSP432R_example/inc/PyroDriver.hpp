@@ -11,11 +11,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    #define GPIO_PYRO_FIRST 7
-    #define GPIO_PYRO_SECOND 8
-    #define GPIO_PYRO_THIRD 9
-    #define GPIO_PYRO_FOURTH 10
-
     #define TIME_PYRO 30 /* Length of the time the pyro runs multiplied by the PYRO_TIMER_INTERVAL below*/
     #define PYRO_TIMER_INTERVAL 500000
     /* Driver Header files */

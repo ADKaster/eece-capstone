@@ -14,8 +14,8 @@
 extern "C" {
 #endif
 
-    // PyroDriver setTime method interface, sets the time for the PyroDriver to remain activated before shutting off
-    void PyroDriver_setTime(int timeMS);
+    // PyroDriver activate method interface, activates the corresponding pyro gpio
+    void PyroDriver_activate(int pyroIndex);
 
 #ifdef __cplusplus
 }
