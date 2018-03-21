@@ -76,7 +76,7 @@ PyroDriver::PyroDriver(void)
 
 void PyroDriver::activate(int pyroGpio)
 {
-    if(pyroGpio < 3)
+    if(pyroGpio < sizeof(pyroIdx)/sizeof(pyroIdx[0]))
     {
         pyroIdx[pyroGpio] = 1;
 
