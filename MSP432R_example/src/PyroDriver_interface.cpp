@@ -1,19 +1,27 @@
 #include "PyroDriver_interface.hpp"
 
+static PyroDriver pyro = PyroDriver();
+
+#ifdef __cplusplus
 extern "C" {
-        PyroDriverHandle newPyroDriver() {
-                return new PyroDriver();
-        }
+#endif
+//        PyroDriverHandle newPyroDriver() {
+//                return new PyroDriver();
+//        }
+//
+//        int PyroDriver_activate(PyroDriverHandle v, int idx) {
+//                return v->activate(idx);
+//        }
 
-        int PyroDriver_activate(PyroDriverHandle v) {
-                return v->activate();
-        }
+        void PyroDriver_setTime(int pyroIndex) {
+            pyro.activate(pyroIndex);
 
-        void PyroDriver_setTime(PyroDriverHandle v, int timeMS) {
-                v->setTime(timeMS);
         }
-
-        void deletePyroDriver(PyroDriverHandle v) {
-                delete  v;
-        }
+#ifdef __cplusplus
 }
+#endif
+//
+//        void deletePyroDriver(PyroDriverHandle v) {
+//                delete  v;
+//        }
+//}

@@ -13,20 +13,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    // Handler to work with cpp class in c and use the PyroDrivers methods methods
-    typedef struct PyroDriver* PyroDriverHandle;
-
-    // PyroDriver constructor interface
-    PyroDriverHandle newPyroDriver();
-
-    // PyroDriver activate method, which is used to activate the PyroDriver
-    int PyroDriver_activate(PyroDriverHandle v);
 
     // PyroDriver setTime method interface, sets the time for the PyroDriver to remain activated before shutting off
-    void PyroDriver_setTime(PyroDriverHandle v, int timeMS);
-
-    // PyroDriver deconstructor interface
-    void deletePyroDriver(PyroDriverHandle v);
+    void PyroDriver_setTime(int timeMS);
 
 #ifdef __cplusplus
 }

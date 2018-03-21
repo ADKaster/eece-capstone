@@ -15,7 +15,16 @@
 #include "dmcf_msgdef.h"
 #include "dmcf_pubsub.h"
 #include <stdio.h>
-#include <PyroDriver_interface.hpp>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <PyroDriver.hpp>
+#include "PyroDriver_interface.hpp"
+
+#ifdef __cplusplus
+}
+#endif
 
 char txBuffer[PING_MSG_LEN];
 char rxBuffer[PING_MSG_LEN];
@@ -31,8 +40,10 @@ void *mainThread(void *arg0)
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
-    PyroDriverHandle pyro = newPyroDriver();
-    PyroDriver_activate(pyro);
+    PyroDriver_setTime(GPIO_PYRO_FIRST);
+    PyroDriver_setTime(GPIO_PYRO_SECOND);
+    PyroDriver_setTime(GPIO_PYRO_THIRD);
+    PyroDriver_setTime(GPIO_PYRO_FOURTH);
 
     static uint32_t pubcount = 0;
 
