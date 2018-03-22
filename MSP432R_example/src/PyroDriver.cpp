@@ -9,7 +9,7 @@
 #include <stddef.h>
 
 
-int pyroIdx[4];
+volatile int pyroIdx[4];
 const int pyroGpioValues[] = {GPIO_PYRO_FIRST, GPIO_PYRO_SECOND, GPIO_PYRO_THIRD, GPIO_PYRO_FOURTH};
 
 
@@ -20,13 +20,15 @@ extern "C" void timerCallbackFunc(Timer_Handle myHandle)
 {
     for(int i = 0; i < 4; i++)
     {
-        if (pyroIdx[i])
-        {
-            pyroIdx[i] = (pyroIdx[i] + 1) % TIME_PYRO;
-        }
-        else if(GPIO_read(pyroGpioValues[i]))
+        if (pyroIdx[i] >= TIME_PYRO)
         {
             GPIO_toggle(pyroGpioValues[i]);
+            pyroIdx[i] = 0;
+
+        }
+        else if(pyroIdx[i] > 0)
+        {
+            pyroIdx[i]++;
         }
     }
 
@@ -72,6 +74,8 @@ PyroDriver::PyroDriver(void)
         /* Failed to initialized timer */
         while (1);
     }
+
+    Timer_start(timer0);
 }
 
 void PyroDriver::activate(int pyroGpio)
@@ -82,7 +86,6 @@ void PyroDriver::activate(int pyroGpio)
 
         GPIO_toggle(pyroGpioValues[pyroGpio]);
 
-        Timer_start(timer0);
     }
 }
 
