@@ -21,6 +21,7 @@
 #include <limits.h>
 
 #include "inc/Adafruit_BNO055.h"
+#include <ti/drivers/I2C.h>
 
 #include <unistd.h>
 #include <time.h>
@@ -626,6 +627,7 @@ bool Adafruit_BNO055::isFullyCalibrated(void)
  PRIVATE FUNCTIONS
  ***************************************************************************/
 
+
 /**************************************************************************/
 /*!
     @brief  Writes an 8 bit value over I2C
@@ -668,7 +670,7 @@ byte Adafruit_BNO055::read8(adafruit_bno055_reg_t reg )
     trans.readCount = 1;
     trans.arg = NULL;
 
-    value = I2C_transfer(_bus, &trans);
+    I2C_transfer(_bus, &trans);
     return value;
 }
 

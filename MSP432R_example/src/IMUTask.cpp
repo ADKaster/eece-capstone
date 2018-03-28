@@ -67,9 +67,10 @@ void *IMUTask(void *arg0)
         // - VECTOR_EULER         - degrees
         // - VECTOR_LINEARACCEL   - m/s^2
         // - VECTOR_GRAVITY       - m/s^2
-        imu::Vector<3> euler = bno.getVector(Adafruit_BNO055::VECTOR_EULER);
 
-        debug_printf(const_cast<char *>("X: %f Y: %f Z: %f"), euler.x(), euler.y(), euler.z());
+        imu::Vector<3> val = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
+
+        debug_printf(const_cast<char *>("X: %f Y: %f Z: %f"), val.x(), val.y(), val.z());
 
         /* Display calibration status for each sensor. */
         uint8_t system, gyro, accel, mag = 0;
@@ -77,8 +78,9 @@ void *IMUTask(void *arg0)
 
         debug_printf(const_cast<char *>("CALIBRATION: Sys=%d Gyro=%d Accel=%d Mag=%d"), system, gyro, accel, mag);
 
-        usleep(100000);
+        usleep(500000);
     }
 
+    return NULL;
 
 }

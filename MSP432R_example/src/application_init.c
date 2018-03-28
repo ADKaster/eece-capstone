@@ -7,7 +7,7 @@
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
-#include "dmcf_pubsub.h"
+//#include "dmcf_pubsub.h"
 #include "appdefs.h"
 #include "IMUTask.h"
 
@@ -34,7 +34,7 @@ void ApplicationInit(void)
 
     appDisplay_Init();
 
-    I2C_init();
+//    I2C_init();
 /*
     if(NODE_FOO == currentApplication)
      {
