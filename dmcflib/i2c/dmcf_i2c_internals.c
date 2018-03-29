@@ -26,7 +26,7 @@
 
 
 /******* File Defines *******/
-#define I2C_STACK_DEPTH (2048) /* 1kiB of stack */
+#define I2C_STACK_DEPTH (4096) /* 4kiB of stack */
 #define I2C_RX_BUFFER_SIZE (0x100) /* Hold 256  words of data at once */
 #define I2C_PUB_BUFFER_SIZE (0x80) /* Hold 128 words of data at once */
 #define I2C_TXQUEUE_NAME ("I2C TX QUEUE")

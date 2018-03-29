@@ -42,6 +42,8 @@ void *mainThread(void *arg0)
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
+    time_t prev_tv_sec = 0;
+
     char printbuffer[256];
     pyro_sts_msg_t pyro_status = {0};
     alt_sts_msg_t altimeter_status;
@@ -55,24 +57,31 @@ void *mainThread(void *arg0)
         pyro_status.max_power = 5;
 
         pubstatus = dmcf_pub_put(PYRO_STATUS_MSG, (void *)&pyro_status);
+        dmcf_debugprintf("Pub Status: %d", pubstatus);
 
         substatus = dmcf_sub_get(ALTIMETER_STATUS_MSG, (void *)&altimeter_status, &nack);
-        if(substatus == SUB_SUCCESS)
+        if(substatus == SUB_SUCCESS && altimeter_status.time.tv_sec != prev_tv_sec)
         {
             sprintf(printbuffer, "Time = %ld\n", altimeter_status.time.tv_sec);
             sprintf(printbuffer + strlen(printbuffer), "Temperature = %f *C\n", altimeter_status.temp);
             sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", altimeter_status.press);
             sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", altimeter_status.alt);  // this should be adjusted to your local forecast
             dmcf_debugprintf(printbuffer);
+            prev_tv_sec = altimeter_status.time.tv_sec;
         }
 
         substatus = dmcf_sub_get(PYRO_TRIGGER_MSG, (void *)&trig, &nack);
         if(substatus == SUB_SUCCESS)
         {
             if(trig.trigger_val < 4)
+            {
                 PyroDriver_activate(trig.trigger_val);
+                pyro_status.enabled[trig.trigger_val] = 1;
+            }
             else
+            {
                 dmcf_debugprintf("Error, invalid trigger value: %d", trig.trigger_val);
+            }
         }
 
         vTaskDelayUntil( &xLastWaketime, xFrequency );

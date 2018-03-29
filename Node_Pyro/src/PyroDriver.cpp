@@ -22,7 +22,7 @@ extern "C" void timerCallbackFunc(Timer_Handle myHandle)
     {
         if (pyroIdx[i] >= TIME_PYRO)
         {
-            GPIO_toggle(pyroGpioValues[i]);
+            GPIO_write(pyroGpioValues[i], Board_GPIO_LED_OFF);
             pyroIdx[i] = 0;
 
         }
@@ -84,7 +84,7 @@ void PyroDriver::activate(int pyroGpio)
     {
         pyroIdx[pyroGpio] = 1;
 
-        GPIO_toggle(pyroGpioValues[pyroGpio]);
+        GPIO_write(pyroGpioValues[pyroGpio], Board_GPIO_LED_ON);
 
     }
 }

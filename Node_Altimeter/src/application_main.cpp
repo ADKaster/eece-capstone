@@ -54,6 +54,7 @@ void *mainThread(void *arg0)
     pyro_sts_msg_t pyro_status;
     pyro_trigger_msg_t pyro_trigger;
     uint8_t pyroIdx = 0;
+    time_t prev_tv_sec;
 
     for (;;)
     {
@@ -65,21 +66,25 @@ void *mainThread(void *arg0)
         altimeter_status.alt = bmp.readAltitude(1013.25); //in hPa, equivalent to mb
 
         pubstatus = dmcf_pub_put(ALTIMETER_STATUS_MSG, (void *)&altimeter_status);
-        dmcf_debugprintf("PubStatus: %d", pubstatus);
 
         substatus = dmcf_sub_get(PYRO_STATUS_MSG, (void *)&pyro_status, &nack);
 
-        if(SUB_SUCCESS == substatus)
+        if(SUB_SUCCESS == substatus && pyro_status.time.tv_sec != prev_tv_sec)
         {
             dmcf_debugprintf("Pyro Status Received!");
             sprintf(printbuffer, "Time = %ld\n", pyro_status.time.tv_sec);
+            sprintf(printbuffer + strlen(printbuffer), "Pyro Status: max_I %lu max_P %lu", pyro_status.max_current, pyro_status.max_power);
+            sprintf(printbuffer + strlen(printbuffer), "Enabled pyros: %d", pyro_status.enabled[0] + pyro_status.enabled[1] * 10 + pyro_status.enabled[2] * 100 + pyro_status.enabled[3] * 1000);
+            dmcf_debugprintf(printbuffer);
+            prev_tv_sec = pyro_status.time.tv_sec;
         }
 
         pubcount++;
 
         if(pubcount%100 == 0)
         {
-            pyro_trigger.trigger_val = pyroIdx++ & 0x3;
+            pyro_trigger.trigger_val = pyroIdx++;
+            if(pyroIdx > 3) pyroIdx = 0;
             pubstatus = dmcf_pub_put(PYRO_TRIGGER_MSG, (void *)&pyro_trigger);
         }
 

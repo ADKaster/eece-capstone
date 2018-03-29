@@ -112,8 +112,8 @@ void i2c_msp432_SlaveTransferCallback(I2CSlave_Handle handle, bool status)
 
     if(slaveNotificationHandle){
         vTaskNotifyGiveFromISR(slaveNotificationHandle, &xHigherPriorityTaskWoken);
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 void i2c_msp432_slaveFixups(void)
@@ -158,6 +158,7 @@ void i2c_msp432_masterFixups(void)
 
 void i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP432_Object *object)
 {
+#if 0
     HwiP_Params     interruptParams;
 
     HwiP_Params_init(&interruptParams);
@@ -169,6 +170,7 @@ void i2c_msp432_enableCustomMasterInt(I2CMSP432_HWAttrsV1 const *hwAttrs, I2CMSP
     object->hwiHandle = HwiP_create( hwAttrs->intNum,
                                      dmcf_i2cmaster_hwiIntFxn,
                                      &interruptParams);
+#endif
 }
 
 #endif /* __MSP432P401R__ */
