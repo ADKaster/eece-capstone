@@ -443,21 +443,43 @@ I2CSlaveMSP432_Object i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVECOUNT];
 
 const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT] = {
 
-    {/* UNUSED */ },
-    {/* UNUSED */ },
+    {
+        .baseAddr = EUSCI_B0_BASE,
+        .intNum = INT_EUSCIB0,
+        .intPriority = ~0,
+        .slaveAddress = SLAVEADDR_ALT,
+        .dataPin = I2CSLAVEMSP432_P1_6_UCB0SDA,
+        .clkPin = I2CSLAVEMSP432_P1_7_UCB0SCL
+    },
+    {
+        .baseAddr = EUSCI_B1_BASE,
+        .intNum = INT_EUSCIB1,
+        .intPriority = ~0,
+        .slaveAddress = SLAVEADDR_ALT,
+        .dataPin = I2CSLAVEMSP432_P6_4_UCB1SDA,
+        .clkPin = I2CSLAVEMSP432_P6_5_UCB1SCL
+    },
     {
         .baseAddr = EUSCI_B2_BASE,
         .intNum = INT_EUSCIB2,
         .intPriority = ~0,
-        .slaveAddress = SLAVEADDR_PYRO,
+        .slaveAddress = SLAVEADDR_ALT,
         .dataPin = I2CSLAVEMSP432_P3_6_UCB2SDA,
         .clkPin = I2CSLAVEMSP432_P3_7_UCB2SCL
     }
 };
 
 const I2CSlave_Config I2CSlave_config[MSP_EXP432P401R_I2CSLAVECOUNT] = {
-    { /* UNUSED */ },
-    { /* UNUSED */ },
+    {
+         .fxnTablePtr = &I2CSlaveMSP432_fxnTable,
+         .object = &i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVEB0],
+         .hwAttrs = &i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVEB0]
+    },
+    {
+         .fxnTablePtr = &I2CSlaveMSP432_fxnTable,
+         .object = &i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVEB1],
+         .hwAttrs = &i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVEB1]
+    },
     {
         .fxnTablePtr = &I2CSlaveMSP432_fxnTable,
         .object = &i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVEB2],
