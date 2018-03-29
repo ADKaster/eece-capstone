@@ -57,7 +57,6 @@ void *mainThread(void *arg0)
         pyro_status.max_power = 5;
 
         pubstatus = dmcf_pub_put(PYRO_STATUS_MSG, (void *)&pyro_status);
-        dmcf_debugprintf("Pub Status: %d", pubstatus);
 
         substatus = dmcf_sub_get(ALTIMETER_STATUS_MSG, (void *)&altimeter_status, &nack);
         if(substatus == SUB_SUCCESS && altimeter_status.time.tv_sec != prev_tv_sec)
