@@ -7,6 +7,7 @@
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
+#include "DmcfLibSystem.h"
 #include "dmcf_pubsub.h"
 #include "appdefs.h"
 
@@ -22,7 +23,7 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-dmcf_node_t currentApplication = NODE_FOO;
+dmcf_node_t currentApplication = NODE_PYRO;;
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
@@ -33,26 +34,18 @@ void ApplicationInit(void)
 
     appDisplay_Init();
 
-    if(NODE_FOO == currentApplication)
-     {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(PYRO_TRIGGER_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
 
-        dmcf_publish_configure(BROADCAST_PING_MSG,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
-    else
-    {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
+    dmcf_publish_configure(PYRO_STATUS_MSG,
+                           FREQ_UNLIMITED,
+                           APP_QUEUE_DEPTH);
 
-        dmcf_publish_configure(BROADCAST_PING_MSG_2,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
+    // todo remove testing things;
+    dmcf_subscribe_configure(ALTIMETER_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
 
     return;
 }

@@ -344,6 +344,16 @@ GPIO_PinConfig gpioPinConfigs[] = {
 
     /* MSP_EXP432P401R_SDSPI_CS */
     GPIOMSP432_P4_6 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_HIGH,
+
+    /* GPIO_PYRO_FIRST */
+    GPIOMSP432_P5_6 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_LOW,
+    /* GPIO_PYRO_SECOND */
+    GPIOMSP432_P2_4 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_LOW,
+    /* GPIO_PYRO_THIRD */
+    GPIOMSP432_P2_6 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_LOW,
+    /* GPIO_PYRO_FOURTH */
+    GPIOMSP432_P2_7 | GPIO_CFG_OUT_STD | GPIO_CFG_OUT_STR_LOW | GPIO_CFG_OUT_LOW,
+
 };
 
 /*
@@ -392,6 +402,14 @@ const I2CMSP432_HWAttrsV1 i2cMSP432HWAttrs[MSP_EXP432P401R_I2CCOUNT] = {
         .clockSource = EUSCI_B_I2C_CLOCKSOURCE_SMCLK,
         .dataPin = I2CMSP432_P6_4_UCB1SDA,
         .clkPin = I2CMSP432_P6_5_UCB1SCL
+    },
+    {
+        .baseAddr = EUSCI_B2_BASE,
+        .intNum = INT_EUSCIB2,
+        .intPriority = (~0),
+        .clockSource = EUSCI_B_I2C_CLOCKSOURCE_SMCLK,
+        .dataPin = I2CMSP432_P3_6_UCB2SDA,
+        .clkPin = I2CMSP432_P3_7_UCB2SCL
     }
 };
 
@@ -405,6 +423,11 @@ const I2C_Config I2C_config[MSP_EXP432P401R_I2CCOUNT] = {
         .fxnTablePtr = &I2CMSP432_fxnTable,
         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB1],
         .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB1]
+    },
+    {
+         .fxnTablePtr = &I2CMSP432_fxnTable,
+         .object = &i2cMSP432Objects[MSP_EXP432P401R_I2CB2],
+         .hwAttrs = &i2cMSP432HWAttrs[MSP_EXP432P401R_I2CB2]
     }
 };
 
@@ -419,25 +442,26 @@ const uint_least8_t I2C_count = MSP_EXP432P401R_I2CCOUNT;
 I2CSlaveMSP432_Object i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVECOUNT];
 
 const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT] = {
+
+    {/* UNUSED */ },
+    {/* UNUSED */ },
     {
-        .baseAddr = EUSCI_B0_BASE,
-        .intNum = INT_EUSCIB0,
+        .baseAddr = EUSCI_B2_BASE,
+        .intNum = INT_EUSCIB2,
         .intPriority = ~0,
-#ifdef APPFOO
-        .slaveAddress = SLAVEADDR_FOO,
-#else
-        .slaveAddress = SLAVEADDR_BAR,
-#endif
-        .dataPin = I2CSLAVEMSP432_P1_6_UCB0SDA,
-        .clkPin = I2CSLAVEMSP432_P1_7_UCB0SCL
+        .slaveAddress = SLAVEADDR_PYRO,
+        .dataPin = I2CSLAVEMSP432_P3_6_UCB2SDA,
+        .clkPin = I2CSLAVEMSP432_P3_7_UCB2SCL
     }
 };
 
 const I2CSlave_Config I2CSlave_config[MSP_EXP432P401R_I2CSLAVECOUNT] = {
+    { /* UNUSED */ },
+    { /* UNUSED */ },
     {
         .fxnTablePtr = &I2CSlaveMSP432_fxnTable,
-        .object = &i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVEB0],
-        .hwAttrs = &i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVEB0]
+        .object = &i2cSlaveMSP432Objects[MSP_EXP432P401R_I2CSLAVEB2],
+        .hwAttrs = &i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVEB2]
     }
 };
 

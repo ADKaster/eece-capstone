@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>bmp280_example</name>
+	<name>Node_Altimeter</name>
 	<comment></comment>
 	<projects>
+		<project>freertos_builds_MSP_EXP432P401R_release_gcc</project>
+		<project>dmcflib</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

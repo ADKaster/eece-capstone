@@ -28,7 +28,7 @@
     EUSCI_B_I2C_START_INTERRUPT )
 
 #ifndef DMCF_I2C_SLAVE_PORT
-    #define DMCF_I2C_SLAVE_PORT (0)
+    #define DMCF_I2C_SLAVE_PORT (2)
 #endif
 #ifndef DMCF_I2C_MASTER_PORT
     #define DMCF_I2C_MASTER_PORT (1)

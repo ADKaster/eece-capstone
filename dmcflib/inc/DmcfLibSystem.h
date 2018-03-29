@@ -9,6 +9,7 @@
 #ifndef EXAMPLE_DMCFLIBSYSTEM_H_
 #define EXAMPLE_DMCFLIBSYSTEM_H_
 
+#include <time.h>
 
 #ifndef NULL
 #define NULL (void *)0
@@ -23,10 +24,11 @@
 
 typedef enum nodeenum_tag
 {
-    NODE_FOO, /**< Foo contains feature x */
-    NODE_BAR, /**< Bar contains feature y */
-    NODE_BAZ, /**< Baz contains feature z */
-    BROADCAST, /**< MUST BE INCLUDED in this enum */
+    NODE_PYRO,      /**< Pyro holds pyrotechnic triggers (LEDs for testing) */
+    NODE_ALT,       /**< Altimeter contains BMP280 */
+    NODE_IMU,       /**< IMU contains BNO055 */
+    NODE_DATA,      /**< Data contains SD card and battery(?) */
+    BROADCAST,      /**< MUST BE INCLUDED in this enum */
 } dmcf_node_t;
 
 #define NUM_NODES BROADCAST
@@ -42,9 +44,10 @@ extern dmcf_node_t currentApplication;
  */
 typedef enum slvaddr_tag
 {
-    SLAVEADDR_FOO = 0x48, /**< Address for FOO */
-    SLAVEADDR_BAR = 0x49, /**< Address for BAR */
-    SLAVEADDR_BAZ = 0x50, /**< Address for BAZ */
+    SLAVEADDR_PYRO = 0x48,  /**< Address for Pyro */
+    SLAVEADDR_ALT = 0x49,   /**< Address for Altimeter */
+    SLAVEADDR_IMU = 0x50,   /**< Address for IMU */
+    SLAVEADDR_DATA = 0x51,  /**< Address for Data */
 } dmcf_slave_addr_t;
 
 extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
@@ -56,9 +59,10 @@ extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
  */
 typedef enum masaddr_tag
 {
-    MASTERADDR_FOO = 0x40, /**< Address for FOO */
-    MASTERADDR_BAR = 0x41, /**< Address for BAR */
-    MASTERADDR_BAZ = 0x42, /**< Address for BAZ */
+    MASTERADDR_PYRO = 0x40,  /**< Address for Pyro */
+    MASTERADDR_ALT = 0x41,  /**< Address for Altimeter */
+    MASTERADDR_IMU = 0x42,  /**< Address for IMU */
+    MASTERADDR_DATA = 0x43, /**< Address for Data */
 } dmcf_master_addr_t;
 
 extern dmcf_master_addr_t gTheMasterAddresses[NUM_NODES];
@@ -71,11 +75,15 @@ extern dmcf_master_addr_t gTheMasterAddresses[NUM_NODES];
 */
 typedef enum msgenum_tag
 {
-    STANDARD_PING_MSG = 0, /**<  A simple ping message */
+    BROADCAST_PING_MSG = 0, /**<  A simple ping message */
+
     /* Insert your message names here */
-    /* MY_FAV_MSG_NAME, */
-    BROADCAST_PING_MSG,
-    BROADCAST_PING_MSG_2,
+    PYRO_TRIGGER_MSG,
+    ALTIMETER_STATUS_MSG,
+    IMU_STATUS_MSG,
+    PYRO_STATUS_MSG,
+    BATTERY_STATUS_MSG,
+
     NUM_MSG_DEFINITONS, /**< The total number of possible messages. DO NOT REMOVE */
 } dmcf_msg_enum_t;
 
@@ -94,8 +102,56 @@ typedef enum msgenum_tag
 typedef struct ping_tag
 {
     uint8_t ping_payload[PING_MSG_LEN]; /**< The payload array, contains debug values */
-} sample_ping_msg_t;
+} ping_msg_t;
 
+
+typedef struct pyro_trig_s
+{
+    struct timespec time;
+    uint32_t trigger_val;
+    uint32_t checksum;
+} pyro_trigger_msg_t;
+
+typedef struct alt_sts_s
+{
+    struct timespec time;
+    float temp;
+    float press;
+    float alt;
+    uint32_t checksum;
+} alt_sts_msg_t;
+
+typedef struct imu_sts_s
+{
+    struct timespec time;
+    float accel[3];
+    float gyro[3];
+    float mag[3];
+    uint32_t checksum;
+} imu_sts_msg_t;
+
+typedef struct pyro_sts_s
+{
+    struct timespec time;
+    uint32_t max_current;
+    uint32_t max_power;
+    uint8_t enabled[4];
+    uint32_t checksum;
+} pyro_sts_msg_t;
+
+#define WARN_LOW_BATT   (1 << 0)
+#define WARN_HIGH_CURR  (1 << 1)
+#define WARN_LOW_CURR   (1 << 2)
+#define WARN_BLAH_BLAH  (1 << 3)
+
+typedef struct bat_sts_s
+{
+    struct timespec time;
+    uint32_t max_current;
+    uint32_t max_power;
+    uint32_t warnings;
+    uint32_t checksum;
+} battery_sts_msg_t;
 
 #define BROADCAST_ADDRESS (0x00)
 

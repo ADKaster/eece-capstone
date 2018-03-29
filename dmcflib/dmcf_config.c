@@ -20,33 +20,60 @@
 dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 {
     /* PING Message. For testing purposes */
-    [STANDARD_PING_MSG] = 
-    {
-        .message_number =   STANDARD_PING_MSG,
-        .message_source =   NODE_FOO,
-        .message_dest =     NODE_BAR,
-        .message_type =     TX_TYPE_P2P,
-        .message_bus =      BUS_TYPE_I2C,
-        .message_length =   PING_MSG_LEN,
-    },
     [BROADCAST_PING_MSG] =
     {
          .message_number =   BROADCAST_PING_MSG,
-         .message_source =   NODE_FOO,
+         .message_source =   NODE_PYRO,
          .message_dest =     BROADCAST,
          .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
-         .message_length =   PING_MSG_LEN,
+         .message_length =   sizeof(ping_msg_t),
     },
-    [BROADCAST_PING_MSG_2] =
-        {
-             .message_number =   BROADCAST_PING_MSG_2,
-             .message_source =   NODE_BAR,
-             .message_dest =     BROADCAST,
-             .message_type =     TX_TYPE_BROADCAST,
-             .message_bus =      BUS_TYPE_I2C,
-             .message_length =   PING_MSG_LEN,
-        },
+    [PYRO_TRIGGER_MSG] =
+    {
+         .message_number =   PYRO_TRIGGER_MSG,
+         .message_source =   NODE_ALT,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
+         .message_bus =      BUS_TYPE_I2C,
+         .message_length =   sizeof(pyro_trigger_msg_t),
+    },
+    [ALTIMETER_STATUS_MSG] =
+    {
+         .message_number =   ALTIMETER_STATUS_MSG,
+         .message_source =   NODE_ALT,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
+         .message_bus =      BUS_TYPE_I2C,
+         .message_length =   sizeof(alt_sts_msg_t),
+    },
+    [IMU_STATUS_MSG] =
+    {
+         .message_number =   IMU_STATUS_MSG,
+         .message_source =   NODE_IMU,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
+         .message_bus =      BUS_TYPE_I2C,
+         .message_length =   sizeof(imu_sts_msg_t),
+    },
+    [PYRO_STATUS_MSG] =
+    {
+         .message_number =   PYRO_STATUS_MSG,
+         .message_source =   NODE_PYRO,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
+         .message_bus =      BUS_TYPE_I2C,
+         .message_length =   sizeof(pyro_sts_msg_t),
+    },
+    [BATTERY_STATUS_MSG] =
+    {
+         .message_number =   BATTERY_STATUS_MSG,
+         .message_source =   NODE_DATA,
+         .message_dest =     BROADCAST,
+         .message_type =     TX_TYPE_BROADCAST,
+         .message_bus =      BUS_TYPE_I2C,
+         .message_length =   sizeof(battery_sts_msg_t),
+    },
     /* Insert your message definitions here         */
     /* [MY_FAV_MSG_NAME] =                          */
     /* {                                            */
@@ -57,6 +84,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     /*      .message_bus =      BUS_TYPE_I2C,       */
     /*      .message_length =   MY_FAV_MSG_LEN ,    */
     /* },                                           */
+
     
 };
 
@@ -65,9 +93,10 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
  */
 dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
 {
-    MASTERADDR_FOO,
-    MASTERADDR_BAR,
-    MASTERADDR_BAZ
+    MASTERADDR_PYRO,
+    MASTERADDR_ALT,
+    MASTERADDR_IMU,
+    MASTERADDR_DATA,
 };
 
 /*! \var gTheSlaveAddresses
@@ -75,8 +104,9 @@ dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
  */
 dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
 {
-    SLAVEADDR_FOO,
-    SLAVEADDR_BAR,
-    SLAVEADDR_BAZ
+    SLAVEADDR_PYRO,
+    SLAVEADDR_ALT,
+    SLAVEADDR_IMU,
+    SLAVEADDR_DATA,
 };
 
