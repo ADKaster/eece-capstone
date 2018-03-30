@@ -83,6 +83,7 @@ void *mainThread(void *arg0)
     while (!BQ27441_initOpConfig())
     {
         dmcf_debugprintf("Clearing BIE in Operation Configuration");
+        usleep(200000);
     }
 
     BQ27441_control(BAT_INSERT, 1000);
