@@ -71,7 +71,7 @@ void *mainThread(void *arg0)
 
         if(SUB_SUCCESS == substatus && pyro_status.time.tv_sec != prev_tv_sec)
         {
-            dmcf_debugprintf("Pyro Status Received!");
+            dmcf_debugprintf(const_cast<char *>("Pyro Status Received!"));
             sprintf(printbuffer, "Time = %ld\n", pyro_status.time.tv_sec);
             sprintf(printbuffer + strlen(printbuffer), "Pyro Status: max_I %lu max_P %lu", pyro_status.max_current, pyro_status.max_power);
             sprintf(printbuffer + strlen(printbuffer), "Enabled pyros: %d", pyro_status.enabled[0] + pyro_status.enabled[1] * 10 + pyro_status.enabled[2] * 100 + pyro_status.enabled[3] * 1000);
