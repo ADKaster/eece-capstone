@@ -63,7 +63,7 @@ void *mainThread(void *arg0)
 {
 #ifdef FREERTOS
     TickType_t xLastWaketime = xTaskGetTickCount();
-    TickType_t xFrequency = portTICK_PERIOD_MS * 100;
+    TickType_t xFrequency = portTICK_PERIOD_MS * 1000;
 #endif
    struct timespec currtime;
     //dmcf_pub_status_t       pubstatus;
@@ -72,15 +72,17 @@ void *mainThread(void *arg0)
 
     static uint32_t pubcount = 0;
 
+    dmcf_debugprintf("TEST TEST TEST");
+
     if (!BQ27441_initConfig())
     {
-        dmcf_debugprintf("Error initializing BQ27441 Config\r\n");
-        dmcf_debugprintf("Make sure BOOSTXL-BATPAKMKII is connected and switch is flipped to \"CONNECTED\"\r\n");
+        dmcf_debugprintf("Error initializing BQ27441 Config");
+        dmcf_debugprintf("Make sure BOOSTXL-BATPAKMKII is connected and switch is flipped to \"CONNECTED\"");
     }
 
     while (!BQ27441_initOpConfig())
     {
-        dmcf_debugprintf("Clearing BIE in Operation Configuration\r\n");
+        dmcf_debugprintf("Clearing BIE in Operation Configuration");
     }
 
     BQ27441_control(BAT_INSERT, 1000);
@@ -92,68 +94,68 @@ void *mainThread(void *arg0)
     {
         clock_gettime(CLOCK_REALTIME, &currtime);
 
-         dmcf_debugprintf("\r\n");
-         dmcf_debugprintf("\r\n");
-         dmcf_debugprintf("*************************************\r\n");
-         dmcf_debugprintf("Battery Information\r\n");
-         dmcf_debugprintf("*************************************\r\n");
+         dmcf_debugprintf("");
+         dmcf_debugprintf("");
+         dmcf_debugprintf("*************************************");
+         dmcf_debugprintf("Battery Information");
+         dmcf_debugprintf("*************************************");
 
          /* Read Design Capacity */
          if(!BQ27441_read16(DESIGN_CAPACITY, &result16, 1000))
-             dmcf_debugprintf("Error Reading Design Capacity \r\n");
+             dmcf_debugprintf("Error Reading Design Capacity ");
          else
          {
-             sprintf(str, "Design Capacity: %dmAh\r\n", result16);
+             sprintf(str, "Design Capacity: %dmAh", result16);
              dmcf_debugprintf(str);
          }
 
          /* Read Remaining Capacity */
          if(!BQ27441_read16(REMAINING_CAPACITY, &result16, 1000))
-             dmcf_debugprintf("Error Reading Remaining Capacity \r\n");
+             dmcf_debugprintf("Error Reading Remaining Capacity ");
          else
          {
-             sprintf(str, "Remaining Capacity: %dmAh\r\n", result16);
+             sprintf(str, "Remaining Capacity: %dmAh", result16);
              dmcf_debugprintf(str);
          }
 
          /* Read State Of Charge */
          if(!BQ27441_read16(STATE_OF_CHARGE, &result16, 1000))
-             dmcf_debugprintf("Error Reading State Of Charge \r\n");
+             dmcf_debugprintf("Error Reading State Of Charge ");
          else
          {
-             sprintf(str, "State of Charge: %d%%\r\n", (unsigned short)result16);
+             sprintf(str, "State of Charge: %d%%", (unsigned short)result16);
              dmcf_debugprintf(str);
          }
 
          /* Read Temperature */
          if(!BQ27441_read16(TEMPERATURE, &result16, 1000))
-             dmcf_debugprintf("Error Reading Temperature \r\n");
+             dmcf_debugprintf("Error Reading Temperature ");
          else
          {
-             sprintf(str, "Temperature: %dC\r\n", result16/10 - 273);
+             sprintf(str, "Temperature: %dC", result16/10 - 273);
              dmcf_debugprintf(str);
          }
 
          /* Read Voltage */
          if(!BQ27441_read16(VOLTAGE, &result16, 1000))
-             dmcf_debugprintf("Error Reading Voltage \r\n");
+             dmcf_debugprintf("Error Reading Voltage ");
          else
          {
-             sprintf(str, "Voltage: %dmV\r\n", result16);
+             sprintf(str, "Voltage: %dmV", result16);
              dmcf_debugprintf(str);
          }
 
          /* Read Average Current */
          if(!BQ27441_read16(AVERAGE_CURRENT, &result16, 1000))
-             dmcf_debugprintf("Error Reading Average Current \r\n");
+             dmcf_debugprintf("Error Reading Average Current ");
          else
          {
-             sprintf(str, "Average Current: %dmA\r\n", result16);
+             sprintf(str, "Average Current: %dmA", result16);
              dmcf_debugprintf(str);
              if (result16 > 0) {
-                 dmcf_debugprintf("Status : charging\r\n");
+                 dmcf_debugprintf("Status : charging");
              } else {
-                 dmcf_debugprintf("Status : discharging\r\n");
+                 dmcf_debugprintf("Status : discharging");
              }
          }
 

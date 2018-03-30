@@ -63,19 +63,19 @@ bool BQ27441_initConfig()
     if(battpack_i2c == NULL)
         return 0;
 
-    dmcf_debugprintf("*************************************\r\n");
-	dmcf_debugprintf("Initializing BQ27441 Configuration\r\n");
-	dmcf_debugprintf("*************************************\r\n");
+    dmcf_debugprintf("*************************************");
+	dmcf_debugprintf("Initializing BQ27441 Configuration");
+	dmcf_debugprintf("*************************************");
 
 	//Default Config, DesignCapacity = 1200mAh, DesignEnergy = 1200mAh*3.7V, Terminate Voltage = 3200mV, Taper Current = 120mA
 	char str[64];
-	sprintf(str, "DesignCapacity = %dmAh\r\n", CONF_DESIGN_CAPACITY);
+	sprintf(str, "DesignCapacity = %dmAh", CONF_DESIGN_CAPACITY);
 	dmcf_debugprintf(str);
-	sprintf(str, "DesignEnergy = %dmAh * 3.7 = %dJ\r\n", CONF_DESIGN_CAPACITY, CONF_DESIGN_ENERGY);
+	sprintf(str, "DesignEnergy = %dmAh * 3.7 = %dJ", CONF_DESIGN_CAPACITY, CONF_DESIGN_ENERGY);
 	dmcf_debugprintf(str);
-	sprintf(str, "TerminateVoltage = %dmV\r\n", CONF_TERMINATE_VOLTAGE);
+	sprintf(str, "TerminateVoltage = %dmV", CONF_TERMINATE_VOLTAGE);
 	dmcf_debugprintf(str);
-	sprintf(str, "TaperRate = %dmAh/(0.1*%dmA) = %d\r\n", CONF_DESIGN_CAPACITY, CONF_TAPER_CURRENT, CONF_TAPER_RATE);
+	sprintf(str, "TaperRate = %dmAh/(0.1*%dmA) = %d", CONF_DESIGN_CAPACITY, CONF_TAPER_CURRENT, CONF_TAPER_RATE);
 	dmcf_debugprintf(str);
 
 	if (!BQ27441_read16(FLAGS, &result, 1000))
@@ -95,7 +95,10 @@ bool BQ27441_initConfig()
 		while(!(result & 0x0010))
 		{
 			if (!BQ27441_read16(FLAGS, &result, 1000))
-				return 0;
+			{
+			    dmcf_debugprintf("Flags %u", result);
+			    return 0;
+			}
 		}
 
 		/* Enable Block data memory control */
@@ -204,16 +207,16 @@ bool BQ27441_initConfig()
 				return 0;
 		}
 
-		dmcf_debugprintf("*************************************\r\n");
-		dmcf_debugprintf("BQ27441 config inialized succesfully\r\n");
-		dmcf_debugprintf("*************************************\r\n");
+		dmcf_debugprintf("*************************************");
+		dmcf_debugprintf("BQ27441 config inialized succesfully");
+		dmcf_debugprintf("*************************************");
 		return 1;
 	}
 	else
 	{
-		dmcf_debugprintf("*************************************\r\n");
-		dmcf_debugprintf("BQ27441 config inialized already\r\n");
-		dmcf_debugprintf("*************************************\r\n");
+		dmcf_debugprintf("*************************************");
+		dmcf_debugprintf("BQ27441 config inialized already");
+		dmcf_debugprintf("*************************************");
 		return 1;
 	}
 }
@@ -328,8 +331,8 @@ bool BQ27441_control(short subcommand, unsigned int timeout)
     bool ret;
     uint8_t buf[3];
     buf[0] = CONTROL;
-    buf[1] = subcommand & 0xFF00 >> 8;
-    buf[2] = subcommand & 0xFF;
+    buf[1] = (subcommand & 0xFF);
+    buf[2] = subcommand >> 8;;
 
     I2C_Transaction trans;
 
@@ -357,6 +360,8 @@ bool BQ27441_controlRead(short subcommand, short *result, unsigned int timeout)
 
     if(!ret)
         return ret;
+
+    buf[0] = CONTROL;
 
     trans.readBuf = result;
     trans.readCount = 2;
@@ -397,8 +402,8 @@ bool BQ27441_write16(short addr, short data, unsigned int timeout)
 
 	uint8_t buf[3];
 	buf[0] = addr;
-	buf[1] = data & 0xFF00 >> 8;
-	buf[2] = data & 0xFF;
+	buf[1] = (data & 0xFF);
+	buf[2] = data >> 8;
 
     I2C_Transaction trans;
 
