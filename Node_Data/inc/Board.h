@@ -84,6 +84,9 @@ extern "C" {
 #define Board_I2C0                  MSP_EXP432P401R_I2CB0
 #define Board_I2C_TPL0401           MSP_EXP432P401R_I2CB0
 #define Board_I2C_TMP               MSP_EXP432P401R_I2CB1
+#define BATTPACK_I2C                MSP_EXP432P401R_I2CB1
+#define DMCF_I2C_SLAVE_PORT         MSP_EXP432P401R_I2CB2
+#define DMCF_I2C_MASTER_PORT        MSP_EXP432P401R_I2CB3
 
 #define Board_I2CSLAVE0             MSP_EXP432P401R_I2CSLAVEB0
 

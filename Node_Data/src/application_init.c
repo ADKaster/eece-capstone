@@ -6,6 +6,8 @@
 
 #include <ti/display/Display.h>
 #include <pthread.h>
+#include <ti/drivers/I2C.h>
+#include <ti/drivers/GPIO.h>
 #include "Board.h"
 #include "dmcf_pubsub.h"
 #include "appdefs.h"
@@ -27,32 +29,35 @@ dmcf_node_t currentApplication = NODE_BAR;
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    dmcf_init();
+   // dmcf_init();
 
     createMainThread();
 
     appDisplay_Init();
 
-    if(NODE_FOO == currentApplication)
-     {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
+    I2C_init();
+    GPIO_init();
 
-        dmcf_publish_configure(BROADCAST_PING_MSG,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
-    else
-    {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
-
-        dmcf_publish_configure(BROADCAST_PING_MSG_2,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
+//    if(NODE_FOO == currentApplication)
+//     {
+//        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
+//                                 FREQ_UNLIMITED,
+//                                 APP_QUEUE_DEPTH);
+//
+//        dmcf_publish_configure(BROADCAST_PING_MSG,
+//                               FREQ_UNLIMITED,
+//                               APP_QUEUE_DEPTH);
+//    }
+//    else
+//    {
+//        dmcf_subscribe_configure(BROADCAST_PING_MSG,
+//                                 FREQ_UNLIMITED,
+//                                 APP_QUEUE_DEPTH);
+//
+//        dmcf_publish_configure(BROADCAST_PING_MSG_2,
+//                               FREQ_UNLIMITED,
+//                               APP_QUEUE_DEPTH);
+//    }
 
     return;
 }
