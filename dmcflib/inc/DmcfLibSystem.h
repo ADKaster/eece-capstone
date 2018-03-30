@@ -124,9 +124,10 @@ typedef struct alt_sts_s
 typedef struct imu_sts_s
 {
     struct timespec time;
-    float accel[3];
-    float gyro[3];
-    float mag[3];
+    double accel[3];
+    double gyro[3];
+    double mag[3];
+    uint8_t calibration[4]; // system, gyro, accel, mag
     uint32_t checksum;
 } imu_sts_msg_t;
 

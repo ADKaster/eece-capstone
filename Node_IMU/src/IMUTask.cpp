@@ -10,14 +10,18 @@
 #include <stdint.h>
 #include "inc/Adafruit_BNO055.h"
 
-//#include "sensorDefs.h"
 #include "inc/Board.h"
 #include "inc/IMUTask.h"
-#include "inc/debug_printf.h"
 
+extern "C" {
+#include "dmcf_debug.h"
+#include "dmcf_pubsub.h"
 #include <unistd.h>
+#include <FreeRTOS.h>
+#include <task.h>
+}
 
-#define IMU_I2C Board_I2C_TMP
+#define IMU_I2C Board_I2C0
 
 I2C_Handle imuI2CHandle;
 Adafruit_BNO055 bno;
@@ -42,7 +46,7 @@ bool init_imu_task(void)
         if(ret)
         {
             usleep(1000000);
-            debug_printf(const_cast<char *>("temperature: %d C"), bno.getTemp());
+            dmcf_debugprintf(const_cast<char *>("temperature: %d C"), bno.getTemp());
             bno.setExtCrystalUse(true);
         }
     }
@@ -57,9 +61,21 @@ void *IMUTask(void *arg0)
     if(!init_imu_task())
         while(1);
 
+    dmcf_pub_status_t pubstatus;
+    imu_sts_msg_t imu_status = {0};
+    // calibrations
+    uint8_t *system = &imu_status.calibration[0];
+    uint8_t *gyro = &imu_status.calibration[1];
+    uint8_t *accel = &imu_status.calibration[2];
+    uint8_t *mag = &imu_status.calibration[3];
+
+    TickType_t xLastWaketime = xTaskGetTickCount();
+    TickType_t xFrequency = portTICK_PERIOD_MS * 100;
 
     for(;;)
     {
+        clock_gettime(CLOCK_REALTIME, &imu_status.time);
+
         // Possible vector values can be:
         // - VECTOR_ACCELEROMETER - m/s^2
         // - VECTOR_MAGNETOMETER  - uT
@@ -70,15 +86,31 @@ void *IMUTask(void *arg0)
 
         imu::Vector<3> val = bno.getVector(Adafruit_BNO055::VECTOR_ACCELEROMETER);
 
-        debug_printf(const_cast<char *>("X: %f Y: %f Z: %f"), val.x(), val.y(), val.z());
+        for(int i = 0; i < 3; i++)
+            imu_status.accel[i] = val[i];
 
-        /* Display calibration status for each sensor. */
-        uint8_t system, gyro, accel, mag = 0;
-        bno.getCalibration(&system, &gyro, &accel, &mag);
+        dmcf_debugprintf(const_cast<char *>("X: %f Y: %f Z: %f"), val.x(), val.y(), val.z());
 
-        debug_printf(const_cast<char *>("CALIBRATION: Sys=%d Gyro=%d Accel=%d Mag=%d"), system, gyro, accel, mag);
+        val = bno.getVector(Adafruit_BNO055::VECTOR_GYROSCOPE);
 
-        usleep(500000);
+        for(int i = 0; i < 3; i++)
+            imu_status.gyro[i] = val[i];
+
+        val = bno.getVector(Adafruit_BNO055::VECTOR_MAGNETOMETER);
+
+        for(int i = 0; i < 3; i++)
+            imu_status.mag[i] = val[i];
+
+        /* Get calibration status for each sensor. */
+        bno.getCalibration(system, gyro, accel, mag);
+
+        dmcf_debugprintf(const_cast<char *>("CALIBRATION: Sys=%d Gyro=%d Accel=%d Mag=%d"), *system, *gyro, *accel, *mag);
+
+        pubstatus = dmcf_pub_put(IMU_STATUS_MSG, (void *)&imu_status);
+        if(pubstatus != PUB_SUCCESS)
+            dmcf_debugprintf(const_cast<char *>("Pubstatus: %d"), pubstatus);
+
+        vTaskDelayUntil(&xLastWaketime, xFrequency);
     }
 
     return NULL;

@@ -7,14 +7,13 @@
 #include <ti/display/Display.h>
 #include <pthread.h>
 #include "Board.h"
-//#include "dmcf_pubsub.h"
+#include "dmcf_pubsub.h"
 #include "appdefs.h"
 #include "IMUTask.h"
 
 /* Stack size in bytes */
-#define THREADSTACKSIZE   1024
+#define THREADSTACKSIZE   4096
 
-extern void *mainThread(void *arg0);
 void createMainThread(void);
 void appDisplay_Init(void);
 
@@ -23,40 +22,20 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-dmcf_node_t currentApplication = NODE_FOO;
+dmcf_node_t currentApplication = NODE_IMU;
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-//    dmcf_init();
+    dmcf_init();
 
     createMainThread();
 
     appDisplay_Init();
 
-//    I2C_init();
-/*
-    if(NODE_FOO == currentApplication)
-     {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG_2,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
-
-        dmcf_publish_configure(BROADCAST_PING_MSG,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
-    else
-    {
-        dmcf_subscribe_configure(BROADCAST_PING_MSG,
-                                 FREQ_UNLIMITED,
-                                 APP_QUEUE_DEPTH);
-
-        dmcf_publish_configure(BROADCAST_PING_MSG_2,
-                               FREQ_UNLIMITED,
-                               APP_QUEUE_DEPTH);
-    }
-    */
+    dmcf_publish_configure(IMU_STATUS_MSG,
+                           FREQ_UNLIMITED,
+                           APP_QUEUE_DEPTH);
 
     return;
 }
@@ -87,12 +66,6 @@ void createMainThread(void)
     retc |= pthread_attr_setstacksize(&attrs, THREADSTACKSIZE);
     if (retc != 0) {
         /* pthread_attr_setstacksize() failed */
-        while (1);
-    }
-
-    retc = pthread_create(&thread, &attrs, mainThread, NULL);
-    if (retc != 0) {
-        /* pthread_create() failed */
         while (1);
     }
 
