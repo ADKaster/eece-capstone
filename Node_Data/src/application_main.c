@@ -58,6 +58,7 @@
 #include "dmcf_debug.h"
 #include <stdio.h>
 #include "HAL_BQ27441.h"
+#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 
 void *mainThread(void *arg0)
 {
@@ -80,10 +81,13 @@ void *mainThread(void *arg0)
         dmcf_debugprintf("Make sure BOOSTXL-BATPAKMKII is connected and switch is flipped to \"CONNECTED\"");
     }
 
-    while (!BQ27441_initOpConfig())
+    if(!BQ27441_initOpConfig())
     {
         dmcf_debugprintf("Clearing BIE in Operation Configuration");
         usleep(200000);
+        // time to reset baby
+        MAP_WDT_A_startTimer();
+        while(1);
     }
 
     BQ27441_control(BAT_INSERT, 1000);

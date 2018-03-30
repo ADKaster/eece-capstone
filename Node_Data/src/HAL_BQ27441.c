@@ -88,7 +88,7 @@ bool BQ27441_initConfig()
 		if (!BQ27441_control(SET_CFGUPDATE, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 
 		result = 0;
 		/* Check if CFGUPMODE bit is set in FLAGS */
@@ -113,7 +113,7 @@ bool BQ27441_initConfig()
 		if (!BQ27441_command(DATA_BLOCK, 0x00, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 
 		char old_chksum = 0;
 		char new_chksum = 0;
@@ -125,7 +125,7 @@ bool BQ27441_initConfig()
 			if (!BQ27441_readChecksum(&old_chksum, 1000))
 				return 0;
 
-			usleep(200000);
+			usleep(400000);
 
 			/* Checksum calculation */
 			tmp_chksum = old_chksum;
@@ -183,13 +183,13 @@ bool BQ27441_initConfig()
 			if (!BQ27441_command(BLOCK_DATA_CHECKSUM, new_chksum, 1000))
 				return 0;
 
-			usleep(200000);
+			usleep(400000);
 
 			/* Read Block Data Checksum */
 			if (!BQ27441_readChecksum(&chksum, 1000))
 				return 0;
 
-			usleep(200000);
+			usleep(400000);
 		}
 		while(new_chksum != chksum);
 
@@ -197,7 +197,7 @@ bool BQ27441_initConfig()
 		if (!BQ27441_control(SOFT_RESET, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 
 		result = 0;
 		/* Check if CFGUPMODE bit is cleared in FLAGS */
@@ -231,7 +231,7 @@ bool BQ27441_initOpConfig()
 	if (!BQ27441_control(SET_CFGUPDATE, 1000))
 		return 0;
 
-	usleep(200000);
+	usleep(400000);
 
 	result = 0;
 	/* Check if CFGUPMODE bit is set in FLAGS */
@@ -253,7 +253,7 @@ bool BQ27441_initOpConfig()
 	if (!BQ27441_command(DATA_BLOCK, 0x00, 1000))
 		return 0;
 
-	usleep(200000);
+	usleep(400000);
 
 	char old_chksum = 0;
 	char new_chksum = 0;
@@ -265,7 +265,7 @@ bool BQ27441_initOpConfig()
 		if (!BQ27441_readChecksum(&old_chksum, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 
 		/* Checksum calculation */
 		tmp_chksum = old_chksum;
@@ -289,13 +289,13 @@ bool BQ27441_initOpConfig()
 		if (!BQ27441_command(BLOCK_DATA_CHECKSUM, new_chksum, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 
 		/* Read Block Data Checksum */
 		if (!BQ27441_readChecksum(&chksum, 1000))
 			return 0;
 
-		usleep(200000);
+		usleep(400000);
 	}
 	while(new_chksum != chksum);
 
@@ -303,7 +303,7 @@ bool BQ27441_initOpConfig()
 	if (!BQ27441_control(SOFT_RESET, 1000))
 		return 0;
 
-	usleep(200000);
+	usleep(400000);
 
 	result = 0;
 	/* Check if CFGUPMODE bit is cleared in FLAGS */
@@ -361,7 +361,7 @@ bool BQ27441_controlRead(short subcommand, short *result, unsigned int timeout)
     if(!ret)
         return ret;
 
-    usleep(200000);
+    usleep(400000);
 
     buf[0] = CONTROL;
 
