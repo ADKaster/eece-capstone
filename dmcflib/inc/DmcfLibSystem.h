@@ -148,8 +148,12 @@ typedef struct pyro_sts_s
 typedef struct bat_sts_s
 {
     struct timespec time;
-    uint32_t max_current;
-    uint32_t max_power;
+    int16_t design_capacity;       // mAh
+    int16_t remaining_capacity;    // mAh
+    int16_t state_of_charge;       // Integer Percent
+    int16_t temperature;           // deg C
+    int16_t voltage;               // mV
+    int16_t avg_current;           // mA
     uint32_t warnings;
     uint32_t checksum;
 } battery_sts_msg_t;

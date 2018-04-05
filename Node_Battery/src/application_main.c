@@ -53,7 +53,7 @@
 #include <unistd.h>
 #include <time.h>
 #include "appdefs.h"
-#include "dmcf_msgdef.h"
+#include "DmcfLibSystem.h"
 #include "dmcf_pubsub.h"
 #include "dmcf_debug.h"
 #include <stdio.h>
@@ -62,18 +62,11 @@
 
 void *mainThread(void *arg0)
 {
-#ifdef FREERTOS
     TickType_t xLastWaketime = xTaskGetTickCount();
     TickType_t xFrequency = portTICK_PERIOD_MS * 1000;
-#endif
-   struct timespec currtime;
-    //dmcf_pub_status_t       pubstatus;
-//    dmcf_sub_status_t       substatus;
-//    dmcf_nack_t             nack;
 
-    static uint32_t pubcount = 0;
-
-    dmcf_debugprintf("TEST TEST TEST");
+    dmcf_pub_status_t       pubstatus;
+    battery_sts_msg_t       battery_status;
 
     if (!BQ27441_initConfig())
     {
@@ -92,83 +85,53 @@ void *mainThread(void *arg0)
 
     BQ27441_control(BAT_INSERT, 1000);
 
-    short result16 = 0;
-    char str[64];
-
     for(;;)
     {
-        clock_gettime(CLOCK_REALTIME, &currtime);
+        clock_gettime(CLOCK_REALTIME, &battery_status.time);
 
-         dmcf_debugprintf("");
-         dmcf_debugprintf("");
-         dmcf_debugprintf("*************************************");
-         dmcf_debugprintf("Battery Information");
-         dmcf_debugprintf("*************************************");
+        /* Read Design Capacity */
+        if(!BQ27441_read16(DESIGN_CAPACITY, &battery_status.design_capacity, 1000))
+        {
+            battery_status.design_capacity = (~0);
+        }
 
-         /* Read Design Capacity */
-         if(!BQ27441_read16(DESIGN_CAPACITY, &result16, 1000))
-             dmcf_debugprintf("Error Reading Design Capacity ");
-         else
-         {
-             sprintf(str, "Design Capacity: %dmAh", result16);
-             dmcf_debugprintf(str);
-         }
+        /* Read Remaining Capacity */
+        if(!BQ27441_read16(REMAINING_CAPACITY, &battery_status.remaining_capacity, 1000))
+        {
+            battery_status.remaining_capacity = (~0);
+        }
 
-         /* Read Remaining Capacity */
-         if(!BQ27441_read16(REMAINING_CAPACITY, &result16, 1000))
-             dmcf_debugprintf("Error Reading Remaining Capacity ");
-         else
-         {
-             sprintf(str, "Remaining Capacity: %dmAh", result16);
-             dmcf_debugprintf(str);
-         }
+        /* Read State Of Charge */
+        if(!BQ27441_read16(STATE_OF_CHARGE, &battery_status.state_of_charge, 1000))
+        {
+            battery_status.state_of_charge = (~0);
+        }
 
-         /* Read State Of Charge */
-         if(!BQ27441_read16(STATE_OF_CHARGE, &result16, 1000))
-             dmcf_debugprintf("Error Reading State Of Charge ");
-         else
-         {
-             sprintf(str, "State of Charge: %d%%", (unsigned short)result16);
-             dmcf_debugprintf(str);
-         }
+        /* Read Temperature */
+        if(!BQ27441_read16(TEMPERATURE, &battery_status.temperature, 1000))
+        {
+            battery_status.temperature = (~0);
+        }
+        else
+        {
+            battery_status.temperature = battery_status.temperature/10 - 273;
+        }
 
-         /* Read Temperature */
-         if(!BQ27441_read16(TEMPERATURE, &result16, 1000))
-             dmcf_debugprintf("Error Reading Temperature ");
-         else
-         {
-             sprintf(str, "Temperature: %dC", result16/10 - 273);
-             dmcf_debugprintf(str);
-         }
+        /* Read Voltage */
+        if(!BQ27441_read16(VOLTAGE, &battery_status.voltage, 1000))
+        {
+            battery_status.voltage = (~0);
+        }
 
-         /* Read Voltage */
-         if(!BQ27441_read16(VOLTAGE, &result16, 1000))
-             dmcf_debugprintf("Error Reading Voltage ");
-         else
-         {
-             sprintf(str, "Voltage: %dmV", result16);
-             dmcf_debugprintf(str);
-         }
+        /* Read Average Current */
+        if(!BQ27441_read16(AVERAGE_CURRENT, &battery_status.avg_current, 1000))
+        {
+            battery_status.avg_current = (~0);
+        }
 
-         /* Read Average Current */
-         if(!BQ27441_read16(AVERAGE_CURRENT, &result16, 1000))
-             dmcf_debugprintf("Error Reading Average Current ");
-         else
-         {
-             sprintf(str, "Average Current: %dmA", result16);
-             dmcf_debugprintf(str);
-             if (result16 > 0) {
-                 dmcf_debugprintf("Status : charging");
-             } else {
-                 dmcf_debugprintf("Status : discharging");
-             }
-         }
+        pubstatus = dmcf_pub_put(BATTERY_STATUS_MSG, (void *)&battery_status);
 
-#ifdef FREERTOS
         vTaskDelayUntil( &xLastWaketime, xFrequency );
-#else
-        usleep(10000);
-#endif
     }
     return NULL;
 }

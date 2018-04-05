@@ -63,10 +63,6 @@ bool BQ27441_initConfig()
     if(battpack_i2c == NULL)
         return 0;
 
-    dmcf_debugprintf("*************************************");
-	dmcf_debugprintf("Initializing BQ27441 Configuration");
-	dmcf_debugprintf("*************************************");
-
 	//Default Config, DesignCapacity = 1200mAh, DesignEnergy = 1200mAh*3.7V, Terminate Voltage = 3200mV, Taper Current = 120mA
 	char str[64];
 	sprintf(str, "DesignCapacity = %dmAh", CONF_DESIGN_CAPACITY);
@@ -206,17 +202,12 @@ bool BQ27441_initConfig()
 			if (!BQ27441_read16(FLAGS, &result, 1000))
 				return 0;
 		}
-
-		dmcf_debugprintf("*************************************");
 		dmcf_debugprintf("BQ27441 config inialized succesfully");
-		dmcf_debugprintf("*************************************");
 		return 1;
 	}
 	else
 	{
-		dmcf_debugprintf("*************************************");
 		dmcf_debugprintf("BQ27441 config inialized already");
-		dmcf_debugprintf("*************************************");
 		return 1;
 	}
 }

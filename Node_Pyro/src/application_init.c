@@ -42,11 +42,14 @@ void ApplicationInit(void)
                            FREQ_UNLIMITED,
                            APP_QUEUE_DEPTH);
 
-    // todo remove testing things;
+    // todo remove testing things, belong in node_data
     dmcf_subscribe_configure(ALTIMETER_STATUS_MSG,
                              FREQ_UNLIMITED,
                              APP_QUEUE_DEPTH);
     dmcf_subscribe_configure(IMU_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(BATTERY_STATUS_MSG,
                              FREQ_UNLIMITED,
                              APP_QUEUE_DEPTH);
 

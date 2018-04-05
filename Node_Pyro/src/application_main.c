@@ -28,9 +28,6 @@ extern "C" {
 }
 #endif
 
-char txBuffer[PING_MSG_LEN];
-char rxBuffer[PING_MSG_LEN];
-
 void *mainThread(void *arg0)
 {
 #ifdef FREERTOS
@@ -42,12 +39,15 @@ void *mainThread(void *arg0)
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
-    time_t prev_tv_sec = 0;
+    time_t prev_sec_alt = 0;
+    time_t prev_sec_imu = 0;
+    time_t prev_sec_bat = 0;
 
     char printbuffer[256];
     pyro_sts_msg_t pyro_status = {0};
     alt_sts_msg_t altimeter_status;
     imu_sts_msg_t imu_status;
+    battery_sts_msg_t battery_status;
     pyro_trigger_msg_t trig;
 
     for (;;)
@@ -60,24 +60,36 @@ void *mainThread(void *arg0)
         pubstatus = dmcf_pub_put(PYRO_STATUS_MSG, (void *)&pyro_status);
 
         substatus = dmcf_sub_get(ALTIMETER_STATUS_MSG, (void *)&altimeter_status, &nack);
-        if(substatus == SUB_SUCCESS && altimeter_status.time.tv_sec != prev_tv_sec)
+        if(substatus == SUB_SUCCESS && altimeter_status.time.tv_sec != prev_sec_alt)
         {
             sprintf(printbuffer, "Time = %ld\n", altimeter_status.time.tv_sec);
             sprintf(printbuffer + strlen(printbuffer), "Temperature = %f *C\n", altimeter_status.temp);
-            sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", altimeter_status.press);
-            sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", altimeter_status.alt);  // this should be adjusted to your local forecast
+            //sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", altimeter_status.press);
+            //sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", altimeter_status.alt);  // this should be adjusted to your local forecast
             dmcf_debugprintf(printbuffer);
+            prev_sec_alt = altimeter_status.time.tv_sec;
         }
 
         substatus = dmcf_sub_get(IMU_STATUS_MSG, (void *)&imu_status, &nack);
-        if(substatus == SUB_SUCCESS && imu_status.time.tv_sec != prev_tv_sec)
+        if(substatus == SUB_SUCCESS && imu_status.time.tv_sec != prev_sec_imu)
         {
             sprintf(printbuffer, "Time = %ld\n", imu_status.time.tv_sec);
             sprintf(printbuffer + strlen(printbuffer), "Accel X = %f\n", imu_status.accel[0]);
-            sprintf(printbuffer + strlen(printbuffer), "Gyro Y = %f\n", imu_status.gyro[1]);
-            sprintf(printbuffer + strlen(printbuffer), "Mag Z = %f\n", imu_status.mag[2]);
+            //sprintf(printbuffer + strlen(printbuffer), "Gyro Y = %f\n", imu_status.gyro[1]);
+            //sprintf(printbuffer + strlen(printbuffer), "Mag Z = %f\n", imu_status.mag[2]);
             dmcf_debugprintf(printbuffer);
-            prev_tv_sec = imu_status.time.tv_sec;
+            prev_sec_imu = imu_status.time.tv_sec;
+        }
+
+        substatus = dmcf_sub_get(BATTERY_STATUS_MSG, (void *)&battery_status, &nack);
+        if(substatus == SUB_SUCCESS && battery_status.time.tv_sec != prev_sec_bat)
+        {
+            sprintf(printbuffer, "Time = %ld\n", battery_status.time.tv_sec);
+            sprintf(printbuffer + strlen(printbuffer), "Capacity: %dmA\n", battery_status.remaining_capacity);
+            //sprintf(printbuffer + strlen(printbuffer), "Status: %d pct\n", battery_status.state_of_charge);
+            //sprintf(printbuffer + strlen(printbuffer), "Avg Curr: %d\n", battery_status.avg_current);
+            dmcf_debugprintf(printbuffer);
+            prev_sec_bat = battery_status.time.tv_sec;
         }
 
         substatus = dmcf_sub_get(PYRO_TRIGGER_MSG, (void *)&trig, &nack);
