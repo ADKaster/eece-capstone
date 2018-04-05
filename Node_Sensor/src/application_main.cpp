@@ -27,6 +27,7 @@ extern "C"
 Adafruit_BNO055 bno;
 Adafruit_BMP280 bmp;
 I2C_Handle sensorHandle;
+uint8_t pyroIdx = 0;
 
 bool init_altimeter(void);
 bool init_imu(void);
@@ -105,12 +106,11 @@ void run_altimeter(void)
 {
     static char printbuffer[256];
     static uint32_t pubcount = 0;
+    static time_t prev_tv_sec;
 
     alt_sts_msg_t altimeter_status = { 0, 0, 0, 0, 0 };
     pyro_sts_msg_t pyro_status;
     pyro_trigger_msg_t pyro_trigger;
-    uint8_t pyroIdx = 0;
-    time_t prev_tv_sec;
     dmcf_pub_status_t       pubstatus;
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
@@ -128,9 +128,9 @@ void run_altimeter(void)
     if(SUB_SUCCESS == substatus && pyro_status.time.tv_sec != prev_tv_sec)
     {
         dmcf_debugprintf(const_cast<char *>("Pyro Status Received!"));
-        sprintf(printbuffer, "Time = %ld\n", pyro_status.time.tv_sec);
-        sprintf(printbuffer + strlen(printbuffer), "Pyro Status: max_I %lu max_P %lu", pyro_status.max_current, pyro_status.max_power);
-        sprintf(printbuffer + strlen(printbuffer), "Enabled pyros: %d", pyro_status.enabled[0] + pyro_status.enabled[1] * 10 + pyro_status.enabled[2] * 100 + pyro_status.enabled[3] * 1000);
+        //sprintf(printbuffer, "Time = %ld\n", pyro_status.time.tv_sec);
+        //sprintf(printbuffer + strlen(printbuffer), "Pyro Status: max_I %lu max_P %lu", pyro_status.max_current, pyro_status.max_power);
+        //sprintf(printbuffer + strlen(printbuffer), "Enabled pyros: %d", pyro_status.enabled[0] + pyro_status.enabled[1] * 10 + pyro_status.enabled[2] * 100 + pyro_status.enabled[3] * 1000);
         dmcf_debugprintf(printbuffer);
         prev_tv_sec = pyro_status.time.tv_sec;
     }
