@@ -28,10 +28,10 @@
     EUSCI_B_I2C_START_INTERRUPT )
 
 #ifndef DMCF_I2C_SLAVE_PORT
-    #define DMCF_I2C_SLAVE_PORT (1)
+    #define DMCF_I2C_SLAVE_PORT (1) // index into i2c slave config array in MSP432P401R.c
 #endif
 #ifndef DMCF_I2C_MASTER_PORT
-    #define DMCF_I2C_MASTER_PORT (2)
+    #define DMCF_I2C_MASTER_PORT (2) // index into i2c slave config array in MSP432P401R.c
 #endif
 
 static I2C_Handle i2cMasterHandle;

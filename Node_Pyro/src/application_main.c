@@ -47,6 +47,7 @@ void *mainThread(void *arg0)
     char printbuffer[256];
     pyro_sts_msg_t pyro_status = {0};
     alt_sts_msg_t altimeter_status;
+    imu_sts_msg_t imu_status;
     pyro_trigger_msg_t trig;
 
     for (;;)
@@ -66,7 +67,17 @@ void *mainThread(void *arg0)
             sprintf(printbuffer + strlen(printbuffer), "Pressure = %f Pa\n", altimeter_status.press);
             sprintf(printbuffer + strlen(printbuffer), "Approx altitude = %f m\n", altimeter_status.alt);  // this should be adjusted to your local forecast
             dmcf_debugprintf(printbuffer);
-            prev_tv_sec = altimeter_status.time.tv_sec;
+        }
+
+        substatus = dmcf_sub_get(IMU_STATUS_MSG, (void *)&imu_status, &nack);
+        if(substatus == SUB_SUCCESS && imu_status.time.tv_sec != prev_tv_sec)
+        {
+            sprintf(printbuffer, "Time = %ld\n", imu_status.time.tv_sec);
+            sprintf(printbuffer + strlen(printbuffer), "Accel X = %f\n", imu_status.accel[0]);
+            sprintf(printbuffer + strlen(printbuffer), "Gyro Y = %f\n", imu_status.gyro[1]);
+            sprintf(printbuffer + strlen(printbuffer), "Mag Z = %f\n", imu_status.mag[2]);
+            dmcf_debugprintf(printbuffer);
+            prev_tv_sec = imu_status.time.tv_sec;
         }
 
         substatus = dmcf_sub_get(PYRO_TRIGGER_MSG, (void *)&trig, &nack);

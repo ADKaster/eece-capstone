@@ -23,7 +23,7 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-dmcf_node_t currentApplication = NODE_ALT;
+dmcf_node_t currentApplication = NODE_SENSOR;
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
@@ -38,7 +38,10 @@ void ApplicationInit(void)
                            FREQ_UNLIMITED,
                            APP_QUEUE_DEPTH);
 
-    // TODO Remove this, testing only
+    dmcf_publish_configure(IMU_STATUS_MSG,
+                           FREQ_UNLIMITED,
+                           APP_QUEUE_DEPTH);
+
     dmcf_publish_configure(PYRO_TRIGGER_MSG,
                            FREQ_UNLIMITED,
                            APP_QUEUE_DEPTH);

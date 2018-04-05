@@ -26,9 +26,8 @@
  ***************************************************************************/
 
 
-Adafruit_BMP280::Adafruit_BMP280(I2C_Handle *bus)
+Adafruit_BMP280::Adafruit_BMP280(void)
 {
-    _bus = bus;
     _cs = -1;
 }
 

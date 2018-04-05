@@ -25,9 +25,9 @@
 typedef enum nodeenum_tag
 {
     NODE_PYRO,      /**< Pyro holds pyrotechnic triggers (LEDs for testing) */
-    NODE_ALT,       /**< Altimeter contains BMP280 */
-    NODE_IMU,       /**< IMU contains BNO055 */
-    NODE_DATA,      /**< Data contains SD card and battery(?) */
+    NODE_SENSOR,    /**< Altimeter BMP280, IMU BNO055 */
+    NODE_DATA,      /**< Data contains SD card*/
+    NODE_BATTERY,   /**< Battery contains main LiPo Battery */
     BROADCAST,      /**< MUST BE INCLUDED in this enum */
 } dmcf_node_t;
 
@@ -45,9 +45,9 @@ extern dmcf_node_t currentApplication;
 typedef enum slvaddr_tag
 {
     SLAVEADDR_PYRO = 0x48,  /**< Address for Pyro */
-    SLAVEADDR_ALT = 0x49,   /**< Address for Altimeter */
-    SLAVEADDR_IMU = 0x50,   /**< Address for IMU */
-    SLAVEADDR_DATA = 0x51,  /**< Address for Data */
+    SLAVEADDR_SENSOR = 0x49,   /**< Address for sensors */
+    SLAVEADDR_DATA = 0x50,   /**< Address for SD Card */
+    SLAVEADDR_BATTERY = 0x51,  /**< Address for Batt */
 } dmcf_slave_addr_t;
 
 extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
@@ -60,9 +60,9 @@ extern dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES];
 typedef enum masaddr_tag
 {
     MASTERADDR_PYRO = 0x40,  /**< Address for Pyro */
-    MASTERADDR_ALT = 0x41,  /**< Address for Altimeter */
-    MASTERADDR_IMU = 0x42,  /**< Address for IMU */
-    MASTERADDR_DATA = 0x43, /**< Address for Data */
+    MASTERADDR_SENSOR = 0x41,  /**< Address for sensors */
+    MASTERADDR_DATA = 0x42,  /**< Address for SD Card */
+    MASTERADDR_BATTERY = 0x43, /**< Address for Batt */
 } dmcf_master_addr_t;
 
 extern dmcf_master_addr_t gTheMasterAddresses[NUM_NODES];

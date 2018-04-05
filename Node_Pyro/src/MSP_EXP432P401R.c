@@ -447,7 +447,7 @@ const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT
         .baseAddr = EUSCI_B0_BASE,
         .intNum = INT_EUSCIB0,
         .intPriority = ~0,
-        .slaveAddress = SLAVEADDR_ALT,
+        .slaveAddress = SLAVEADDR_PYRO,
         .dataPin = I2CSLAVEMSP432_P1_6_UCB0SDA,
         .clkPin = I2CSLAVEMSP432_P1_7_UCB0SCL
     },
@@ -455,7 +455,7 @@ const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT
         .baseAddr = EUSCI_B1_BASE,
         .intNum = INT_EUSCIB1,
         .intPriority = ~0,
-        .slaveAddress = SLAVEADDR_ALT,
+        .slaveAddress = SLAVEADDR_PYRO,
         .dataPin = I2CSLAVEMSP432_P6_4_UCB1SDA,
         .clkPin = I2CSLAVEMSP432_P6_5_UCB1SCL
     },
@@ -463,7 +463,7 @@ const I2CSlaveMSP432_HWAttrs i2cSlaveMSP432HWAttrs[MSP_EXP432P401R_I2CSLAVECOUNT
         .baseAddr = EUSCI_B2_BASE,
         .intNum = INT_EUSCIB2,
         .intPriority = ~0,
-        .slaveAddress = SLAVEADDR_ALT,
+        .slaveAddress = SLAVEADDR_PYRO,
         .dataPin = I2CSLAVEMSP432_P3_6_UCB2SDA,
         .clkPin = I2CSLAVEMSP432_P3_7_UCB2SCL
     }

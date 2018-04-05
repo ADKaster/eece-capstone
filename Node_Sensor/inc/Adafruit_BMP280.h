@@ -125,7 +125,7 @@ class Adafruit_BMP280_Unified : public Adafruit_Sensor
 
 class Adafruit_BMP280{
   public:
-    Adafruit_BMP280(I2C_Handle *bus);
+    Adafruit_BMP280(void);
 //    Adafruit_BMP280(int8_t cspin);
 //    Adafruit_BMP280(int8_t cspin, int8_t mosipin, int8_t misopin, int8_t sckpin);
 
@@ -133,6 +133,7 @@ class Adafruit_BMP280{
     float readTemperature(void);
     float readPressure(void);
     float readAltitude(float seaLevelhPa = 1013.25);
+    void  setBus(I2C_Handle *newBus) { _bus = newBus; }
 
   private:
 

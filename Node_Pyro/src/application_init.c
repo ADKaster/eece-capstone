@@ -46,6 +46,9 @@ void ApplicationInit(void)
     dmcf_subscribe_configure(ALTIMETER_STATUS_MSG,
                              FREQ_UNLIMITED,
                              APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(IMU_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
 
     return;
 }

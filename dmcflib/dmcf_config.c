@@ -32,7 +32,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     [PYRO_TRIGGER_MSG] =
     {
          .message_number =   PYRO_TRIGGER_MSG,
-         .message_source =   NODE_ALT,
+         .message_source =   NODE_SENSOR,
          .message_dest =     BROADCAST,
          .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
@@ -41,7 +41,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     [ALTIMETER_STATUS_MSG] =
     {
          .message_number =   ALTIMETER_STATUS_MSG,
-         .message_source =   NODE_ALT,
+         .message_source =   NODE_SENSOR,
          .message_dest =     BROADCAST,
          .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
@@ -50,7 +50,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     [IMU_STATUS_MSG] =
     {
          .message_number =   IMU_STATUS_MSG,
-         .message_source =   NODE_IMU,
+         .message_source =   NODE_SENSOR,
          .message_dest =     BROADCAST,
          .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
@@ -68,7 +68,7 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
     [BATTERY_STATUS_MSG] =
     {
          .message_number =   BATTERY_STATUS_MSG,
-         .message_source =   NODE_DATA,
+         .message_source =   NODE_BATTERY,
          .message_dest =     BROADCAST,
          .message_type =     TX_TYPE_BROADCAST,
          .message_bus =      BUS_TYPE_I2C,
@@ -94,9 +94,9 @@ dmcf_msgdef_t gTheMessageDefinitions[NUM_MSG_DEFINITONS] =
 dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
 {
     MASTERADDR_PYRO,
-    MASTERADDR_ALT,
-    MASTERADDR_IMU,
+    MASTERADDR_SENSOR,
     MASTERADDR_DATA,
+    MASTERADDR_BATTERY,
 };
 
 /*! \var gTheSlaveAddresses
@@ -105,8 +105,8 @@ dmcf_master_addr_t gTheMasterAddresses[NUM_NODES] =
 dmcf_slave_addr_t gTheSlaveAddresses[NUM_NODES] =
 {
     SLAVEADDR_PYRO,
-    SLAVEADDR_ALT,
-    SLAVEADDR_IMU,
+    SLAVEADDR_SENSOR,
     SLAVEADDR_DATA,
+    SLAVEADDR_BATTERY,
 };
 
