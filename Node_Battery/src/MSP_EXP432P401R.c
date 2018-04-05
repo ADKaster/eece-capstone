@@ -263,7 +263,7 @@ DisplayUart_Object displayUartObject;
 static char displayBuf[MAXPRINTLEN];
 
 const DisplayUart_HWAttrs displayUartHWAttrs = {
-    .uartIdx = MSP_EXP432P401R_UARTA2,
+    .uartIdx = MSP_EXP432P401R_UARTA0,
     .baudRate = 115200,
     .mutexTimeout = (unsigned int)(-1),
     .strBuf = displayBuf,
