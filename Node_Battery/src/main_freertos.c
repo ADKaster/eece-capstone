@@ -78,6 +78,7 @@ void vApplicationMallocFailedHook()
     /* Handle Memory Allocation Errors */
     while(1)
     {
+        vTaskEndScheduler();
     }
 }
 
@@ -95,5 +96,6 @@ void vApplicationStackOverflowHook(TaskHandle_t pxTask, char *pcTaskName)
     //Handle FreeRTOS Stack Overflow
     while(1)
     {
+        vTaskEndScheduler();
     }
 }

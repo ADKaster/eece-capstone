@@ -256,7 +256,7 @@ const UDMAMSP432_Config UDMAMSP432_config = {
  */
 #include <ti/display/Display.h>
 #include <ti/display/DisplayUart.h>
-#define MAXPRINTLEN 1024
+#define MAXPRINTLEN 8192
 
 DisplayUart_Object displayUartObject;
 
