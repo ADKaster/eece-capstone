@@ -18,10 +18,12 @@ class SubplotAnimation(animation.TimedAnimation):
         }
         self.max_points = 300
 
+        # establish subplots
         self.fig = plt.figure()
         self.axes_altitude = self.fig.add_subplot(1, 2, 1)
         self.axes_temperature = self.fig.add_subplot(1, 2, 2)
 
+        # configure altitude subplot
         self.line_altitude = Line2D([], [], color='blue')
         self.axes_altitude.add_line(self.line_altitude)
         self.axes_altitude.set_xlim(0, self.max_points/5)
@@ -30,6 +32,7 @@ class SubplotAnimation(animation.TimedAnimation):
         self.axes_altitude.set_xlabel('Time (s)')
         self.axes_altitude.set_ylabel('Altitude (m)')
 
+        # configure temperature subplot
         self.line_temperature = Line2D([], [], color='green')
         self.axes_temperature.add_line(self.line_temperature)
         self.axes_temperature.set_xlim(0, self.max_points/5)
@@ -38,24 +41,29 @@ class SubplotAnimation(animation.TimedAnimation):
         self.axes_temperature.set_xlabel('Time (s)')
         self.axes_temperature.set_ylabel('Temperature (s)')
 
+        # start animation
         animation.TimedAnimation.__init__(self, self.fig, interval=50, blit=True)
 
     def _draw_frame(self, _):
         self.serial_read()
 
-        while len(self.data_dict['altitude'][0]) > self.max_points:
-            self.data_dict['altitude'][0].pop(0)
-            self.data_dict['altitude'][1].pop(0)
-            self.axes_altitude.set_xlim(self.data_dict['altitude'][0][0], self.data_dict['altitude'][0][-1], auto=True)
-        self.line_altitude.set_data(self.data_dict['altitude'][0], self.data_dict['altitude'][1])
-
-        while len(self.data_dict['temperature'][0]) > self.max_points:
-            self.data_dict['temperature'][0].pop(0)
-            self.data_dict['temperature'][1].pop(0)
-            self.axes_temperature.set_xlim(self.data_dict['temperature'][0][0], self.data_dict['temperature'][0][-1], auto=True)
-        self.line_temperature.set_data(self.data_dict['temperature'][0], self.data_dict['temperature'][1])
+        self.axes_altitude, self.line_altitude = self.adjust_dataset('altitude', self.axes_altitude, self.line_altitude)
+        self.axes_temperature, self.line_temperature = self.adjust_dataset(
+            'temperature', self.axes_temperature, self.line_temperature
+        )
 
         self._drawn_artists = [self.line_altitude, self.line_temperature]
+
+    def adjust_dataset(self, category_str, axes, line):
+        # trim dataset to be within the max number of points
+        # max points can be changes with some other benchmark (time elapsed?)
+        while len(self.data_dict[category_str][0]) > self.max_points:
+            self.data_dict[category_str][0].pop(0)
+            self.data_dict[category_str][1].pop(0)
+            axes.set_xlim(self.data_dict[category_str][0][0], self.data_dict[category_str][0][-1], auto=True)
+        line.set_data(self.data_dict[category_str][0], self.data_dict[category_str][1])
+
+        return axes, line
 
     def new_frame_seq(self):
         # required for implementation; change iterable to something useful if need be
