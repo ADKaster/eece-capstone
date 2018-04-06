@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.animation as animation
@@ -66,7 +65,7 @@ class SubplotAnimation(animation.TimedAnimation):
         return axes, line
 
     def new_frame_seq(self):
-        # required for implementation; change iterable to something useful if need be
+        # required for implementation; change iterable to something useful if need be (like a cyclical timing sequence)
         self.serial_read()
         return iter(range(1))
 
