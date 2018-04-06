@@ -1,110 +1,98 @@
-"""
-Matplotlib Animation Example
-
-author: Jake Vanderplas
-email: vanderplas@astro.washington.edu
-website: http://jakevdp.github.com
-license: BSD
-Please feel free to use and modify this, but keep the above information. Thanks!
-"""
-
 import numpy as np
-from matplotlib import pyplot as plt
-from matplotlib import animation
+import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
+import matplotlib.animation as animation
 import serial
 import io
 from time import time
 from random import randint
 
-def animated_figure():
 
-    def serial_read():
+class SubplotAnimation(animation.TimedAnimation):
+    def __init__(self):
+        self.start_time = time()
+        self.data_dict = {
+            "temperature": ([], []),
+            "pressure": ([], []),
+            "altitude": ([], [])
+        }
+        self.max_points = 300
 
-        ser = serial.serial_for_url('loop://', timeout=1)
+        self.fig = plt.figure()
+        self.axes_altitude = self.fig.add_subplot(1, 2, 1)
+        self.axes_temperature = self.fig.add_subplot(1, 2, 2)
+
+        self.line_altitude = Line2D([], [], color='blue')
+        self.axes_altitude.add_line(self.line_altitude)
+        self.axes_altitude.set_xlim(0, self.max_points/5)
+        self.axes_altitude.set_ylim(0, 10)
+        self.axes_altitude.set_title('Altitude v Time')
+        self.axes_altitude.set_xlabel('Time (s)')
+        self.axes_altitude.set_ylabel('Altitude (m)')
+
+        self.line_temperature = Line2D([], [], color='green')
+        self.axes_temperature.add_line(self.line_temperature)
+        self.axes_temperature.set_xlim(0, self.max_points/5)
+        self.axes_temperature.set_ylim(60, 80)
+        self.axes_temperature.set_title('Temperature v Time')
+        self.axes_temperature.set_xlabel('Time (s)')
+        self.axes_temperature.set_ylabel('Temperature (s)')
+
+        animation.TimedAnimation.__init__(self, self.fig, interval=50, blit=True)
+
+    def _draw_frame(self, _):
+        self.serial_read()
+
+        while len(self.data_dict['altitude'][0]) > self.max_points:
+            self.data_dict['altitude'][0].pop(0)
+            self.data_dict['altitude'][1].pop(0)
+            self.axes_altitude.set_xlim(self.data_dict['altitude'][0][0], self.data_dict['altitude'][0][-1], auto=True)
+        self.line_altitude.set_data(self.data_dict['altitude'][0], self.data_dict['altitude'][1])
+
+        while len(self.data_dict['temperature'][0]) > self.max_points:
+            self.data_dict['temperature'][0].pop(0)
+            self.data_dict['temperature'][1].pop(0)
+            self.axes_temperature.set_xlim(self.data_dict['temperature'][0][0], self.data_dict['temperature'][0][-1], auto=True)
+        self.line_temperature.set_data(self.data_dict['temperature'][0], self.data_dict['temperature'][1])
+
+        self._drawn_artists = [self.line_altitude, self.line_temperature]
+
+    def new_frame_seq(self):
+        # required for implementation; change iterable to something useful if need be
+        self.serial_read()
+        return iter(range(1))
+
+    def _init_draw(self):
+        lines = [self.line_altitude, self.line_temperature]
+        for l in lines:
+            l.set_data([], [])
+
+    def serial_read(self):
+        ser = serial.serial_for_url('loop://', timeout=0.1)
 
         serial_writer = io.TextIOWrapper(io.BufferedWriter(ser))
 
         serial_writer.write('alt,{0}\n'.format(randint(1, 10)))
         serial_writer.flush()
-
+        serial_writer.write('tem,{0}\n'.format(randint(67, 73)))
+        serial_writer.flush()
         serial_reader = io.TextIOWrapper(io.BufferedReader(ser))
 
-        line_in = serial_reader.readline()
-        line_split = line_in.split(',')
-        if line_split[0] == 'alt':
-            data_dict['altitude'][0].append(time()-start_time)
-            data_dict['altitude'][1].append(int(line_split[1]))
+        try:
+            line_in = serial_reader.readline()
+            while line_in != '':
+                line_split = line_in.split(',')
+                if line_split[0] == 'alt':
+                    self.data_dict['altitude'][0].append(time()-self.start_time)
+                    self.data_dict['altitude'][1].append(int(line_split[1]))
+                elif line_split[0] == 'tem':
+                    self.data_dict['temperature'][0].append(time() - self.start_time)
+                    self.data_dict['temperature'][1].append(int(line_split[1]))
+                line_in = serial_reader.readline()
+        except ValueError:
+            pass
 
-    # def serial_write():
-    #     serial_writer = io.TextIOWrapper(io.BufferedWriter(ser))
-    #
-    #     serial_writer.write('alt,{0}\n'.format(randint(1, 10)))
-    #     serial_writer.flush
 
-    start_time = time()
-    max_points = 30
-    # First set up the figure, the axis, and the plot element we want to animate
-    fig = plt.figure()
-    ax = plt.axes(xlim=(0, max_points), ylim=(0, 10))
-    line_altitude, = ax.plot([], [], lw=2)
-
-    data_dict = {
-        "temperature": ([], []),
-        "pressure": ([], []),
-        "altitude": ([], [])
-    }
-
-    # initialization function: plot the background of each frame
-    def init():
-        line_altitude.set_data([], [])
-        return line_altitude,
-
-    # animation function.  This is called sequentially
-    def animate(i):
-        # serial_write()
-        serial_read()
-        # x = np.linspace(0, 2, 1000)
-        # y = np.sin(2 * np.pi * (x - 0.01 * i))
-        while len(data_dict['altitude'][0]) > max_points:
-            data_dict['altitude'][0].pop(0)
-            data_dict['altitude'][1].pop(0)
-            ax.set_xlim(data_dict['altitude'][0][0], data_dict['altitude'][0][-1], auto=True)
-
-        else:
-            x = data_dict['altitude'][0]
-            y = data_dict['altitude'][1]
-        line_altitude.set_data(x, y)
-        return line_altitude,
-
-    # call the animator.  blit=True means only re-draw the parts that have changed.
-    anim = animation.FuncAnimation(fig, animate, init_func=init,
-                                   frames=200, interval=10, blit=False)
-
-    # save the animation as an mp4.  This requires ffmpeg or mencoder to be
-    # installed.  The extra_args ensure that the x264 codec is used, so that
-    # the video can be embedded in html5.  You may need to adjust this for
-    # your system: for more information, see
-    # http://matplotlib.sourceforge.net/api/animation_api.html
-    # anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-
+if __name__ == '__main__':
+    ani = SubplotAnimation()
     plt.show()
-
-
-
-
-
-def experiment_serial():
-    ser = serial.serial_for_url('loop://', timeout=1)
-    # ser = serial.Serial(port=None)
-    sio = io.TextIOWrapper(io.BufferedRWPair(ser, ser))
-
-    sio.write("hello\n")
-    sio.flush()     # it is buffering. required to get the data out *now*
-    hello = sio.readline()
-    print(hello == "hello\n")
-
-
-if __name__ == "__main__":
-    # experiment_serial()
-    animated_figure()
-
