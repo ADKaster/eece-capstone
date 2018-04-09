@@ -37,7 +37,7 @@ void run_imu(void);
 void *mainThread(void *arg0)
 {
     TickType_t xLastWaketime = xTaskGetTickCount();
-    TickType_t xFrequency = portTICK_PERIOD_MS * 50;
+    TickType_t xFrequency = portTICK_PERIOD_MS * 200;
 
     bool alt_good = true;
     bool imu_good = true;

@@ -65,7 +65,7 @@ void *mainThread(void *arg0)
     TickType_t xLastWaketime = xTaskGetTickCount();
     TickType_t xFrequency = portTICK_PERIOD_MS * 1000;
 
-    dmcf_pub_status_t       pubstatus;
+    //dmcf_pub_status_t       pubstatus;
     battery_sts_msg_t       battery_status;
 
     if (!BQ27441_initConfig())
@@ -129,7 +129,10 @@ void *mainThread(void *arg0)
             battery_status.avg_current = (~0);
         }
 
-        pubstatus = dmcf_pub_put(BATTERY_STATUS_MSG, (void *)&battery_status);
+        dmcf_debugprintf("State of charge: %d %%", battery_status.state_of_charge);
+        dmcf_debugprintf("Average Current: %dmA", battery_status.avg_current);
+
+        //pubstatus = dmcf_pub_put(BATTERY_STATUS_MSG, (void *)&battery_status);
 
         vTaskDelayUntil( &xLastWaketime, xFrequency );
     }

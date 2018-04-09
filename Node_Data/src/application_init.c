@@ -6,14 +6,13 @@
 
 #include <ti/display/Display.h>
 #include <pthread.h>
-#include <ti/drivers/I2C.h>
-#include <ti/drivers/GPIO.h>
 #include "Board.h"
+#include "DmcfLibSystem.h"
 #include "dmcf_pubsub.h"
 #include "appdefs.h"
 
 /* Stack size in bytes */
-#define THREADSTACKSIZE   2048
+#define THREADSTACKSIZE   4096
 
 extern void *mainThread(void *arg0);
 void createMainThread(void);
@@ -24,24 +23,27 @@ pthread_mutex_t gDisplayMuxtex;
 Display_Handle gTheDisplay;
 
 /* CHANGE THIS FOR DIFFERENT APPLICATION */
-dmcf_node_t currentApplication = NODE_BATTERY;
+dmcf_node_t currentApplication = NODE_DATA;;
 
 /* Initialize the entire application before the scheduler. Initialize dmcf library BEFORE application subscribes to anything!!! */
 void ApplicationInit(void)
 {
-    GPIO_init();
-
-    I2C_init();
-
-    //dmcf_init();
+    dmcf_init();
 
     createMainThread();
 
     appDisplay_Init();
 
-    //dmcf_publish_configure(BATTERY_STATUS_MSG,
-    //                       FREQ_UNLIMITED,
-    //                       APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(ALTIMETER_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(IMU_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
+    dmcf_subscribe_configure(BATTERY_STATUS_MSG,
+                             FREQ_UNLIMITED,
+                             APP_QUEUE_DEPTH);
+
     return;
 }
 

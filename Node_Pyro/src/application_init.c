@@ -41,7 +41,7 @@ void ApplicationInit(void)
     dmcf_publish_configure(PYRO_STATUS_MSG,
                            FREQ_UNLIMITED,
                            APP_QUEUE_DEPTH);
-
+#if 0
     // todo remove testing things, belong in node_data
     dmcf_subscribe_configure(ALTIMETER_STATUS_MSG,
                              FREQ_UNLIMITED,
@@ -52,7 +52,7 @@ void ApplicationInit(void)
     dmcf_subscribe_configure(BATTERY_STATUS_MSG,
                              FREQ_UNLIMITED,
                              APP_QUEUE_DEPTH);
-
+#endif
     return;
 }
 

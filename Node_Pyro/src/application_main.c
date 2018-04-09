@@ -35,7 +35,7 @@ void *mainThread(void *arg0)
     TickType_t xFrequency = portTICK_PERIOD_MS * 50;
 #endif
 
-    dmcf_pub_status_t       pubstatus;
+    //dmcf_pub_status_t       pubstatus;
     dmcf_sub_status_t       substatus;
     dmcf_nack_t             nack;
 
@@ -59,6 +59,7 @@ void *mainThread(void *arg0)
 
         pubstatus = dmcf_pub_put(PYRO_STATUS_MSG, (void *)&pyro_status);
 
+#if 0
         substatus = dmcf_sub_get(ALTIMETER_STATUS_MSG, (void *)&altimeter_status, &nack);
         if(substatus == SUB_SUCCESS && altimeter_status.time.tv_sec != prev_sec_alt)
         {
@@ -80,6 +81,11 @@ void *mainThread(void *arg0)
             dmcf_debugprintf(printbuffer);
             prev_sec_imu = imu_status.time.tv_sec;
         }
+        else if(imu_status.time.tv_sec != prev_sec_imu)
+        {
+            dmcf_debugprintf("IMU Sub status is %d", substatus);
+            prev_sec_imu = imu_status.time.tv_sec;
+        }
 
         substatus = dmcf_sub_get(BATTERY_STATUS_MSG, (void *)&battery_status, &nack);
         if(substatus == SUB_SUCCESS && battery_status.time.tv_sec != prev_sec_bat)
@@ -91,7 +97,7 @@ void *mainThread(void *arg0)
             dmcf_debugprintf(printbuffer);
             prev_sec_bat = battery_status.time.tv_sec;
         }
-
+#endif
         substatus = dmcf_sub_get(PYRO_TRIGGER_MSG, (void *)&trig, &nack);
         if(substatus == SUB_SUCCESS)
         {

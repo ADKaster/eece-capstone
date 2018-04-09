@@ -28,8 +28,8 @@ void *p2p_sub_scheduler_task(void *arg0);
 
 /******* File Defines *******/
 #define P2P_SCHED_STACK_SIZE (1024) /* 1kiB of stack */
-#define P2P_BUFSIZE (0x80) /* 128 words per message */
-#define SUB_BUFSIZE (0x80) /* Hold 128 words */
+#define P2P_BUFSIZE (0x100) /* 256 words per message */
+#define SUB_BUFSIZE (0x100) /* Hold 256 words */
 #define PUB_BUFSIZE SUB_BUFSIZE
 
 /******* Globals *****/
