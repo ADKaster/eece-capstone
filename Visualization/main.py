@@ -5,41 +5,43 @@ import serial
 import io
 from time import time
 from random import randint
+from math import sqrt
 
 
 class SubplotAnimation(animation.TimedAnimation):
     def __init__(self):
         self.start_time = time()
         self.data_dict = {
-            "temperature": ([], []),
-            "pressure": ([], []),
-            "altitude": ([], [])
+            "acceleration": ([0], [0]),
+            "altitude": ([0], [0])
         }
-        self.max_points = 300
+        self.display_time = 60
 
         # establish subplots
         self.fig = plt.figure()
-        self.axes_altitude = self.fig.add_subplot(1, 2, 1)
-        self.axes_temperature = self.fig.add_subplot(1, 2, 2)
+        self.axes_altitude = self.fig.add_subplot(2, 2, 1)
+        self.axes_acceleration = self.fig.add_subplot(2, 2, 2)
 
         # configure altitude subplot
         self.line_altitude = Line2D([], [], color='blue')
         self.axes_altitude.add_line(self.line_altitude)
-        self.axes_altitude.set_xlim(0, self.max_points/5)
-        self.axes_altitude.set_ylim(0, 10)
+        self.axes_altitude.set_xlim(0, self.display_time)
+        self.axes_altitude.set_ylim(-100, 0)
         self.axes_altitude.set_title('Altitude v Time')
         self.axes_altitude.set_xlabel('Time (s)')
         self.axes_altitude.set_ylabel('Altitude (m)')
 
-        # configure temperature subplot
-        self.line_temperature = Line2D([], [], color='green')
-        self.axes_temperature.add_line(self.line_temperature)
-        self.axes_temperature.set_xlim(0, self.max_points/5)
-        self.axes_temperature.set_ylim(60, 80)
-        self.axes_temperature.set_title('Temperature v Time')
-        self.axes_temperature.set_xlabel('Time (s)')
-        self.axes_temperature.set_ylabel('Temperature (s)')
+        # configure acceleration subplot
+        self.line_acceleration = Line2D([], [], color='purple')
+        self.axes_acceleration.add_line(self.line_acceleration)
+        self.axes_acceleration.set_xlim(0, self.display_time)
+        self.axes_acceleration.set_ylim(-2, 2)
+        self.axes_acceleration.set_title('Acceleration v Time')
+        self.axes_acceleration.set_xlabel('Time (s)')
+        self.axes_acceleration.set_ylabel('Newtons (N)')
 
+        plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25,
+                            wspace=0.35)
         # start animation
         animation.TimedAnimation.__init__(self, self.fig, interval=50, blit=True)
 
@@ -47,16 +49,16 @@ class SubplotAnimation(animation.TimedAnimation):
         self.serial_read()
 
         self.axes_altitude, self.line_altitude = self.adjust_dataset('altitude', self.axes_altitude, self.line_altitude)
-        self.axes_temperature, self.line_temperature = self.adjust_dataset(
-            'temperature', self.axes_temperature, self.line_temperature
+        self.axes_acceleration, self.line_acceleration = self.adjust_dataset(
+            'acceleration', self.axes_acceleration, self.line_acceleration
         )
 
-        self._drawn_artists = [self.line_altitude, self.line_temperature]
+        self._drawn_artists = [self.line_altitude, self.line_acceleration]
 
     def adjust_dataset(self, category_str, axes, line):
         # trim dataset to be within the max number of points
         # max points can be changes with some other benchmark (time elapsed?)
-        while len(self.data_dict[category_str][0]) > self.max_points:
+        while (self.data_dict[category_str][0][-1] - self.data_dict[category_str][0][0]) > self.display_time:
             self.data_dict[category_str][0].pop(0)
             self.data_dict[category_str][1].pop(0)
             axes.set_xlim(self.data_dict[category_str][0][0], self.data_dict[category_str][0][-1], auto=True)
@@ -70,34 +72,49 @@ class SubplotAnimation(animation.TimedAnimation):
         return iter(range(1))
 
     def _init_draw(self):
-        lines = [self.line_altitude, self.line_temperature]
+        lines = [self.line_altitude, self.line_acceleration]
         for l in lines:
             l.set_data([], [])
 
     def serial_read(self):
-        ser = serial.serial_for_url('loop://', timeout=0.1)
+        """
+        0: tag (ALT|ACCEL)
+        1: time seconds
+        2: time nsec
+        3: alt / accel-0
+        4: accel-1
+        5: accel-2
+        """
+        ser = serial.Serial('COM3', 115200, timeout=0.4)
+        lines_in = []
+        lines_in.append('0')
+        lines_in.append('0')
 
-        serial_writer = io.TextIOWrapper(io.BufferedWriter(ser))
+        while lines_in[0] != '':
+            lines_in[0] = ser.readline()[1:].decode()
+            lines_in[1] = ser.readline()[1:].decode()
 
-        serial_writer.write('alt,{0}\n'.format(randint(1, 10)))
-        serial_writer.flush()
-        serial_writer.write('tem,{0}\n'.format(randint(67, 73)))
-        serial_writer.flush()
-        serial_reader = io.TextIOWrapper(io.BufferedReader(ser))
-
-        try:
-            line_in = serial_reader.readline()
-            while line_in != '':
+            for line_in in lines_in:
+                print(line_in)
+                line_in = line_in.lstrip()
+                line_in = line_in.rstrip()
                 line_split = line_in.split(',')
-                if line_split[0] == 'alt':
-                    self.data_dict['altitude'][0].append(time()-self.start_time)
-                    self.data_dict['altitude'][1].append(int(line_split[1]))
-                elif line_split[0] == 'tem':
-                    self.data_dict['temperature'][0].append(time() - self.start_time)
-                    self.data_dict['temperature'][1].append(int(line_split[1]))
-                line_in = serial_reader.readline()
-        except ValueError:
-            pass
+
+                if line_split[0] != '':
+                    time_sec = line_split[1]
+                    time_nsec = '0.{0}'.format(line_split[2])
+
+                    if line_split[0] == 'LT':
+                        self.data_dict['altitude'][0].append(float(time_sec)+float(str(time_nsec)))
+                        self.data_dict['altitude'][1].append(float(line_split[3]))
+
+                    elif line_split[0] == 'ACCEL':
+                        accel_0_sq = float(line_split[3])*float(line_split[3])
+                        accel_1_sq = float(line_split[4])*float(line_split[4])
+                        accel_2_sq = float(line_split[5])*float(line_split[5])
+                        accel_total = sqrt(accel_0_sq + accel_1_sq + accel_2_sq)
+                        self.data_dict['acceleration'][0].append(int(time_sec)+float(str(time_nsec)))
+                        self.data_dict['acceleration'][1].append(accel_total)
 
 
 if __name__ == '__main__':
