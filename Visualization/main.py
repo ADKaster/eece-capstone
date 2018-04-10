@@ -2,10 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import matplotlib.animation as animation
 import serial
-import io
 from time import time
-from random import randint
-from subprocess import Popen
 import threading
 from math import sqrt
 
@@ -14,8 +11,8 @@ class SubplotAnimation(animation.TimedAnimation):
     def __init__(self):
         self.start_time = time()
         self.data_dict = {
-            "acceleration": ([0], [0]),
-            "altitude": ([0], [0])
+            "acceleration": ([], []),
+            "altitude": ([], [])
         }
         self.display_time = 60
 
@@ -27,8 +24,8 @@ class SubplotAnimation(animation.TimedAnimation):
         # configure altitude subplot
         self.line_altitude = Line2D([], [], color='blue')
         self.axes_altitude.add_line(self.line_altitude)
-        self.axes_altitude.set_xlim(0, self.display_time)
-        self.axes_altitude.set_ylim(-70, -60)
+        self.axes_altitude.set_xlim(0, 60)
+        self.axes_altitude.set_ylim(-5, 5)
         self.axes_altitude.set_title('Altitude v Time')
         self.axes_altitude.set_xlabel('Time (s)')
         self.axes_altitude.set_ylabel('Altitude (m)')
@@ -36,14 +33,13 @@ class SubplotAnimation(animation.TimedAnimation):
         # configure acceleration subplot
         self.line_acceleration = Line2D([], [], color='purple')
         self.axes_acceleration.add_line(self.line_acceleration)
-        self.axes_acceleration.set_xlim(0, self.display_time)
-        self.axes_acceleration.set_ylim(-20, 20)
-        self.axes_acceleration.set_title('Acceleration v Time')
+        self.axes_acceleration.set_xlim(0, 60)
+        self.axes_acceleration.set_ylim(0, 20)
+        self.axes_acceleration.set_title('Total Force v Time')
         self.axes_acceleration.set_xlabel('Time (s)')
-        self.axes_acceleration.set_ylabel('Newtons (N)')
+        self.axes_acceleration.set_ylabel('Force (N)')
 
-        # plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25,
-        #                     wspace=0.35)
+        plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
         # start animation
         animation.TimedAnimation.__init__(self, self.fig, interval=1, blit=True)
 
@@ -60,10 +56,17 @@ class SubplotAnimation(animation.TimedAnimation):
     def adjust_dataset(self, category_str, axes, line):
         # trim dataset to be within the max number of points
         # max points can be changes with some other benchmark (time elapsed?)
-        while (self.data_dict[category_str][0][-1] - self.data_dict[category_str][0][0]) > self.display_time:
-            self.data_dict[category_str][0].pop(0)
-            self.data_dict[category_str][1].pop(0)
-        axes.set_xlim(self.data_dict[category_str][0][0], self.data_dict[category_str][0][-1], auto=True)
+        try:
+            axes.set_xlim(self.data_dict[category_str][0][0], self.data_dict[category_str][0][0] + 60, auto=True)
+
+            while (self.data_dict[category_str][0][-1] - self.data_dict[category_str][0][0]) > self.display_time:
+                # print(len(self.data_dict[category_str][0]))
+                self.data_dict[category_str][0].pop(0)
+                self.data_dict[category_str][1].pop(0)
+                axes.set_xlim(self.data_dict[category_str][0][0], self.data_dict[category_str][0][-1], auto=True)
+        except IndexError:
+            pass
+
         line.set_data(self.data_dict[category_str][0], self.data_dict[category_str][1])
 
         return axes, line
@@ -99,7 +102,7 @@ def serial_read(data_dict):
             lines_in[1] = ser.readline()[1:].decode()
 
             for line_in in lines_in:
-                print(line_in)
+                # print(line_in)
                 line_in = line_in.lstrip()
                 line_in = line_in.rstrip()
                 line_split = line_in.split(',')
@@ -110,7 +113,7 @@ def serial_read(data_dict):
 
                     if line_split[0] == 'LT' or line_split[0] == 'ALT':
                         data_dict['altitude'][0].append(float(time_sec)+float(str(time_nsec)))
-                        data_dict['altitude'][1].append(float(line_split[3]))
+                        data_dict['altitude'][1].append(float(line_split[3])+65)
 
                     elif line_split[0] == 'ACCEL':
                         accel_0_sq = float(line_split[3])*float(line_split[3])
