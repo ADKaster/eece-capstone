@@ -57,9 +57,9 @@ void *mainThread(void *arg0)
 
         if(timespec_compare(&prevtime, &currtime, 200))
         {
-            sprintf(printbuffer, "ALT,%ld,%ld,%f\r", currtime.tv_sec, currtime.tv_nsec, altimeter_status.alt);  // this should be adjusted to your local forecast
+            sprintf(printbuffer, "ALT,%ld,%ld,%f", currtime.tv_sec, currtime.tv_nsec, altimeter_status.alt);  // this should be adjusted to your local forecast
             dmcf_debugprintf(printbuffer);
-            sprintf(printbuffer, "ACCEL,%ld,%ld,%f,%f,%f\r", currtime.tv_sec, currtime.tv_nsec, imu_status.accel[0], imu_status.accel[1], imu_status.accel[2]);
+            sprintf(printbuffer, "ACCEL,%ld,%ld,%f,%f,%f", currtime.tv_sec, currtime.tv_nsec, imu_status.accel[0], imu_status.accel[1], imu_status.accel[2]);
             dmcf_debugprintf(printbuffer);
             //sprintf(printbuffer, "BATT,%d,%d,%d\r", currtime.tv_sec, currtime.tv_nsec, battery_status.remaining_capacity);
             //dmcf_debugprintf(printbuffer);
