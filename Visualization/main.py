@@ -35,9 +35,9 @@ class SubplotAnimation(animation.TimedAnimation):
         self.axes_acceleration.add_line(self.line_acceleration)
         self.axes_acceleration.set_xlim(0, 60)
         self.axes_acceleration.set_ylim(0, 20)
-        self.axes_acceleration.set_title('Total Force v Time')
+        self.axes_acceleration.set_title('Acceleration v Time')
         self.axes_acceleration.set_xlabel('Time (s)')
-        self.axes_acceleration.set_ylabel('Force (N)')
+        self.axes_acceleration.set_ylabel('Acceleration (m/s^2)')
 
         plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
         # start animation
@@ -102,7 +102,7 @@ def serial_read(data_dict):
             lines_in[1] = ser.readline()[1:].decode()
 
             for line_in in lines_in:
-                # print(line_in)
+                print(line_in)
                 line_in = line_in.lstrip()
                 line_in = line_in.rstrip()
                 line_split = line_in.split(',')
@@ -113,7 +113,7 @@ def serial_read(data_dict):
 
                     if line_split[0] == 'LT' or line_split[0] == 'ALT':
                         data_dict['altitude'][0].append(float(time_sec)+float(str(time_nsec)))
-                        data_dict['altitude'][1].append(float(line_split[3])+65)
+                        data_dict['altitude'][1].append(float(line_split[3])+50)
 
                     elif line_split[0] == 'ACCEL':
                         accel_0_sq = float(line_split[3])*float(line_split[3])
